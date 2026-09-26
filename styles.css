@@ -54,13 +54,18 @@
   min-height: 0;
   flex: 1;
   display: block;
-  background: radial-gradient(circle at 50% 44%, #10241a 0%, #07090a 68%);
+  background:
+    linear-gradient(#00ff4109 1px, transparent 1px),
+    linear-gradient(90deg, #00ff4109 1px, transparent 1px),
+    radial-gradient(circle at 50% 44%, #10241a 0%, #07090a 68%);
+  background-size: 36px 36px, 36px 36px, auto;
   touch-action: none;
   cursor: grab;
 }
 .nexo-map:active { cursor: grabbing; }
 .nexo-backdrop { fill: transparent; }
-.nexo-edges line { stroke: #28643c; stroke-width: 1.05; opacity: 0.52; pointer-events: none; }
+.nexo-cluster-label { font: 700 10px ui-monospace, monospace; letter-spacing: 0.3em; opacity: 0.7; pointer-events: none; }
+.nexo-edges path { fill: none; stroke: var(--nexo-edge-color, #28643c); stroke-width: 1.05; opacity: 0.45; pointer-events: none; }
 .nexo-node { color: var(--nexo-node-color); cursor: pointer; transition: opacity 120ms ease; }
 .nexo-node circle { fill: currentColor; stroke: #07090a; stroke-width: 1.5; filter: drop-shadow(0 0 4px currentColor); }
 .nexo-node text { fill: #b9d7c2; font: 11px ui-monospace, monospace; pointer-events: none; paint-order: stroke; stroke: #07100a; stroke-width: 3px; stroke-linejoin: round; }

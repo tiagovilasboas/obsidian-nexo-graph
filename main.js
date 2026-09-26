@@ -12,6 +12,7 @@ const DEFAULT_SETTINGS = {
     { name: 'Meta', prefix: 'pages/meta/', color: '#00e5a0' }
   ]
 };
+const GROUP_CENTERS = [[330, 230], [870, 230], [330, 585], [870, 585], [600, 400]];
 
 function svgElement(name, attributes = {}) {
   const element = document.createElementNS(SVG_NS, name);
@@ -57,7 +58,6 @@ function graphData(app, rules) {
 }
 
 function positionNodes(nodes) {
-  const centers = [[330, 230], [870, 230], [330, 585], [870, 585], [600, 400]];
   const groups = [[], [], [], [], []];
   for (const node of nodes) groups[node.group].push(node);
   for (const [groupIndex, group] of groups.entries()) {
@@ -65,8 +65,8 @@ function positionNodes(nodes) {
     group.forEach((node, index) => {
       const radius = index === 0 ? 0 : Math.min(185, 13.5 * Math.sqrt(index));
       const angle = index * 2.399963229728653 + groupIndex * 0.6;
-      node.x = centers[groupIndex][0] + Math.cos(angle) * radius;
-      node.y = centers[groupIndex][1] + Math.sin(angle) * radius;
+      node.x = GROUP_CENTERS[groupIndex][0] + Math.cos(angle) * radius;
+      node.y = GROUP_CENTERS[groupIndex][1] + Math.sin(angle) * radius;
     });
   }
 }
@@ -123,6 +123,24 @@ class NexoGraphView extends ItemView {
     svg.appendChild(backdrop);
     const viewport = svgElement('g');
     svg.appendChild(viewport);
+    const defs = svgElement('defs');
+    svg.prepend(defs);
+    const atmosphere = svgElement('g', { class: 'nexo-atmosphere' });
+    viewport.appendChild(atmosphere);
+    GROUP_CENTERS.forEach(([x, y], index) => {
+      const color = this.plugin.settings.groups[index]?.color || '#668b72';
+      const gradient = svgElement('radialGradient', { id: `nexo-halo-${index}` });
+      gradient.appendChild(svgElement('stop', { offset: '0%', 'stop-color': color, 'stop-opacity': index === 4 ? 0.08 : 0.17 }));
+      gradient.appendChild(svgElement('stop', { offset: '100%', 'stop-color': color, 'stop-opacity': 0 }));
+      defs.appendChild(gradient);
+      atmosphere.appendChild(svgElement('circle', { cx: x, cy: y, r: index === 4 ? 180 : 260, fill: `url(#nexo-halo-${index})` }));
+      if (index < 4) {
+        const caption = svgElement('text', { x, y: y - 195, 'text-anchor': 'middle', class: 'nexo-cluster-label' });
+        caption.style.fill = color;
+        caption.textContent = this.plugin.settings.groups[index].name.toUpperCase();
+        atmosphere.appendChild(caption);
+      }
+    });
     const edgeLayer = svgElement('g', { class: 'nexo-edges' });
     const nodeLayer = svgElement('g', { class: 'nexo-nodes' });
     viewport.append(edgeLayer, nodeLayer);
@@ -130,7 +148,14 @@ class NexoGraphView extends ItemView {
     for (const [source, target] of edges) {
       const a = byPath.get(source);
       const b = byPath.get(target);
-      edgeLayer.appendChild(svgElement('line', { x1: a.x, y1: a.y, x2: b.x, y2: b.y }));
+      const dx = b.x - a.x;
+      const dy = b.y - a.y;
+      const bend = Math.min(34, Math.hypot(dx, dy) * 0.045);
+      const middleX = (a.x + b.x) / 2 - dy / Math.max(1, Math.hypot(dx, dy)) * bend;
+      const middleY = (a.y + b.y) / 2 + dx / Math.max(1, Math.hypot(dx, dy)) * bend;
+      const edge = svgElement('path', { d: `M ${a.x} ${a.y} Q ${middleX} ${middleY} ${b.x} ${b.y}` });
+      edge.style.setProperty('--nexo-edge-color', this.plugin.settings.groups[a.group]?.color || '#3f8e5b');
+      edgeLayer.appendChild(edge);
     }
     const nodeElements = [];
     for (const node of nodes) {
