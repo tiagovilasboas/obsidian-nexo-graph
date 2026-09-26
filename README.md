@@ -2,7 +2,7 @@
 
 **A graph view with its own signal.** Nexo Graph maps the links between your Markdown notes into a dark, luminous network with four configurable green groups.
 
-[Download](../../releases/latest) · [Nexo theme](https://github.com/tiagovilasboas/obsidian-nexo) · [Report an issue](../../issues)
+[Download preview 0.1.0](../../releases/tag/0.1.0) · [Nexo theme](https://github.com/tiagovilasboas/obsidian-nexo) · [Report an issue](../../issues)
 
 ## What it does
 
@@ -27,7 +27,7 @@ Change prefixes and colors in **Settings → Community plugins → Nexo Graph**.
 
 ## Install
 
-1. Download `manifest.json`, `main.js`, and `styles.css` from the [latest release](../../releases/latest).
+1. Download `manifest.json`, `main.js`, and `styles.css` from [preview 0.1.0](../../releases/tag/0.1.0).
 2. Put them in `<your-vault>/.obsidian/plugins/nexo-graph/`.
 3. In Obsidian, turn on community plugins and enable **Nexo Graph**.
 4. Choose **Open Nexo Graph** in the command palette or click its ribbon icon.
