@@ -4,6 +4,8 @@
 
 [Latest release](../../releases/latest) · [Nexo theme](https://github.com/tiagovilasboas/obsidian-nexo) · [Report an issue](../../issues)
 
+Release candidate: **0.3.0** · [Changelog](CHANGELOG.md)
+
 [![Buy me a coffee](https://raw.githubusercontent.com/tiagovilasboas/tiagovilasboas/main/assets/buy-me-a-coffee.svg)](https://buymeacoffee.com/tiagovilasboas)
 
 ## What it does
@@ -39,7 +41,7 @@ Use the group toggles above the graph to focus on selected areas. Open Nexo Grap
 3. In Obsidian, turn on community plugins and enable **Nexo Graph**.
 4. Choose **Open Nexo Graph** in the command palette or click its ribbon icon.
 
-Version 0.1.0 was an early preview. Version 0.2.1 is the first installable release with the filters and local exploration described here. Community plugin gallery submission is planned; until then, install manually. The manifest includes the funding link for the future listing.
+Version 0.1.0 was an early preview. Version 0.2.1 introduced filters and local exploration; 0.3.0 improves how dense graphs sample notes and links across groups. Community plugin gallery submission is planned; until then, install manually. The manifest includes the funding link for the future listing.
 
 ## Privacy and architecture
 
