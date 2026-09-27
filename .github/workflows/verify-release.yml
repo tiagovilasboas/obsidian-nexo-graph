@@ -1,0 +1,21 @@
+name: Verify release assets
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
+          fetch-depth: 0
+      - name: Verify assets against the release tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/verify-release-assets.mjs "${{ github.event.release.tag_name }}"

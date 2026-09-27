@@ -2,7 +2,7 @@
 
 **A graph view with its own signal.** Nexo Graph maps the links between your Markdown notes into a dark, luminous network with four configurable green groups.
 
-[Download preview 0.1.0](../../releases/tag/0.1.0) · [Nexo theme](https://github.com/tiagovilasboas/obsidian-nexo) · [Report an issue](../../issues)
+[Latest release](../../releases/latest) · [Nexo theme](https://github.com/tiagovilasboas/obsidian-nexo) · [Report an issue](../../issues)
 
 [![Buy me a coffee](https://raw.githubusercontent.com/tiagovilasboas/tiagovilasboas/main/assets/buy-me-a-coffee.svg)](https://buymeacoffee.com/nexoobsidian)
 
@@ -34,12 +34,12 @@ Use the group toggles above the graph to focus on selected areas. Open Nexo Grap
 
 ## Install
 
-1. Download `manifest.json`, `main.js`, and `styles.css` from [preview 0.1.0](../../releases/tag/0.1.0).
+1. Download `manifest.json`, `main.js`, and `styles.css` from the [latest release](../../releases/latest).
 2. Put them in `<your-vault>/.obsidian/plugins/nexo-graph/`.
 3. In Obsidian, turn on community plugins and enable **Nexo Graph**.
 4. Choose **Open Nexo Graph** in the command palette or click its ribbon icon.
 
-Community plugin gallery submission is planned. The manifest includes a funding link for the listing; until submission, this is a manual installation.
+Version 0.1.0 was an early preview. Version 0.2.0 is the first installable release with the filters and local exploration described here. Community plugin gallery submission is planned; until then, install manually. The manifest includes the funding link for the future listing.
 
 ## Privacy and architecture
 
