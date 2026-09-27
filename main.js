@@ -78,7 +78,15 @@ function graphData(app, rules, options = {}) {
     degree: degree.get(file.path) || 0,
     group: groupFor(file.path, rules)
   }));
-  const edges = allEdges.filter(([a, b]) => visible.has(a) && visible.has(b)).slice(0, MAX_EDGES);
+  const edgePairs = new Map();
+  for (const [source, target] of allEdges) {
+    if (!visible.has(source) || !visible.has(target)) continue;
+    const key = [source, target].sort().join('\u0000');
+    const existing = edgePairs.get(key);
+    if (existing) existing.bidirectional = true;
+    else edgePairs.set(key, { source, target, bidirectional: false });
+  }
+  const edges = [...edgePairs.values()].slice(0, MAX_EDGES).map(edge => [edge.source, edge.target, edge.bidirectional]);
   return { nodes, edges, total: files.length, inScope: candidates.length };
 }
 
@@ -220,7 +228,7 @@ class NexoGraphView extends ItemView {
     viewport.append(edgeLayer, nodeLayer);
     const edgeElements = [];
 
-    for (const [source, target] of edges) {
+    for (const [source, target, bidirectional] of edges) {
       const a = byPath.get(source);
       const b = byPath.get(target);
       const dx = b.x - a.x;
@@ -231,7 +239,8 @@ class NexoGraphView extends ItemView {
       const edge = svgElement('path', { d: `M ${a.x} ${a.y} Q ${middleX} ${middleY} ${b.x} ${b.y}` });
       edge.style.setProperty('--nexo-edge-color', this.plugin.settings.groups[a.group]?.color || '#3f8e5b');
       edge.setAttribute('marker-end', `url(#nexo-arrow-${a.group})`);
-      edge.setAttribute('aria-label', `${a.name} links to ${b.name}`);
+      if (bidirectional) edge.setAttribute('marker-start', `url(#nexo-arrow-${b.group})`);
+      edge.setAttribute('aria-label', bidirectional ? `${a.name} and ${b.name} link to each other` : `${a.name} links to ${b.name}`);
       edgeLayer.appendChild(edge);
       edgeElements.push([source, target, edge]);
     }
@@ -272,18 +281,30 @@ class NexoGraphView extends ItemView {
       title.textContent = node.path;
       group.appendChild(title);
       const open = () => this.app.workspace.getLeaf('tab').openFile(node.file);
-      group.addEventListener('click', open);
-      group.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); open(); } });
-      group.addEventListener('pointerenter', () => { emphasis.path = node.path; updateEmphasis(); });
-      group.addEventListener('pointerleave', () => { emphasis.path = ''; updateEmphasis(); });
-      group.addEventListener('focus', () => { emphasis.path = node.path; updateEmphasis(); });
-      group.addEventListener('blur', () => { emphasis.path = ''; updateEmphasis(); });
-      group.addEventListener('contextmenu', event => {
+      const showContextMenu = event => {
         event.preventDefault();
         const menu = new Menu();
         menu.addItem(item => item.setTitle('Open note').setIcon('file-text').onClick(open));
         menu.showAtMouseEvent(event);
+      };
+      group.addEventListener('click', open);
+      group.addEventListener('keydown', event => {
+        if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); open(); }
+        if (event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')) {
+          const bounds = group.getBoundingClientRect();
+          showContextMenu(new MouseEvent('contextmenu', {
+            bubbles: true,
+            clientX: bounds.left + bounds.width / 2,
+            clientY: bounds.top + bounds.height / 2
+          }));
+          event.preventDefault();
+        }
       });
+      group.addEventListener('pointerenter', () => { emphasis.path = node.path; updateEmphasis(); });
+      group.addEventListener('pointerleave', () => { emphasis.path = ''; updateEmphasis(); });
+      group.addEventListener('focus', () => { emphasis.path = node.path; updateEmphasis(); });
+      group.addEventListener('blur', () => { emphasis.path = ''; updateEmphasis(); });
+      group.addEventListener('contextmenu', showContextMenu);
       nodeLayer.appendChild(group);
       nodeElements.push([node, group]);
     }

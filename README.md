@@ -4,7 +4,7 @@
 
 [Download preview 0.1.0](../../releases/tag/0.1.0) · [Nexo theme](https://github.com/tiagovilasboas/obsidian-nexo) · [Report an issue](../../issues)
 
-[![Support Nexo](assets/support-nexo.svg)](https://buymeacoffee.com/nexoobsidian)
+[![Buy me a coffee](https://raw.githubusercontent.com/tiagovilasboas/tiagovilasboas/main/assets/buy-me-a-coffee.svg)](https://buymeacoffee.com/nexoobsidian)
 
 ## What it does
 
@@ -14,6 +14,7 @@
 - Supports search highlighting, zoom, drag to pan, and click or keyboard activation to open a note.
 - Filters groups and can focus on notes connected to the last active note at one, two, or three link hops.
 - Highlights a note's neighbors on hover/focus, shows link direction, and offers a context-menu action to open a note.
+- Keyboard users can open that context menu with **Shift+F10** or the Context Menu key while a note is focused; reciprocal links share one edge with arrows at both ends.
 - Keeps group settings in the vault's plugin data and updates when links or files change.
 
 The graph uses a stable layout. For large vaults, it displays the 500 most connected notes and up to 1,600 links so the view remains responsive. The footer shows how many notes are visible. It does not modify notes, Obsidian's native Graph settings, or `.obsidian/graph.json`.
@@ -38,7 +39,7 @@ Use the group toggles above the graph to focus on selected areas. Open Nexo Grap
 3. In Obsidian, turn on community plugins and enable **Nexo Graph**.
 4. Choose **Open Nexo Graph** in the command palette or click its ribbon icon.
 
-Community plugin gallery submission is planned. Until then, this is a manual installation.
+Community plugin gallery submission is planned. The manifest includes a funding link for the listing; until submission, this is a manual installation.
 
 ## Privacy and architecture
 

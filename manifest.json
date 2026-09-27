@@ -5,5 +5,6 @@
   "minAppVersion": "1.13.0",
   "description": "Explore your notes in an original, configurable green graph view.",
   "author": "Nexo",
-  "isDesktopOnly": false
+  "isDesktopOnly": false,
+  "fundingUrl": "https://buymeacoffee.com/nexoobsidian"
 }
