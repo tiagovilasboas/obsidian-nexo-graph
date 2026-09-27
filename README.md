@@ -17,7 +17,7 @@
 - Keyboard users can open that context menu with **Shift+F10** or the Context Menu key while a note is focused; reciprocal links share one edge with arrows at both ends.
 - Keeps group settings in the vault's plugin data and updates when links or files change.
 
-The graph uses a stable layout. For large vaults, it displays the 500 most connected notes and up to 1,600 links so the view remains responsive. The footer shows how many notes are visible. It does not modify notes, Obsidian's native Graph settings, or `.obsidian/graph.json`.
+The graph uses a deterministic layout that adapts each group's radius to its note count. For large vaults, it shows up to 500 notes: within each folder group, notes are ranked by link count and selected in round-robin passes so a large group cannot hide smaller groups. It shows up to 1,600 links, selected in passes across observed group pairs; cross-group links come first, then endpoint link count and path order break ties. The footer reports when either cap applies. In graphs with 80 or more visible notes, labels are limited to the four highest-degree notes per group; search matches and the focused note reveal their labels on demand. Zoom and pan remain available to inspect crowded groups. It does not modify notes, Obsidian's native Graph settings, or `.obsidian/graph.json`.
 
 ## Palette
 

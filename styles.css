@@ -88,6 +88,8 @@
 .nexo-node { color: var(--nexo-node-color); cursor: pointer; transition: opacity 120ms ease; }
 .nexo-node circle { fill: currentColor; stroke: #07090a; stroke-width: 1.5; filter: drop-shadow(0 0 4px currentColor); }
 .nexo-node text { fill: #b9d7c2; font: 11px ui-monospace, monospace; pointer-events: none; paint-order: stroke; stroke: #07100a; stroke-width: 3px; stroke-linejoin: round; }
+.nexo-node-label { opacity: 0; transition: opacity 100ms ease; }
+.nexo-node.is-labeled .nexo-node-label { opacity: 1; }
 .nexo-node:hover circle, .nexo-node:focus circle, .nexo-node.is-match circle { stroke: #e1ffb6; stroke-width: 2.5; filter: drop-shadow(0 0 10px currentColor); }
 .nexo-node:hover text, .nexo-node:focus text, .nexo-node.is-match text { fill: #f0fff3; font-weight: 700; }
 .nexo-node.is-neighbor circle { stroke: #c7ff6b; stroke-width: 2; filter: drop-shadow(0 0 8px currentColor); }

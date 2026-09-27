@@ -8,6 +8,68 @@ function groupFor(path, rules) {
   return index < 0 ? rules.length : index;
 }
 
+function selectNodesByGroup(candidates, degree, rules) {
+  const groups = new Map();
+  for (const file of candidates) {
+    const group = groupFor(file.path, rules);
+    if (!groups.has(group)) groups.set(group, []);
+    groups.get(group).push(file);
+  }
+  for (const files of groups.values()) {
+    files.sort((a, b) => (degree.get(b.path) || 0) - (degree.get(a.path) || 0) || a.path.localeCompare(b.path));
+  }
+
+  const selected = [];
+  const groupQueues = [...groups.entries()].sort(([a], [b]) => a - b).map(([, files]) => files);
+  while (selected.length < MAX_NODES) {
+    let added = false;
+    for (const files of groupQueues) {
+      if (files.length && selected.length < MAX_NODES) {
+        selected.push(files.shift());
+        added = true;
+      }
+    }
+    if (!added) break;
+  }
+  return selected;
+}
+
+function selectRepresentativeEdges(edgePairs, nodes, limit = MAX_EDGES) {
+  const byPath = new Map(nodes.map(node => [node.path, node]));
+  const buckets = new Map();
+  for (const edge of edgePairs.values()) {
+    const source = byPath.get(edge.source);
+    const target = byPath.get(edge.target);
+    const pair = [source.group, target.group].sort((a, b) => a - b).join(':');
+    if (!buckets.has(pair)) buckets.set(pair, []);
+    buckets.get(pair).push(edge);
+  }
+
+  const score = (edge) => {
+    const source = byPath.get(edge.source);
+    const target = byPath.get(edge.target);
+    return [source.group === target.group ? 1 : 0, -(source.degree + target.degree), edge.source, edge.target];
+  };
+  const compare = (a, b) => {
+    const left = score(a);
+    const right = score(b);
+    return left[0] - right[0] || left[1] - right[1] || left[2].localeCompare(right[2]) || left[3].localeCompare(right[3]);
+  };
+  const groups = [...buckets.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([, edges]) => edges.sort(compare));
+  const selected = [];
+  for (let round = 0; selected.length < limit; round++) {
+    let added = false;
+    for (const edges of groups) {
+      if (edges[round] && selected.length < limit) {
+        selected.push(edges[round]);
+        added = true;
+      }
+    }
+    if (!added) break;
+  }
+  return selected;
+}
+
 function graphData(app, rules, options = {}) {
   const files = app.vault.getMarkdownFiles();
   const byPath = new Map(files.map(file => [file.path, file]));
@@ -49,9 +111,7 @@ function graphData(app, rules, options = {}) {
   }
 
   candidates = candidates.filter(file => options.visibleGroups?.has(groupFor(file.path, rules)) ?? true);
-  const chosen = [...candidates]
-    .sort((a, b) => (degree.get(b.path) || 0) - (degree.get(a.path) || 0) || a.path.localeCompare(b.path))
-    .slice(0, MAX_NODES);
+  const chosen = selectNodesByGroup(candidates, degree, rules);
   const visible = new Set(chosen.map(file => file.path));
   const nodes = chosen.map(file => ({
     path: file.path,
@@ -63,13 +123,18 @@ function graphData(app, rules, options = {}) {
   const edgePairs = new Map();
   for (const [source, target] of allEdges) {
     if (!visible.has(source) || !visible.has(target)) continue;
-    const key = [source, target].sort().join('\u0000');
-    const existing = edgePairs.get(key);
-    if (existing) existing.bidirectional = true;
-    else edgePairs.set(key, { source, target, bidirectional: false });
+      const [left, right] = [source, target].sort();
+      const key = `${left}\u0000${right}`;
+      const existing = edgePairs.get(key);
+      if (existing) {
+        existing.source = left;
+        existing.target = right;
+        existing.bidirectional = true;
+      }
+      else edgePairs.set(key, { source, target, bidirectional: false });
   }
-  const edges = [...edgePairs.values()].slice(0, MAX_EDGES).map(edge => [edge.source, edge.target, edge.bidirectional]);
-  return { nodes, edges, total: files.length, inScope: candidates.length };
+  const edges = selectRepresentativeEdges(edgePairs, nodes).map(edge => [edge.source, edge.target, edge.bidirectional]);
+  return { nodes, edges, total: files.length, inScope: candidates.length, linksInScope: edgePairs.size };
 }
 
 function positionNodes(nodes) {
@@ -77,8 +142,9 @@ function positionNodes(nodes) {
   for (const node of nodes) groups[node.group].push(node);
   for (const [groupIndex, group] of groups.entries()) {
     group.sort((a, b) => b.degree - a.degree || a.path.localeCompare(b.path));
+    const spacing = group.length <= 1 ? 13.5 : Math.min(13.5, 167 / Math.sqrt(group.length - 1));
     group.forEach((node, index) => {
-      const radius = index === 0 ? 0 : Math.min(185, 13.5 * Math.sqrt(index));
+      const radius = index === 0 ? 0 : 18 + spacing * Math.sqrt(index - 1);
       const angle = index * 2.399963229728653 + groupIndex * 0.6;
       node.x = GROUP_CENTERS[groupIndex][0] + Math.cos(angle) * radius;
       node.y = GROUP_CENTERS[groupIndex][1] + Math.sin(angle) * radius;
@@ -86,4 +152,4 @@ function positionNodes(nodes) {
   }
 }
 
-module.exports = { GROUP_CENTERS, MAX_EDGES, MAX_NODES, graphData, groupFor, positionNodes };
+module.exports = { GROUP_CENTERS, MAX_EDGES, MAX_NODES, graphData, groupFor, positionNodes, selectNodesByGroup, selectRepresentativeEdges };

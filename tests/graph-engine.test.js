@@ -23,9 +23,9 @@ test('groups paths case-insensitively and places unmatched notes in Other', () =
 
   const data = graphData(app(['pages/pessoal/ideas.md', 'pages/carreira/cv.md', 'inbox.md']), rules);
   assert.deepEqual(data.nodes.map(node => [node.path, node.group]), [
-    ['inbox.md', 2],
+    ['pages/pessoal/ideas.md', 0],
     ['pages/carreira/cv.md', 1],
-    ['pages/pessoal/ideas.md', 0]
+    ['inbox.md', 2]
   ]);
 });
 
@@ -37,6 +37,11 @@ test('merges reciprocal links into one bidirectional edge', () => {
 
   assert.deepEqual(data.edges, [['a.md', 'b.md', true]]);
   assert.deepEqual(data.nodes.map(node => [node.path, node.degree]), [['a.md', 2], ['b.md', 2]]);
+  const reversedCache = graphData(app(
+    ['b.md', 'a.md'],
+    { 'b.md': { 'a.md': 1 }, 'a.md': { 'b.md': 1 } }
+  ), rules);
+  assert.deepEqual(reversedCache.edges, data.edges);
 });
 
 test('local traversal includes exactly the configured undirected depth', () => {
@@ -84,6 +89,39 @@ test('node and edge limits select a deterministic result', () => {
   assert.deepEqual(dense.edges, graphData(app(densePaths, denseLinks), rules).edges);
 });
 
+test('node sampling preserves smaller groups when one group exceeds the cap', () => {
+  const paths = [
+    ...Array.from({ length: 580 }, (_, index) => `pages/pessoal/${String(index).padStart(3, '0')}.md`),
+    ...Array.from({ length: 6 }, (_, index) => `pages/carreira/cv-${index}.md`),
+    ...Array.from({ length: 6 }, (_, index) => `inbox/note-${index}.md`)
+  ];
+  const result = graphData(app(paths), rules);
+  const counts = result.nodes.reduce((groups, node) => groups.set(node.group, (groups.get(node.group) || 0) + 1), new Map());
+
+  assert.equal(result.nodes.length, MAX_NODES);
+  assert.equal(counts.get(0), 488);
+  assert.equal(counts.get(1), 6);
+  assert.equal(counts.get(2), 6);
+});
+
+test('edge sampling retains every observed folder-group relationship under the cap', () => {
+  const paths = Array.from({ length: 60 }, (_, index) => {
+    const group = index < 20 ? 'pages/pessoal' : index < 40 ? 'pages/carreira' : 'inbox';
+    return `${group}/note-${String(index).padStart(2, '0')}.md`;
+  });
+  const links = Object.fromEntries(paths.map(source => [source, Object.fromEntries(paths.filter(target => target !== source).map(target => [target, 1]))]));
+  const result = graphData(app(paths, links), rules);
+  const groupPairs = new Set(result.edges.map(([source, target]) => {
+    const left = groupFor(source, rules);
+    const right = groupFor(target, rules);
+    return [left, right].sort((a, b) => a - b).join(':');
+  }));
+
+  assert.equal(result.edges.length, MAX_EDGES);
+  assert.equal(result.linksInScope, 1770);
+  assert.equal(groupPairs.size, 6);
+});
+
 test('node positioning is deterministic for an unchanged graph', () => {
   const first = graphData(app(['pages/pessoal/a.md', 'pages/pessoal/b.md'], { 'pages/pessoal/a.md': { 'pages/pessoal/b.md': 1 } }), rules).nodes;
   const second = graphData(app(['pages/pessoal/a.md', 'pages/pessoal/b.md'], { 'pages/pessoal/a.md': { 'pages/pessoal/b.md': 1 } }), rules).nodes;
@@ -91,6 +129,14 @@ test('node positioning is deterministic for an unchanged graph', () => {
   positionNodes(first);
   positionNodes(second);
   assert.deepEqual(first.map(({ path, x, y }) => [path, x, y]), second.map(({ path, x, y }) => [path, x, y]));
+});
+
+test('crowded group positions remain inside its documented radius', () => {
+  const paths = Array.from({ length: MAX_NODES }, (_, index) => `pages/pessoal/note-${index}.md`);
+  const nodes = graphData(app(paths), rules).nodes;
+  positionNodes(nodes);
+  const maxRadius = Math.max(...nodes.map(node => Math.hypot(node.x - 330, node.y - 230)));
+  assert.ok(maxRadius <= 185, `group radius was ${maxRadius.toFixed(1)}`);
 });
 
 test('documented maximum-size graph stays within a generous runtime budget', () => {

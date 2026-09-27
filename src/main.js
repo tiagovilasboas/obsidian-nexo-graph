@@ -150,7 +150,7 @@ class NexoGraphView extends ItemView {
     if (!search) return;
     this.svgEl?.remove();
 
-    const { nodes, edges, total, inScope } = graphData(this.app, this.plugin.settings.groups, {
+    const { nodes, edges, inScope, linksInScope } = graphData(this.app, this.plugin.settings.groups, {
       localMode: this.localMode,
       anchorPath: this.anchorPath,
       depth: this.localDepth,
@@ -196,6 +196,16 @@ class NexoGraphView extends ItemView {
     const nodeLayer = svgElement('g', { class: 'nexo-nodes' });
     viewport.append(edgeLayer, nodeLayer);
     const edgeElements = [];
+    const nodesByGroup = new Map();
+    for (const node of nodes) {
+      if (!nodesByGroup.has(node.group)) nodesByGroup.set(node.group, []);
+      nodesByGroup.get(node.group).push(node);
+    }
+    const labelCandidates = new Set();
+    for (const group of nodesByGroup.values()) {
+      group.sort((a, b) => b.degree - a.degree || a.path.localeCompare(b.path));
+      group.slice(0, 4).forEach(node => labelCandidates.add(node.path));
+    }
 
     for (const [source, target, bidirectional] of edges) {
       const a = byPath.get(source);
@@ -224,11 +234,13 @@ class NexoGraphView extends ItemView {
         }
       }
       for (const [node, element] of nodeElements) {
-        const matchesQuery = !query || node.name.toLowerCase().includes(query) || node.path.toLowerCase().includes(query);
+        const queryMatches = Boolean(query && (node.name.toLowerCase().includes(query) || node.path.toLowerCase().includes(query)));
+        const matchesQuery = !query || queryMatches;
         const matchesNeighborhood = !this.emphasisPath || related.has(node.path);
         element.classList.toggle('is-match', Boolean(query && matchesQuery));
         element.classList.toggle('is-neighbor', Boolean(this.emphasisPath && node.path !== this.emphasisPath && related.has(node.path)));
         element.classList.toggle('is-dimmed', !matchesQuery || !matchesNeighborhood);
+        element.classList.toggle('is-labeled', nodes.length < 80 || labelCandidates.has(node.path) || queryMatches || this.emphasisPath === node.path);
       }
       for (const [source, target, edge] of edgeElements) {
         const incident = !this.emphasisPath || source === this.emphasisPath || target === this.emphasisPath;
@@ -241,11 +253,9 @@ class NexoGraphView extends ItemView {
       group.style.setProperty('--nexo-node-color', this.plugin.settings.groups[node.group]?.color || '#729680');
       const radius = Math.min(10, 3.5 + Math.sqrt(node.degree) * 1.2);
       group.appendChild(svgElement('circle', { r: radius }));
-      if (node.degree >= 4 || nodes.length < 80) {
-        const label = svgElement('text', { x: radius + 5, y: 3.5 });
-        label.textContent = node.name;
-        group.appendChild(label);
-      }
+      const label = svgElement('text', { x: radius + 5, y: 3.5, class: 'nexo-node-label' });
+      label.textContent = node.name;
+      group.appendChild(label);
       const title = svgElement('title');
       title.textContent = node.path;
       group.appendChild(title);
@@ -309,7 +319,10 @@ class NexoGraphView extends ItemView {
     if (!this.footerLimit) this.footerLimit = footer.createSpan();
     const scopeLabel = this.localMode ? `within ${this.anchorPath.split('/').pop() || 'local graph'}` : 'in vault';
     this.footerSummary.textContent = `${nodes.length.toLocaleString()} shown · ${inScope.toLocaleString()} ${scopeLabel} · ${edges.length.toLocaleString()} links`;
-    this.footerLimit.textContent = inScope > MAX_NODES ? `Showing the ${MAX_NODES} most connected notes. Filter groups or use local mode to narrow the graph.` : '';
+    const limits = [];
+    if (inScope > MAX_NODES) limits.push(`Showing ${MAX_NODES} notes in rounds across folder groups, ranked by connections within each group`);
+    if (linksInScope > edges.length) limits.push(`Showing ${MAX_EDGES} links in rounds across folder-group pairs, ranked by endpoint connections`);
+    this.footerLimit.textContent = limits.join('. ') + (limits.length ? '. Filter groups or use Local mode to narrow the graph.' : '');
     if (!this.legendEl) {
       const legend = footer.createDiv({ cls: 'nexo-legend' });
       this.legendEl = legend;
