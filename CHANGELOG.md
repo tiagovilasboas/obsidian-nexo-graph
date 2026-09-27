@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.3.0 (release candidate; not published)
+## 0.3.0
 
 - Balance large graphs across folder groups and link-group pairs so dense scopes cannot monopolize the view.
 - Adapt graph layout and label density for larger vaults; reveal matching and focused labels on demand.
