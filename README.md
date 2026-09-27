@@ -4,7 +4,7 @@
 
 [Latest release](../../releases/latest) · [Nexo theme](https://github.com/tiagovilasboas/obsidian-nexo) · [Report an issue](../../issues)
 
-[![Buy me a coffee](https://raw.githubusercontent.com/tiagovilasboas/tiagovilasboas/main/assets/buy-me-a-coffee.svg)](https://buymeacoffee.com/nexoobsidian)
+[![Buy me a coffee](https://raw.githubusercontent.com/tiagovilasboas/tiagovilasboas/main/assets/buy-me-a-coffee.svg)](https://buymeacoffee.com/tiagovilasboas)
 
 ## What it does
 
@@ -49,6 +49,6 @@ The plugin source lives in `src/`; the dependency-free `node scripts/bundle.mjs`
 
 ## Support and feedback
 
-Support development of Nexo Graph on [Buy Me a Coffee](https://buymeacoffee.com/nexoobsidian), or use [Issues](../../issues) for bugs and ideas.
+Support development of Nexo Graph on [Buy Me a Coffee](https://buymeacoffee.com/tiagovilasboas), or use [Issues](../../issues) for bugs and ideas.
 
 Nexo Graph is original software distributed under the [MIT license](LICENSE).
