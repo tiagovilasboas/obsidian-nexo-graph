@@ -4,7 +4,7 @@
 
 [Latest release](../../releases/latest) · [Nexo theme](https://github.com/tiagovilasboas/obsidian-nexo) · [Report an issue](../../issues)
 
-Release candidate: **0.3.0** · [Changelog](CHANGELOG.md)
+[Changelog](CHANGELOG.md)
 
 [![Buy me a coffee](https://raw.githubusercontent.com/tiagovilasboas/tiagovilasboas/main/assets/buy-me-a-coffee.svg)](https://buymeacoffee.com/tiagovilasboas)
 
