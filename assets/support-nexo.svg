@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="188" height="40" viewBox="0 0 188 40" role="img" aria-labelledby="title">
+  <title id="title">Support Nexo on Buy Me a Coffee</title>
+  <defs>
+    <linearGradient id="nexo" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#00ff41"/>
+      <stop offset="1" stop-color="#00e5a0"/>
+    </linearGradient>
+  </defs>
+  <rect x="1" y="1" width="186" height="38" rx="19" fill="#0d1117" stroke="#00b32c" stroke-width="2"/>
+  <circle cx="22" cy="20" r="11" fill="url(#nexo)"/>
+  <path d="M18 16h8v7a4 4 0 0 1-8 0zM26 17h2a2 2 0 0 1 0 4h-2" fill="#07100a"/>
+  <text x="42" y="25" fill="#d8f7df" font-family="Inter,Arial,sans-serif" font-size="13" font-weight="700">Support Nexo</text>
+</svg>
