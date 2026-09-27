@@ -21,17 +21,4 @@ jobs:
       - name: Run graph engine tests
         run: node --test tests/*.test.js
       - name: Validate manifest contract
-        run: |
-          node --input-type=module <<'EOF'
-          import { readFileSync } from 'node:fs';
-
-          const manifest = JSON.parse(readFileSync('manifest.json', 'utf8'));
-          for (const key of ['id', 'name', 'version', 'minAppVersion', 'description']) {
-            if (typeof manifest[key] !== 'string' || manifest[key].trim() === '') {
-              throw new Error(`manifest.${key} must be a non-empty string`);
-            }
-          }
-          if (!/^\d+\.\d+\.\d+$/.test(manifest.version)) {
-            throw new Error('manifest.version must use x.y.z semver');
-          }
-          EOF
+        run: node scripts/check-manifest.mjs
