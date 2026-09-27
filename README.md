@@ -49,6 +49,18 @@ All rendering happens locally inside Obsidian. The plugin has no network calls, 
 
 The plugin source lives in `src/`; the dependency-free `node scripts/bundle.mjs` command generates the self-contained `main.js` that Obsidian loads. Edit `src/main.js`, `src/graph-engine.js`, and `styles.css` when developing locally.
 
+### Local quality checks
+
+Run the same checks used by GitHub Actions before opening a pull request:
+
+```sh
+node --check src/main.js
+node --check src/graph-engine.js
+node scripts/bundle.mjs --check
+node --test tests/*.test.js
+node scripts/check-manifest.mjs
+```
+
 ## Support and feedback
 
 Support development of Nexo Graph on [Buy Me a Coffee](https://buymeacoffee.com/tiagovilasboas), or use [Issues](../../issues) for bugs and ideas.
