@@ -39,13 +39,13 @@ Use the group toggles above the graph to focus on selected areas. Open Nexo Grap
 3. In Obsidian, turn on community plugins and enable **Nexo Graph**.
 4. Choose **Open Nexo Graph** in the command palette or click its ribbon icon.
 
-Version 0.1.0 was an early preview. Version 0.2.0 is the first installable release with the filters and local exploration described here. Community plugin gallery submission is planned; until then, install manually. The manifest includes the funding link for the future listing.
+Version 0.1.0 was an early preview. Version 0.2.1 is the first installable release with the filters and local exploration described here. Community plugin gallery submission is planned; until then, install manually. The manifest includes the funding link for the future listing.
 
 ## Privacy and architecture
 
 All rendering happens locally inside Obsidian. The plugin has no network calls, analytics, bundled dependencies, or access to private Graph internals. It uses `getMarkdownFiles()` and `metadataCache.resolvedLinks` from the public API, and only writes its own group settings.
 
-The plugin is hand-written JavaScript and CSS, with no build step. Edit `main.js` and `styles.css` directly when developing locally.
+The plugin source lives in `src/`; the dependency-free `node scripts/bundle.mjs` command generates the self-contained `main.js` that Obsidian loads. Edit `src/main.js`, `src/graph-engine.js`, and `styles.css` when developing locally.
 
 ## Support and feedback
 

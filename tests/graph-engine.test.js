@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { MAX_EDGES, MAX_NODES, graphData, groupFor, positionNodes } = require('../graph-engine');
+const { MAX_EDGES, MAX_NODES, graphData, groupFor, positionNodes } = require('../src/graph-engine');
 
 const rules = [
   { name: 'Personal', prefix: 'pages/pessoal/' },
@@ -53,6 +53,17 @@ test('local traversal includes exactly the configured undirected depth', () => {
   assert.equal(graphData(graph, rules, { localMode: true, anchorPath: 'missing.md', depth: 1 }).nodes.length, 0);
 });
 
+test('group filters limit the graph without changing group classification', () => {
+  const data = graphData(app([
+    'pages/pessoal/ideas.md',
+    'pages/carreira/cv.md',
+    'inbox.md'
+  ]), rules, { visibleGroups: new Set([1]) });
+
+  assert.deepEqual(data.nodes.map(node => [node.path, node.group]), [['pages/carreira/cv.md', 1]]);
+  assert.equal(data.inScope, 1);
+});
+
 test('node and edge limits select a deterministic result', () => {
   const nodePaths = Array.from({ length: MAX_NODES + 1 }, (_, index) => `notes/${String(index).padStart(3, '0')}.md`);
   const nodeLinks = { [nodePaths[0]]: Object.fromEntries(nodePaths.slice(1).map(path => [path, 1])) };
@@ -80,4 +91,27 @@ test('node positioning is deterministic for an unchanged graph', () => {
   positionNodes(first);
   positionNodes(second);
   assert.deepEqual(first.map(({ path, x, y }) => [path, x, y]), second.map(({ path, x, y }) => [path, x, y]));
+});
+
+test('documented maximum-size graph stays within a generous runtime budget', () => {
+  const paths = Array.from({ length: MAX_NODES }, (_, index) => `notes/${String(index).padStart(3, '0')}.md`);
+  const links = {};
+  let remainingEdges = MAX_EDGES;
+  for (let sourceIndex = 0; sourceIndex < paths.length && remainingEdges > 0; sourceIndex++) {
+    const targets = {};
+    for (let offset = 1; offset <= 4 && remainingEdges > 0; offset++) {
+      targets[paths[(sourceIndex + offset) % paths.length]] = 1;
+      remainingEdges--;
+    }
+    links[paths[sourceIndex]] = targets;
+  }
+
+  const startedAt = performance.now();
+  const result = graphData(app(paths, links), rules);
+  positionNodes(result.nodes);
+  const elapsedMs = performance.now() - startedAt;
+
+  assert.equal(result.nodes.length, MAX_NODES);
+  assert.equal(result.edges.length, MAX_EDGES);
+  assert.ok(elapsedMs < 1500, `500-note / 1,600-link fixture took ${elapsedMs.toFixed(1)} ms`);
 });

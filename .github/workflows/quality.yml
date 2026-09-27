@@ -15,8 +15,9 @@ jobs:
       - uses: actions/checkout@v4
       - name: Check plugin JavaScript syntax
         run: |
-          node --check main.js
-          node --check graph-engine.js
+          node --check src/main.js
+          node --check src/graph-engine.js
+          node scripts/bundle.mjs --check
       - name: Run graph engine tests
         run: node --test tests/*.test.js
       - name: Validate manifest contract
