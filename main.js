@@ -1,9 +1,9 @@
 const { ItemView, Menu, Plugin, PluginSettingTab, Setting } = require('obsidian');
 const MAX_NODES = 500;
 const MAX_EDGES = 1600;
-// Signal Field keeps the four configured domains around a neutral Nexo core.
-// The diamond gives a reader a stable centre of gravity without force-layout drift.
-const GROUP_CENTERS = [[600, 165], [930, 400], [600, 635], [270, 400], [600, 400]];
+// Irregular domain anchors create a neural constellation around a stable core.
+// Deterministic placement keeps the graph still while its real links carry meaning.
+const GROUP_CENTERS = [[335, 210], [885, 260], [770, 625], [275, 520], [600, 400]];
 const GROUP_RADIUS = 146;
 const CORE_EXCLUSION_RADIUS = 86;
 const LABEL_CLEARANCE = 56;
@@ -162,9 +162,9 @@ function positionNodes(nodes) {
   for (const node of nodes) groups[node.group].push(node);
   for (const [groupIndex, group] of groups.entries()) {
     group.sort((a, b) => b.degree - a.degree || a.path.localeCompare(b.path));
-    const spacing = group.length <= 1 ? 13.5 : Math.min(13.5, (GROUP_RADIUS - 18) / Math.sqrt(group.length - 1));
+    const spacing = group.length <= 1 ? 0 : Math.min(26, (GROUP_RADIUS - 36) / Math.sqrt(group.length - 1));
     group.forEach((node, index) => {
-      const radius = index === 0 ? 0 : 18 + spacing * Math.sqrt(index - 1);
+      const radius = index === 0 ? 0 : 36 + spacing * Math.sqrt(index - 1);
       const angle = index * 2.399963229728653 + groupIndex * 0.6;
       node.x = GROUP_CENTERS[groupIndex][0] + Math.cos(angle) * radius;
       node.y = GROUP_CENTERS[groupIndex][1] + Math.sin(angle) * radius;
@@ -174,43 +174,27 @@ function positionNodes(nodes) {
 
 function edgeRoute(source, target) {
   const local = source.group === target.group || source.group > 3 || target.group > 3;
+  const dx = target.x - source.x;
+  const dy = target.y - source.y;
+  const length = Math.max(1, Math.hypot(dx, dy));
+  const midpointX = (source.x + target.x) / 2;
+  const midpointY = (source.y + target.y) / 2;
+  const normalX = -dy / length;
+  const normalY = dx / length;
+  let hash = 0;
+  for (const character of `${source.path}|${target.path}`) hash = (hash * 31 + character.charCodeAt(0)) >>> 0;
+  const side = hash & 1 ? 1 : -1;
   if (local) {
-    const dx = target.x - source.x;
-    const dy = target.y - source.y;
-    const length = Math.max(1, Math.hypot(dx, dy));
     const bend = Math.min(28, length * 0.07);
-    const side = source.path.localeCompare(target.path) < 0 ? 1 : -1;
     const controlX = (source.x + target.x) / 2 - dy / length * bend * side;
     const controlY = (source.y + target.y) / 2 + dx / length * bend * side;
     return { crossDomain: false, d: `M ${source.x} ${source.y} Q ${controlX} ${controlY} ${target.x} ${target.y}` };
   }
-
-  const pair = [source.group, target.group].sort((a, b) => a - b).join(':');
-  if (pair === '0:2') {
-    const top = source.group === 0 ? source : target;
-    const bottom = source.group === 2 ? source : target;
-    const laneX = GROUP_CENTERS[4][0] - CORE_EXCLUSION_RADIUS - LABEL_CLEARANCE;
-    const canonical = `M ${top.x} ${top.y} C ${top.x - 80} ${top.y + 76}, ${laneX} ${GROUP_CENTERS[4][1] - 72}, ${laneX} ${GROUP_CENTERS[4][1]} C ${laneX} ${GROUP_CENTERS[4][1] + 72}, ${bottom.x - 80} ${bottom.y - 76}, ${bottom.x} ${bottom.y}`;
-    const reverse = `M ${bottom.x} ${bottom.y} C ${bottom.x - 80} ${bottom.y - 76}, ${laneX} ${GROUP_CENTERS[4][1] + 72}, ${laneX} ${GROUP_CENTERS[4][1]} C ${laneX} ${GROUP_CENTERS[4][1] - 72}, ${top.x - 80} ${top.y + 76}, ${top.x} ${top.y}`;
-    return { crossDomain: true, d: source === top ? canonical : reverse };
-  }
-  if (pair === '1:3') {
-    const right = source.group === 1 ? source : target;
-    const left = source.group === 3 ? source : target;
-    const laneY = GROUP_CENTERS[4][1] - CORE_EXCLUSION_RADIUS - 4;
-    const canonical = `M ${right.x} ${right.y} C ${right.x - 86} ${right.y - 48}, ${GROUP_CENTERS[4][0] + 74} ${laneY}, ${GROUP_CENTERS[4][0]} ${laneY} C ${GROUP_CENTERS[4][0] - 74} ${laneY}, ${left.x + 86} ${left.y - 48}, ${left.x} ${left.y}`;
-    const reverse = `M ${left.x} ${left.y} C ${left.x + 86} ${left.y - 48}, ${GROUP_CENTERS[4][0] - 74} ${laneY}, ${GROUP_CENTERS[4][0]} ${laneY} C ${GROUP_CENTERS[4][0] + 74} ${laneY}, ${right.x - 86} ${right.y - 48}, ${right.x} ${right.y}`;
-    return { crossDomain: true, d: source === right ? canonical : reverse };
-  }
-
   const [coreX, coreY] = GROUP_CENTERS[4];
-  const [firstX, firstY] = GROUP_CENTERS[source.group];
-  const [secondX, secondY] = GROUP_CENTERS[target.group];
-  const midpointX = (firstX + secondX) / 2;
-  const midpointY = (firstY + secondY) / 2;
-  const distance = Math.max(1, Math.hypot(midpointX - coreX, midpointY - coreY));
-  const controlX = midpointX + (midpointX - coreX) / distance * (GROUP_RADIUS - LABEL_CLEARANCE);
-  const controlY = midpointY + (midpointY - coreY) / distance * (GROUP_RADIUS - LABEL_CLEARANCE);
+  const centerDistance = Math.hypot(midpointX - coreX, midpointY - coreY);
+  const lane = centerDistance < CORE_EXCLUSION_RADIUS + 20 ? 132 + (hash % 3) * 18 : Math.min(64, Math.max(24, length * 0.12));
+  const controlX = midpointX + normalX * lane * side;
+  const controlY = midpointY + normalY * lane * side;
   return { crossDomain: true, d: `M ${source.x} ${source.y} Q ${controlX} ${controlY} ${target.x} ${target.y}` };
 }
 
@@ -400,13 +384,14 @@ class NexoGraphView extends ItemView {
       arrow.appendChild(svgElement('path', { d: 'M 0 0 L 7 3.5 L 0 7 z', fill: color }));
       defs.appendChild(arrow);
       if (index < 4) {
+        const midpointX = (coreX + x) / 2;
+        const midpointY = (coreY + y) / 2;
         atmosphere.appendChild(svgElement('path', {
-          d: `M ${coreX} ${coreY} L ${x} ${y}`,
+          d: `M ${coreX} ${coreY} Q ${midpointX + (coreY - y) * 0.12} ${midpointY + (x - coreX) * 0.12} ${x} ${y}`,
           class: 'nexo-field-spoke',
           'stroke': color
         }));
-        atmosphere.appendChild(svgElement('circle', { cx: x, cy: y, r: GROUP_RADIUS + 24, class: 'nexo-field-outline', stroke: color }));
-        atmosphere.appendChild(svgElement('circle', { cx: x, cy: y, r: GROUP_RADIUS - 42, class: 'nexo-field-ring', stroke: color }));
+        atmosphere.appendChild(svgElement('circle', { cx: x, cy: y, r: 5, class: 'nexo-field-hub', stroke: color }));
       }
       atmosphere.appendChild(svgElement('circle', { cx: x, cy: y, r: index === 4 ? 156 : GROUP_RADIUS + 38, fill: `url(#nexo-halo-${index})` }));
       if (index < 4) {
@@ -416,14 +401,15 @@ class NexoGraphView extends ItemView {
         atmosphere.appendChild(caption);
       }
     });
-    const core = svgElement('g', { class: 'nexo-core', 'aria-hidden': 'true' });
-    core.appendChild(svgElement('circle', { cx: coreX, cy: coreY, r: 54, class: 'nexo-core-ring' }));
-    core.appendChild(svgElement('circle', { cx: coreX, cy: coreY, r: 26, class: 'nexo-core-ring is-inner' }));
-    core.appendChild(svgElement('path', { d: `M ${coreX} ${coreY - 16} L ${coreX + 16} ${coreY} L ${coreX} ${coreY + 16} L ${coreX - 16} ${coreY} Z`, class: 'nexo-core-mark' }));
+    const core = svgElement('g', { class: 'nexo-core', role: 'presentation' });
+    core.appendChild(svgElement('path', { d: `M ${coreX - 22} ${coreY + 12} L ${coreX - 5} ${coreY - 2} L ${coreX + 14} ${coreY - 17} M ${coreX - 5} ${coreY - 2} L ${coreX + 21} ${coreY + 13}`, class: 'nexo-core-branches' }));
+    core.appendChild(svgElement('circle', { cx: coreX - 22, cy: coreY + 12, r: 5, class: 'nexo-core-neuron is-secondary' }));
+    core.appendChild(svgElement('circle', { cx: coreX - 5, cy: coreY - 2, r: 7, class: 'nexo-core-neuron' }));
+    core.appendChild(svgElement('circle', { cx: coreX + 14, cy: coreY - 17, r: 5, class: 'nexo-core-neuron is-secondary' }));
+    core.appendChild(svgElement('circle', { cx: coreX + 21, cy: coreY + 13, r: 5, class: 'nexo-core-neuron is-secondary' }));
     const coreTitle = svgElement('text', { x: coreX, y: coreY + 78, 'text-anchor': 'middle', class: 'nexo-core-label' });
-    coreTitle.textContent = 'NEXO / SIGNAL FIELD';
+    coreTitle.textContent = 'NEXO / KNOWLEDGE CORE';
     core.appendChild(coreTitle);
-    atmosphere.appendChild(core);
     const edgeLayer = svgElement('g', { class: 'nexo-edges' });
     const nodeLayer = svgElement('g', { class: 'nexo-nodes' });
     viewport.append(edgeLayer, nodeLayer);
@@ -436,6 +422,7 @@ class NexoGraphView extends ItemView {
     const labelCandidates = new Set();
     for (const group of nodesByGroup.values()) {
       group.sort((a, b) => b.degree - a.degree || a.path.localeCompare(b.path));
+      group.forEach((node, index) => { node.labelRank = index; });
       group.slice(0, 4).forEach(node => labelCandidates.add(node.path));
     }
 
@@ -484,7 +471,17 @@ class NexoGraphView extends ItemView {
       group.style.setProperty('--nexo-node-color', this.plugin.settings.groups[node.group]?.color || '#729680');
       const radius = Math.min(10, 3.5 + Math.sqrt(node.degree) * 1.2);
       group.appendChild(svgElement('circle', { r: radius }));
-      const label = svgElement('text', { x: radius + 5, y: 3.5, class: 'nexo-node-label' });
+      const labelRank = node.labelRank || 0;
+      const verticalTerritory = node.group === 0 || node.group === 2;
+      const labelAbove = labelRank % 2 === 0;
+      const label = svgElement('text', {
+        x: verticalTerritory ? 0 : (node.group === 1 ? radius + 8 : -radius - 8),
+        y: verticalTerritory
+          ? (labelAbove ? -radius - 7 : radius + 15)
+          : (labelAbove ? -5 : 12),
+        'text-anchor': verticalTerritory ? 'middle' : (node.group === 1 ? 'start' : 'end'),
+        class: 'nexo-node-label'
+      });
       label.textContent = node.name;
       group.appendChild(label);
       const title = svgElement('title');
@@ -518,6 +515,10 @@ class NexoGraphView extends ItemView {
       nodeLayer.appendChild(group);
       nodeElements.push([node, group]);
     }
+
+    // Keep the branded center legible above routes; placement still excludes
+    // nodes and labels from its clear area.
+    viewport.appendChild(core);
 
     const transform = () => viewport.setAttribute('transform', `translate(${600 + this.panX} ${400 + this.panY}) scale(${this.scale}) translate(-600 -400)`);
     this.applyGraphTransform = transform;

@@ -187,13 +187,14 @@ class NexoGraphView extends ItemView {
       arrow.appendChild(svgElement('path', { d: 'M 0 0 L 7 3.5 L 0 7 z', fill: color }));
       defs.appendChild(arrow);
       if (index < 4) {
+        const midpointX = (coreX + x) / 2;
+        const midpointY = (coreY + y) / 2;
         atmosphere.appendChild(svgElement('path', {
-          d: `M ${coreX} ${coreY} L ${x} ${y}`,
+          d: `M ${coreX} ${coreY} Q ${midpointX + (coreY - y) * 0.12} ${midpointY + (x - coreX) * 0.12} ${x} ${y}`,
           class: 'nexo-field-spoke',
           'stroke': color
         }));
-        atmosphere.appendChild(svgElement('circle', { cx: x, cy: y, r: GROUP_RADIUS + 24, class: 'nexo-field-outline', stroke: color }));
-        atmosphere.appendChild(svgElement('circle', { cx: x, cy: y, r: GROUP_RADIUS - 42, class: 'nexo-field-ring', stroke: color }));
+        atmosphere.appendChild(svgElement('circle', { cx: x, cy: y, r: 5, class: 'nexo-field-hub', stroke: color }));
       }
       atmosphere.appendChild(svgElement('circle', { cx: x, cy: y, r: index === 4 ? 156 : GROUP_RADIUS + 38, fill: `url(#nexo-halo-${index})` }));
       if (index < 4) {
@@ -203,14 +204,15 @@ class NexoGraphView extends ItemView {
         atmosphere.appendChild(caption);
       }
     });
-    const core = svgElement('g', { class: 'nexo-core', 'aria-hidden': 'true' });
-    core.appendChild(svgElement('circle', { cx: coreX, cy: coreY, r: 54, class: 'nexo-core-ring' }));
-    core.appendChild(svgElement('circle', { cx: coreX, cy: coreY, r: 26, class: 'nexo-core-ring is-inner' }));
-    core.appendChild(svgElement('path', { d: `M ${coreX} ${coreY - 16} L ${coreX + 16} ${coreY} L ${coreX} ${coreY + 16} L ${coreX - 16} ${coreY} Z`, class: 'nexo-core-mark' }));
+    const core = svgElement('g', { class: 'nexo-core', role: 'presentation' });
+    core.appendChild(svgElement('path', { d: `M ${coreX - 22} ${coreY + 12} L ${coreX - 5} ${coreY - 2} L ${coreX + 14} ${coreY - 17} M ${coreX - 5} ${coreY - 2} L ${coreX + 21} ${coreY + 13}`, class: 'nexo-core-branches' }));
+    core.appendChild(svgElement('circle', { cx: coreX - 22, cy: coreY + 12, r: 5, class: 'nexo-core-neuron is-secondary' }));
+    core.appendChild(svgElement('circle', { cx: coreX - 5, cy: coreY - 2, r: 7, class: 'nexo-core-neuron' }));
+    core.appendChild(svgElement('circle', { cx: coreX + 14, cy: coreY - 17, r: 5, class: 'nexo-core-neuron is-secondary' }));
+    core.appendChild(svgElement('circle', { cx: coreX + 21, cy: coreY + 13, r: 5, class: 'nexo-core-neuron is-secondary' }));
     const coreTitle = svgElement('text', { x: coreX, y: coreY + 78, 'text-anchor': 'middle', class: 'nexo-core-label' });
-    coreTitle.textContent = 'NEXO / SIGNAL FIELD';
+    coreTitle.textContent = 'NEXO / KNOWLEDGE CORE';
     core.appendChild(coreTitle);
-    atmosphere.appendChild(core);
     const edgeLayer = svgElement('g', { class: 'nexo-edges' });
     const nodeLayer = svgElement('g', { class: 'nexo-nodes' });
     viewport.append(edgeLayer, nodeLayer);
@@ -223,6 +225,7 @@ class NexoGraphView extends ItemView {
     const labelCandidates = new Set();
     for (const group of nodesByGroup.values()) {
       group.sort((a, b) => b.degree - a.degree || a.path.localeCompare(b.path));
+      group.forEach((node, index) => { node.labelRank = index; });
       group.slice(0, 4).forEach(node => labelCandidates.add(node.path));
     }
 
@@ -271,7 +274,17 @@ class NexoGraphView extends ItemView {
       group.style.setProperty('--nexo-node-color', this.plugin.settings.groups[node.group]?.color || '#729680');
       const radius = Math.min(10, 3.5 + Math.sqrt(node.degree) * 1.2);
       group.appendChild(svgElement('circle', { r: radius }));
-      const label = svgElement('text', { x: radius + 5, y: 3.5, class: 'nexo-node-label' });
+      const labelRank = node.labelRank || 0;
+      const verticalTerritory = node.group === 0 || node.group === 2;
+      const labelAbove = labelRank % 2 === 0;
+      const label = svgElement('text', {
+        x: verticalTerritory ? 0 : (node.group === 1 ? radius + 8 : -radius - 8),
+        y: verticalTerritory
+          ? (labelAbove ? -radius - 7 : radius + 15)
+          : (labelAbove ? -5 : 12),
+        'text-anchor': verticalTerritory ? 'middle' : (node.group === 1 ? 'start' : 'end'),
+        class: 'nexo-node-label'
+      });
       label.textContent = node.name;
       group.appendChild(label);
       const title = svgElement('title');
@@ -305,6 +318,10 @@ class NexoGraphView extends ItemView {
       nodeLayer.appendChild(group);
       nodeElements.push([node, group]);
     }
+
+    // Keep the branded center legible above routes; placement still excludes
+    // nodes and labels from its clear area.
+    viewport.appendChild(core);
 
     const transform = () => viewport.setAttribute('transform', `translate(${600 + this.panX} ${400 + this.panY}) scale(${this.scale}) translate(-600 -400)`);
     this.applyGraphTransform = transform;
