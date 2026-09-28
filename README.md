@@ -14,12 +14,13 @@
 
 - Opens a dedicated graph view from the ribbon or command palette.
 - Reads Markdown files and resolved links through Obsidian's public plugin API.
-- Places notes in four visual groups based on folder prefixes; unmatched notes form a neutral center.
+- Places notes in four visual groups based on one or more folder prefixes; unmatched notes form a neutral center.
 - Supports case-insensitive search highlighting by note name or path, with a live match count and an explicit no-match message, plus zoom and drag to pan.
 - Filters groups and can focus on notes connected to the last active note at one, two, or three link hops.
 - Highlights a note's neighbors on hover/focus, shows link direction, and offers a context-menu action to open a note.
 - Keyboard users can open that context menu with **Shift+F10** or the Context Menu key while a note is focused; reciprocal links share one edge with arrows at both ends.
 - Keeps group settings in the vault's plugin data and updates when links or files change.
+- Supports vault-specific ignored path prefixes so trash and archived backups can stay out of the visualization without changing notes; the footer reports the excluded count.
 
 ## Signal Field
 
@@ -36,7 +37,7 @@ The graph uses a deterministic layout that adapts each group's radius to its not
 | Operations | `pages/ops/` | Lime `#b8ff5a` |
 | Meta | `pages/meta/` | Aqua `#00e5a0` |
 
-Change prefixes and colors in **Settings → Community plugins → Nexo Graph**. Nexo Graph works without the Nexo theme, though the two share a palette.
+Change one or more comma-separated prefixes and colors, and set ignored paths, in **Settings → Community plugins → Nexo Graph**. Nexo Graph works without the Nexo theme, though the two share a palette.
 
 Use the group toggles above the graph to focus on selected areas. Search matches notes in the current graph scope and announces the match count, including when no notes match. Open Nexo Graph while viewing a note, then choose **Local** and a hop depth to explore its neighborhood.
 
@@ -47,7 +48,7 @@ Use the group toggles above the graph to focus on selected areas. Search matches
 3. In Obsidian, turn on community plugins and enable **Nexo Graph**.
 4. Choose **Open Nexo Graph** in the command palette or click its ribbon icon.
 
-Version 0.1.0 was an early preview. Version 0.2.1 introduced filters and local exploration; 0.3.0 improves how dense graphs sample notes and links across groups. Community plugin gallery submission is planned; until then, install manually. The manifest includes the funding link for the future listing.
+Version 0.1.0 was an early preview. Version 0.2.1 introduced filters and local exploration; 0.3.0 improved graph sampling; 0.4.0 adds multi-prefix folder groups. Community plugin gallery submission is planned; until then, install manually. The manifest includes the funding link for the future listing.
 
 ## Privacy and architecture
 
