@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Refresh the open graph after vault file and metadata changes so new notes and edited links appear without reopening the view.
+- Clarify that folder prefixes group notes while resolved Markdown links create graph edges.
+
 ## 0.4.0
 
 - Support multiple folder prefixes per graph group for vaults with broader knowledge architectures.

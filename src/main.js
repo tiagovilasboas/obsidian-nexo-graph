@@ -128,6 +128,7 @@ class NexoGraphView extends ItemView {
 
     const groupFilter = root.createDiv({ cls: 'nexo-filters', attr: { role: 'group', 'aria-label': 'Filter graph groups' } });
     const filterGroups = [...this.plugin.settings.groups, { name: 'Other', color: '#668b72' }];
+    this.groupFilterControls = [];
     filterGroups.forEach((rule, index) => {
       const label = groupFilter.createEl('label', { cls: 'nexo-filter' });
       const checkbox = label.createEl('input', { attr: { type: 'checkbox', 'aria-label': `Show ${rule.name} notes` } });
@@ -140,6 +141,8 @@ class NexoGraphView extends ItemView {
       const swatch = label.createSpan({ cls: 'nexo-filter-dot' });
       swatch.style.setProperty('--nexo-node-color', rule.color);
       label.createSpan({ text: rule.name });
+      const count = label.createSpan({ cls: 'nexo-filter-count', text: '(0)' });
+      this.groupFilterControls.push({ checkbox, count, name: rule.name });
     });
 
     this.renderGraph();
@@ -151,12 +154,17 @@ class NexoGraphView extends ItemView {
     if (!search) return;
     this.svgEl?.remove();
 
-    const { nodes, edges, ignoredCount, inScope, linksInScope } = graphData(this.app, this.plugin.settings.groups, {
+    const { nodes, edges, ignoredCount, inScope, linksInScope, groupCounts } = graphData(this.app, this.plugin.settings.groups, {
       ignoredPrefixes: this.plugin.settings.ignoredPrefixes,
       localMode: this.localMode,
       anchorPath: this.anchorPath,
       depth: this.localDepth,
       visibleGroups: this.visibleGroups
+    });
+    this.groupFilterControls?.forEach(({ checkbox, count, name }, index) => {
+      const total = groupCounts[index] || 0;
+      count.textContent = `(${total})`;
+      checkbox.setAttribute('aria-label', `Show ${name} notes (${total})`);
     });
     positionNodes(nodes);
     const byPath = new Map(nodes.map(node => [node.path, node]));
@@ -428,7 +436,10 @@ module.exports = class NexoGraphPlugin extends Plugin {
     this.addSettingTab(new NexoGraphSettings(this.app, this));
     const refresh = () => this.app.workspace.getLeavesOfType(VIEW_TYPE).forEach(leaf => leaf.view.refresh());
     this.registerEvent(this.app.metadataCache.on('resolved', refresh));
+    // File events can precede parsing; metadata changes carry the updated links.
+    this.registerEvent(this.app.metadataCache.on('changed', refresh));
     this.registerEvent(this.app.vault.on('create', refresh));
+    this.registerEvent(this.app.vault.on('modify', refresh));
     this.registerEvent(this.app.vault.on('delete', refresh));
     this.registerEvent(this.app.vault.on('rename', refresh));
   }

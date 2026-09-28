@@ -64,6 +64,7 @@
 .nexo-filter { display: inline-flex; align-items: center; gap: 6px; color: #91a391; font: 11px ui-monospace, monospace; cursor: pointer; user-select: none; }
 .nexo-filter input { margin: 0; accent-color: var(--nexo-node-color, #00ff41); }
 .nexo-filter-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--nexo-node-color, #668b72); box-shadow: 0 0 7px var(--nexo-node-color, #668b72); }
+.nexo-filter-count { color: #738d7c; font-size: 10px; font-variant-numeric: tabular-nums; }
 .nexo-filter:has(input:not(:checked)) { opacity: 0.48; }
 
 .nexo-map {

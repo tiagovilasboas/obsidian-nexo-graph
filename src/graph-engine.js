@@ -136,6 +136,8 @@ function graphData(app, rules, options = {}) {
     candidates = files.filter(file => reached.has(file.path));
   }
 
+  const groupCounts = Array.from({ length: rules.length + 1 }, () => 0);
+  for (const file of candidates) groupCounts[groupFor(file.path, rules)]++;
   candidates = candidates.filter(file => options.visibleGroups?.has(groupFor(file.path, rules)) ?? true);
   const chosen = selectNodesByGroup(candidates, degree, rules);
   const visible = new Set(chosen.map(file => file.path));
@@ -160,7 +162,7 @@ function graphData(app, rules, options = {}) {
       else edgePairs.set(key, { source, target, bidirectional: false });
   }
   const edges = selectRepresentativeEdges(edgePairs, nodes).map(edge => [edge.source, edge.target, edge.bidirectional]);
-  return { nodes, edges, total: allFiles.length, ignoredCount: allFiles.length - files.length, inScope: candidates.length, linksInScope: edgePairs.size };
+  return { nodes, edges, total: allFiles.length, ignoredCount: allFiles.length - files.length, inScope: candidates.length, linksInScope: edgePairs.size, groupCounts };
 }
 
 function positionNodes(nodes) {
