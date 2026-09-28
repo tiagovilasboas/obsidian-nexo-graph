@@ -170,6 +170,39 @@ function positionNodes(nodes) {
   }
 }
 
+function edgeRoute(source, target) {
+  const local = source.group === target.group || source.group > 3 || target.group > 3;
+  if (local) {
+    const dx = target.x - source.x;
+    const dy = target.y - source.y;
+    const length = Math.max(1, Math.hypot(dx, dy));
+    const bend = Math.min(28, length * 0.07);
+    const side = source.path.localeCompare(target.path) < 0 ? 1 : -1;
+    const controlX = (source.x + target.x) / 2 - dy / length * bend * side;
+    const controlY = (source.y + target.y) / 2 + dx / length * bend * side;
+    return { crossDomain: false, d: `M ${source.x} ${source.y} Q ${controlX} ${controlY} ${target.x} ${target.y}` };
+  }
+
+  const pair = [source.group, target.group].sort((a, b) => a - b).join(':');
+  if (pair === '0:2') {
+    // Opposite domains travel through an exterior lane so the Nexo core stays readable.
+    return { crossDomain: true, d: `M ${source.x} ${source.y} C -120 ${source.y}, -120 ${target.y}, ${target.x} ${target.y}` };
+  }
+  if (pair === '1:3') {
+    return { crossDomain: true, d: `M ${source.x} ${source.y} C ${source.x} -90, ${target.x} -90, ${target.x} ${target.y}` };
+  }
+
+  const [coreX, coreY] = GROUP_CENTERS[4];
+  const [firstX, firstY] = GROUP_CENTERS[source.group];
+  const [secondX, secondY] = GROUP_CENTERS[target.group];
+  const midpointX = (firstX + secondX) / 2;
+  const midpointY = (firstY + secondY) / 2;
+  const distance = Math.max(1, Math.hypot(midpointX - coreX, midpointY - coreY));
+  const controlX = midpointX + (midpointX - coreX) / distance * 132;
+  const controlY = midpointY + (midpointY - coreY) / distance * 132;
+  return { crossDomain: true, d: `M ${source.x} ${source.y} Q ${controlX} ${controlY} ${target.x} ${target.y}` };
+}
+
 const VIEW_TYPE = 'nexo-graph-view';
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const DEFAULT_SETTINGS = {
@@ -398,12 +431,9 @@ class NexoGraphView extends ItemView {
     for (const [source, target, bidirectional] of edges) {
       const a = byPath.get(source);
       const b = byPath.get(target);
-      const dx = b.x - a.x;
-      const dy = b.y - a.y;
-      const bend = Math.min(34, Math.hypot(dx, dy) * 0.045);
-      const middleX = (a.x + b.x) / 2 - dy / Math.max(1, Math.hypot(dx, dy)) * bend;
-      const middleY = (a.y + b.y) / 2 + dx / Math.max(1, Math.hypot(dx, dy)) * bend;
-      const edge = svgElement('path', { d: `M ${a.x} ${a.y} Q ${middleX} ${middleY} ${b.x} ${b.y}` });
+      const route = edgeRoute(a, b);
+      const edge = svgElement('path', { d: route.d });
+      edge.classList.toggle('is-cross-domain', route.crossDomain);
       edge.style.setProperty('--nexo-edge-color', this.plugin.settings.groups[a.group]?.color || '#3f8e5b');
       edge.setAttribute('marker-end', `url(#nexo-arrow-${a.group})`);
       if (bidirectional) edge.setAttribute('marker-start', `url(#nexo-arrow-${b.group})`);

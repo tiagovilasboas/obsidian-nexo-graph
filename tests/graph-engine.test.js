@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { GROUP_CENTERS, GROUP_RADIUS, MAX_EDGES, MAX_NODES, graphData, groupFor, positionNodes, searchMatches, searchSummary } = require('../src/graph-engine');
+const { GROUP_CENTERS, GROUP_RADIUS, MAX_EDGES, MAX_NODES, edgeRoute, graphData, groupFor, positionNodes, searchMatches, searchSummary } = require('../src/graph-engine');
 
 const rules = [
   { name: 'Personal', prefix: 'pages/pessoal/' },
@@ -162,6 +162,25 @@ test('Signal Field reserves a neutral center and four distinct domain anchors', 
   assert.ok(GROUP_RADIUS < 170, 'domain fields must leave visual space around the Nexo core');
 });
 
+test('Signal Field routes cross-domain links around the Nexo core', () => {
+  const top = { path: 'pages/pessoal/top.md', group: 0, x: 600, y: 165 };
+  const right = { path: 'pages/carreira/right.md', group: 1, x: 930, y: 400 };
+  const bottom = { path: 'pages/ops/bottom.md', group: 2, x: 600, y: 635 };
+  const peer = { path: 'pages/pessoal/peer.md', group: 0, x: 540, y: 150 };
+
+  const adjacent = edgeRoute(top, right);
+  assert.equal(adjacent.crossDomain, true);
+  assert.match(adjacent.d, /^M 600 165 Q /);
+
+  const opposite = edgeRoute(top, bottom);
+  assert.equal(opposite.crossDomain, true);
+  assert.match(opposite.d, /C -120 165, -120 635/);
+
+  const local = edgeRoute(top, peer);
+  assert.equal(local.crossDomain, false);
+  assert.match(local.d, /^M 600 165 Q /);
+});
+
 test('crowded group positions remain inside its documented radius', () => {
   const paths = Array.from({ length: MAX_NODES }, (_, index) => `pages/pessoal/note-${index}.md`);
   const nodes = graphData(app(paths), rules).nodes;
@@ -187,6 +206,8 @@ test('documented maximum-size graph stays within a generous runtime budget', () 
   const startedAt = performance.now();
   const result = graphData(app(paths, links), rules);
   positionNodes(result.nodes);
+  const byPath = new Map(result.nodes.map(node => [node.path, node]));
+  for (const [source, target] of result.edges) edgeRoute(byPath.get(source), byPath.get(target));
   const elapsedMs = performance.now() - startedAt;
 
   assert.equal(result.nodes.length, MAX_NODES);

@@ -1,5 +1,5 @@
 const { ItemView, Menu, Plugin, PluginSettingTab, Setting } = require('obsidian');
-const { GROUP_CENTERS, GROUP_RADIUS, MAX_NODES, graphData, positionNodes, searchMatches, searchSummary } = require('./graph-engine');
+const { GROUP_CENTERS, GROUP_RADIUS, MAX_NODES, edgeRoute, graphData, positionNodes, searchMatches, searchSummary } = require('./graph-engine');
 
 const VIEW_TYPE = 'nexo-graph-view';
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -229,12 +229,9 @@ class NexoGraphView extends ItemView {
     for (const [source, target, bidirectional] of edges) {
       const a = byPath.get(source);
       const b = byPath.get(target);
-      const dx = b.x - a.x;
-      const dy = b.y - a.y;
-      const bend = Math.min(34, Math.hypot(dx, dy) * 0.045);
-      const middleX = (a.x + b.x) / 2 - dy / Math.max(1, Math.hypot(dx, dy)) * bend;
-      const middleY = (a.y + b.y) / 2 + dx / Math.max(1, Math.hypot(dx, dy)) * bend;
-      const edge = svgElement('path', { d: `M ${a.x} ${a.y} Q ${middleX} ${middleY} ${b.x} ${b.y}` });
+      const route = edgeRoute(a, b);
+      const edge = svgElement('path', { d: route.d });
+      edge.classList.toggle('is-cross-domain', route.crossDomain);
       edge.style.setProperty('--nexo-edge-color', this.plugin.settings.groups[a.group]?.color || '#3f8e5b');
       edge.setAttribute('marker-end', `url(#nexo-arrow-${a.group})`);
       if (bidirectional) edge.setAttribute('marker-start', `url(#nexo-arrow-${b.group})`);
