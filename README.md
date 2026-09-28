@@ -65,6 +65,7 @@ node --check src/main.js
 node --check src/graph-engine.js
 node scripts/bundle.mjs --check
 node --test tests/*.test.js
+node scripts/check-css-contract.mjs
 node scripts/check-manifest.mjs
 ```
 
