@@ -9,8 +9,8 @@
 - Separate node keyboard actions: Enter opens, Space toggles persistent neighbor selection, Escape clears search/selection, and the context-menu shortcut remains available.
 - Keep keyboard selections visually and accessibly exposed after focus moves.
 - Let vault owners name the four configurable graph groups, with the names reflected in filters, legend, and populated Signal Field domains.
-- Place only populated configured groups around the neutral core; keep unclassified notes neutral outside the central mark.
-- Keep Signal Field placement deterministic and route cross-domain links around the core as active group geometry changes.
+- Replace separate folder islands with a deterministic circular neural mesh; resolved links gently attract neighbors while local repulsion and a core exclusion preserve clear space.
+- Keep Signal Field edges quiet at rest and make focused relationships stand out; group colors and filters remain available throughout the shared field.
 - Refresh the open graph after vault file and metadata changes so new notes and edited links appear without reopening the view.
 - Clarify that folder prefixes group notes while resolved Markdown links create graph edges.
 

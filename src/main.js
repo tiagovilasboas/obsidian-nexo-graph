@@ -1,5 +1,5 @@
 const { ItemView, Menu, Plugin, PluginSettingTab, Setting } = require('obsidian');
-const { CORE_CENTER, CORE_EXCLUSION_RADIUS, GROUP_RADIUS, MAX_EDGES, MAX_NODES, edgeRoute, graphData, handleNodeKey, labelPlan, positionNodes, reservedLabelBoxes, searchMatches, searchSummary, shouldShowAllLabels, visibleLegendGroups } = require('./graph-engine');
+const { CORE_CENTER, CORE_EXCLUSION_RADIUS, MAX_EDGES, MAX_NODES, edgeRoute, graphData, handleNodeKey, labelPlan, positionNodes, reservedLabelBoxes, searchMatches, searchSummary, shouldShowAllLabels, visibleLegendGroups } = require('./graph-engine');
 
 const VIEW_TYPE = 'nexo-graph-view';
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -169,7 +169,7 @@ class NexoGraphView extends ItemView {
       count.textContent = `(${total})`;
       checkbox.setAttribute('aria-label', `Show ${name} notes (${total})`);
     });
-    const groupCenters = positionNodes(nodes);
+    positionNodes(nodes, edges);
     const byPath = new Map(nodes.map(node => [node.path, node]));
     const svg = svgElement('svg', { viewBox: '0 0 1200 800', role: 'group', 'aria-label': 'Interactive graph of linked notes' });
     svg.classList.add('nexo-map');
@@ -199,28 +199,9 @@ class NexoGraphView extends ItemView {
       const arrow = svgElement('marker', { id: `nexo-arrow-${index}`, markerWidth: 7, markerHeight: 7, refX: 6, refY: 3.5, viewBox: '0 0 7 7', orient: 'auto', markerUnits: 'userSpaceOnUse' });
       arrow.appendChild(svgElement('path', { d: 'M 0 0 L 7 3.5 L 0 7 z', fill: color }));
       defs.appendChild(arrow);
-      const center = groupCenters.get(index);
-      if (center) {
-        const [x, y] = center;
-        const gradient = svgElement('radialGradient', { id: `nexo-halo-${index}` });
-        gradient.appendChild(svgElement('stop', { offset: '0%', 'stop-color': color, 'stop-opacity': 0.17 }));
-        gradient.appendChild(svgElement('stop', { offset: '100%', 'stop-color': color, 'stop-opacity': 0 }));
-        defs.appendChild(gradient);
-        const midpointX = (coreX + x) / 2;
-        const midpointY = (coreY + y) / 2;
-        atmosphere.appendChild(svgElement('path', {
-          d: `M ${coreX} ${coreY} Q ${midpointX + (coreY - y) * 0.12} ${midpointY + (x - coreX) * 0.12} ${x} ${y}`,
-          class: 'nexo-field-spoke',
-          'stroke': color
-        }));
-        atmosphere.appendChild(svgElement('circle', { cx: x, cy: y, r: 5, class: 'nexo-field-hub', stroke: color }));
-        atmosphere.appendChild(svgElement('circle', { cx: x, cy: y, r: GROUP_RADIUS + 38, fill: `url(#nexo-halo-${index})` }));
-        const caption = svgElement('text', { x, y: y - GROUP_RADIUS + 22, 'text-anchor': 'middle', class: 'nexo-cluster-label' });
-        caption.style.fill = color;
-        caption.textContent = rule.name.trim().toUpperCase();
-        atmosphere.appendChild(caption);
-      }
     });
+    atmosphere.appendChild(svgElement('circle', { cx: coreX, cy: coreY, r: 329, class: 'nexo-field-boundary' }));
+    atmosphere.appendChild(svgElement('circle', { cx: coreX, cy: coreY, r: 250, class: 'nexo-field-ring' }));
     atmosphere.appendChild(svgElement('circle', { cx: coreX, cy: coreY, r: 156, fill: 'url(#nexo-halo-core)' }));
     const core = svgElement('g', { class: 'nexo-core', role: 'presentation' });
     core.appendChild(svgElement('path', { d: `M ${coreX - 22} ${coreY + 12} L ${coreX - 5} ${coreY - 2} L ${coreX + 14} ${coreY - 17} M ${coreX - 5} ${coreY - 2} L ${coreX + 21} ${coreY + 13}`, class: 'nexo-core-branches' }));
@@ -235,7 +216,7 @@ class NexoGraphView extends ItemView {
     const nodeLayer = svgElement('g', { class: 'nexo-nodes' });
     viewport.append(edgeLayer, nodeLayer);
     const edgeElements = [];
-    const labels = labelPlan(nodes, 4, 3, reservedLabelBoxes(groupCenters, visualGroups));
+    const labels = labelPlan(nodes, 4, 3, reservedLabelBoxes());
 
     for (const [source, target, bidirectional] of edges) {
       const a = byPath.get(source);
@@ -275,6 +256,7 @@ class NexoGraphView extends ItemView {
       for (const [source, target, edge] of edgeElements) {
         const incident = !this.emphasisPath || source === this.emphasisPath || target === this.emphasisPath;
         edge.classList.toggle('is-dimmed', !incident);
+        edge.classList.toggle('is-emphasized', Boolean(this.emphasisPath && incident));
       }
       if (this.searchStatus) this.searchStatus.textContent = searchSummary(nodes, query);
     };

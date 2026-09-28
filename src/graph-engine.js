@@ -1,14 +1,8 @@
 const MAX_NODES = 500;
 const MAX_EDGES = 1600;
 const LABEL_ALL_THRESHOLD = 32;
-// Active domains orbit a stable, neutral core. Coordinates are recomputed
-// deterministically so empty configured groups do not reserve visual space.
 const CORE_CENTER = [600, 400];
-const DOMAIN_ORBIT_RADIUS = 290;
-const GROUP_RADIUS = 146;
 const CORE_EXCLUSION_RADIUS = 86;
-const GROUP_CAPTION_OFFSET = 22;
-const GROUP_CAPTION_HEIGHT = 14;
 const CORE_TITLE_BOX = { left: 488, top: 464, right: 712, bottom: 484, kind: 'core-title' };
 
 function groupFor(path, rules) {
@@ -66,48 +60,11 @@ function handleNodeKey(event, actions) {
   return false;
 }
 
-function activeGroupCenters(groupIndexes) {
-  const groups = [...new Set(groupIndexes.filter(index => Number.isInteger(index) && index >= 0 && index < 4))].sort((a, b) => a - b);
-  const centers = new Map();
-  if (!groups.length) return centers;
-
-  const count = groups.length;
-  const startAngle = count === 1 || count === 2 ? 0 : count === 3 ? -Math.PI / 2 : -Math.PI / 4;
-  const orbitRadius = count === 3 ? 238 : DOMAIN_ORBIT_RADIUS;
-  groups.forEach((group, index) => {
-    const angle = startAngle + index * (Math.PI * 2 / count);
-    centers.set(group, [
-      CORE_CENTER[0] + Math.cos(angle) * orbitRadius,
-      CORE_CENTER[1] + Math.sin(angle) * orbitRadius
-    ]);
-  });
-  return centers;
-}
-
-function reservedLabelBoxes(groupCenters, groups) {
-  const boxes = [{ ...CORE_TITLE_BOX }];
-  for (const [groupIndex, [x, y]] of groupCenters) {
-    const name = String(groups[groupIndex]?.name || '').trim();
-    if (!name) continue;
-    // This matches the mono caption approximately; browser font metrics still
-    // require visual QA, so the box is a conservative layout reservation.
-    const width = Math.max(28, name.length * 9);
-    const baseline = y - GROUP_RADIUS + GROUP_CAPTION_OFFSET;
-    boxes.push({
-      left: x - width / 2,
-      top: baseline - GROUP_CAPTION_HEIGHT + 2,
-      right: x + width / 2,
-      bottom: baseline + 3,
-      kind: 'group-caption',
-      group: groupIndex
-    });
-  }
-  return boxes;
+function reservedLabelBoxes() {
+  return [{ ...CORE_TITLE_BOX }];
 }
 
 function labelPlan(nodes, perGroupLimit = 4, clearance = 3, reservedBoxes = []) {
-  const groupIndexes = [...new Set(nodes.map(node => node.group))];
-  const centers = activeGroupCenters(groupIndexes);
   const groups = new Map();
   for (const node of nodes) {
     if (!groups.has(node.group)) groups.set(node.group, []);
@@ -119,12 +76,11 @@ function labelPlan(nodes, perGroupLimit = 4, clearance = 3, reservedBoxes = []) 
   const boxes = [];
   for (const [groupIndex, group] of [...groups].sort(([left], [right]) => left - right)) {
     group.sort((a, b) => b.degree - a.degree || a.path.localeCompare(b.path));
-    const center = centers.get(groupIndex) || CORE_CENTER;
     group.forEach((node, rank) => {
       const radius = Math.min(10, 3.5 + Math.sqrt(node.degree) * 1.2);
       const width = Math.max(8, node.name.length * 6.6);
-      const directionX = groupIndex < 4 ? center[0] - CORE_CENTER[0] : node.x - CORE_CENTER[0];
-      const directionY = groupIndex < 4 ? center[1] - CORE_CENTER[1] : node.y - CORE_CENTER[1];
+      const directionX = node.x - CORE_CENTER[0];
+      const directionY = node.y - CORE_CENTER[1];
       const horizontal = Math.abs(directionX) >= Math.abs(directionY);
       const outward = horizontal ? Math.sign(directionX) || 1 : Math.sign(directionY) || 1;
       const position = horizontal
@@ -284,33 +240,80 @@ function graphData(app, rules, options = {}) {
   return { nodes, edges, total: allFiles.length, ignoredCount: allFiles.length - files.length, inScope: candidates.length, linksInScope: edgePairs.size, groupCounts };
 }
 
-function positionNodes(nodes) {
-  const groups = [[], [], [], [], []];
-  for (const node of nodes) groups[node.group].push(node);
-  const centers = activeGroupCenters(groups.slice(0, 4).flatMap((group, index) => group.length ? [index] : []));
-  for (const [groupIndex, group] of groups.entries()) {
-    group.sort((a, b) => b.degree - a.degree || a.path.localeCompare(b.path));
-    if (groupIndex === 4) {
-      // Keep unclassified notes neutral and outside the central mark.
-      group.forEach((node, index) => {
-        const radius = 112 + Math.min(30, Math.sqrt(index) * 3);
-        const angle = index * 2.399963229728653;
-        node.x = CORE_CENTER[0] + Math.cos(angle) * radius;
-        node.y = CORE_CENTER[1] + Math.sin(angle) * radius;
-      });
-      continue;
+function stableHash(value) {
+  let hash = 2166136261;
+  for (const character of value) hash = Math.imul(hash ^ character.charCodeAt(0), 16777619) >>> 0;
+  return hash;
+}
+
+function positionNodes(nodes, edges = []) {
+  if (!nodes.length) return;
+  const [centerX, centerY] = CORE_CENTER;
+  const innerRadius = CORE_EXCLUSION_RADIUS + 38;
+  const outerRadius = 328;
+  const ordered = [...nodes].sort((a, b) => a.path.localeCompare(b.path));
+  const positions = new Map();
+  const nodeIndexes = new Map(ordered.map((node, index) => [node.path, index]));
+  ordered.forEach(node => {
+    const angle = stableHash(`${node.path}|angle`) / 0x100000000 * Math.PI * 2;
+    const ratio = stableHash(`${node.path}|radius`) / 0x100000000;
+    const radius = Math.sqrt(innerRadius ** 2 + ratio * (outerRadius ** 2 - innerRadius ** 2));
+    node.x = centerX + Math.cos(angle) * radius;
+    node.y = centerY + Math.sin(angle) * radius;
+    positions.set(node.path, node);
+  });
+
+  // A small, fixed relaxation gives connected notes a gentle neural pull.
+  // Pairwise repulsion prevents pileups; the annular clamp preserves the core
+  // and the circular silhouette. Bounded iterations keep rendering predictable.
+  const springs = edges
+    .map(([source, target]) => [positions.get(source), positions.get(target)])
+    .filter(([a, b]) => a && b)
+    .sort(([leftA, leftB], [rightA, rightB]) =>
+      leftA.path.localeCompare(rightA.path) || leftB.path.localeCompare(rightB.path)
+    );
+  const minDistance = 34;
+  for (let iteration = 0; iteration < 20; iteration++) {
+    const forces = ordered.map(() => [0, 0]);
+    for (let left = 0; left < ordered.length; left++) {
+      const a = ordered[left];
+      for (let right = left + 1; right < ordered.length; right++) {
+        const b = ordered[right];
+        let dx = a.x - b.x;
+        let dy = a.y - b.y;
+        let distance = Math.hypot(dx, dy);
+        if (distance >= minDistance) continue;
+        if (distance < 0.01) { dx = left % 2 ? 1 : -1; dy = right % 2 ? 1 : -1; distance = Math.hypot(dx, dy); }
+        const strength = (minDistance - distance) * 0.035 / distance;
+        const fx = dx * strength;
+        const fy = dy * strength;
+        forces[left][0] += fx; forces[left][1] += fy;
+        forces[right][0] -= fx; forces[right][1] -= fy;
+      }
     }
-    if (!group.length) continue;
-    const [centerX, centerY] = centers.get(groupIndex);
-    const spacing = group.length <= 1 ? 0 : Math.min(26, (GROUP_RADIUS - 36) / Math.sqrt(group.length - 1));
-    group.forEach((node, index) => {
-      const radius = index === 0 ? 0 : 36 + spacing * Math.sqrt(index - 1);
-      const angle = index * 2.399963229728653 + groupIndex * 0.6;
-      node.x = centerX + Math.cos(angle) * radius;
-      node.y = centerY + Math.sin(angle) * radius;
+    for (const [a, b] of springs) {
+      const dx = b.x - a.x;
+      const dy = b.y - a.y;
+      const distance = Math.max(1, Math.hypot(dx, dy));
+      const strength = Math.min(1.6, Math.max(0, distance - 78) * 0.006) / distance;
+      const fx = dx * strength;
+      const fy = dy * strength;
+      const left = nodeIndexes.get(a.path);
+      const right = nodeIndexes.get(b.path);
+      forces[left][0] += fx; forces[left][1] += fy;
+      forces[right][0] -= fx; forces[right][1] -= fy;
+    }
+    ordered.forEach((node, index) => {
+      node.x += Math.max(-3, Math.min(3, forces[index][0]));
+      node.y += Math.max(-3, Math.min(3, forces[index][1]));
+      const dx = node.x - centerX;
+      const dy = node.y - centerY;
+      const radius = Math.hypot(dx, dy) || 1;
+      const bounded = Math.min(outerRadius, Math.max(innerRadius, radius));
+      node.x = centerX + dx / radius * bounded;
+      node.y = centerY + dy / radius * bounded;
     });
   }
-  return centers;
 }
 
 function edgeRoute(source, target) {
@@ -339,4 +342,4 @@ function edgeRoute(source, target) {
   return { crossDomain: true, d: `M ${source.x} ${source.y} Q ${controlX} ${controlY} ${target.x} ${target.y}` };
 }
 
-module.exports = { CORE_CENTER, CORE_EXCLUSION_RADIUS, DOMAIN_ORBIT_RADIUS, GROUP_RADIUS, MAX_EDGES, MAX_NODES, activeGroupCenters, edgeRoute, graphData, groupFor, handleNodeKey, labelPlan, positionNodes, reservedLabelBoxes, searchMatches, searchSummary, selectNodesByGroup, selectRepresentativeEdges, shouldShowAllLabels, visibleLegendGroups };
+module.exports = { CORE_CENTER, CORE_EXCLUSION_RADIUS, MAX_EDGES, MAX_NODES, edgeRoute, graphData, groupFor, handleNodeKey, labelPlan, positionNodes, reservedLabelBoxes, searchMatches, searchSummary, selectNodesByGroup, selectRepresentativeEdges, shouldShowAllLabels, visibleLegendGroups };
