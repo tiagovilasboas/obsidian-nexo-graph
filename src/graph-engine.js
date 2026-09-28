@@ -8,6 +8,20 @@ function groupFor(path, rules) {
   return index < 0 ? rules.length : index;
 }
 
+function searchMatches(nodes, query) {
+  const normalized = query.trim().toLowerCase();
+  if (!normalized) return nodes;
+  return nodes.filter(node => node.name.toLowerCase().includes(normalized) || node.path.toLowerCase().includes(normalized));
+}
+
+function searchSummary(nodes, query) {
+  const normalized = query.trim();
+  const matches = searchMatches(nodes, normalized);
+  if (!normalized) return `${nodes.length} searchable ${nodes.length === 1 ? 'note' : 'notes'}`;
+  if (!matches.length) return `No notes match “${normalized}”`;
+  return `${matches.length} matching ${matches.length === 1 ? 'note' : 'notes'}`;
+}
+
 function selectNodesByGroup(candidates, degree, rules) {
   const groups = new Map();
   for (const file of candidates) {
@@ -152,4 +166,4 @@ function positionNodes(nodes) {
   }
 }
 
-module.exports = { GROUP_CENTERS, MAX_EDGES, MAX_NODES, graphData, groupFor, positionNodes, selectNodesByGroup, selectRepresentativeEdges };
+module.exports = { GROUP_CENTERS, MAX_EDGES, MAX_NODES, graphData, groupFor, positionNodes, searchMatches, searchSummary, selectNodesByGroup, selectRepresentativeEdges };

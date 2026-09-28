@@ -9,6 +9,20 @@ function groupFor(path, rules) {
   return index < 0 ? rules.length : index;
 }
 
+function searchMatches(nodes, query) {
+  const normalized = query.trim().toLowerCase();
+  if (!normalized) return nodes;
+  return nodes.filter(node => node.name.toLowerCase().includes(normalized) || node.path.toLowerCase().includes(normalized));
+}
+
+function searchSummary(nodes, query) {
+  const normalized = query.trim();
+  const matches = searchMatches(nodes, normalized);
+  if (!normalized) return `${nodes.length} searchable ${nodes.length === 1 ? 'note' : 'notes'}`;
+  if (!matches.length) return `No notes match “${normalized}”`;
+  return `${matches.length} matching ${matches.length === 1 ? 'note' : 'notes'}`;
+}
+
 function selectNodesByGroup(candidates, degree, rules) {
   const groups = new Map();
   for (const file of candidates) {
@@ -232,6 +246,7 @@ class NexoGraphView extends ItemView {
     this.footerEl = null;
     this.footerSummary = null;
     this.footerLimit = null;
+    this.searchStatus = null;
     this.legendEl = null;
     root.addClass('nexo-graph');
     const toolbar = root.createDiv({ cls: 'nexo-toolbar' });
@@ -378,6 +393,7 @@ class NexoGraphView extends ItemView {
     const nodeElements = [];
     const updateEmphasis = () => {
       const query = search.value.trim().toLowerCase();
+      const matchingPaths = new Set(searchMatches(nodes, query).map(node => node.path));
       const related = new Set(this.emphasisPath ? [this.emphasisPath] : []);
       if (this.emphasisPath) {
         for (const [source, target] of edgeElements) {
@@ -386,7 +402,7 @@ class NexoGraphView extends ItemView {
         }
       }
       for (const [node, element] of nodeElements) {
-        const queryMatches = Boolean(query && (node.name.toLowerCase().includes(query) || node.path.toLowerCase().includes(query)));
+        const queryMatches = Boolean(query && matchingPaths.has(node.path));
         const matchesQuery = !query || queryMatches;
         const matchesNeighborhood = !this.emphasisPath || related.has(node.path);
         element.classList.toggle('is-match', Boolean(query && matchesQuery));
@@ -398,6 +414,7 @@ class NexoGraphView extends ItemView {
         const incident = !this.emphasisPath || source === this.emphasisPath || target === this.emphasisPath;
         edge.classList.toggle('is-dimmed', !incident);
       }
+      if (this.searchStatus) this.searchStatus.textContent = searchSummary(nodes, query);
     };
     this.updateGraphEmphasis = updateEmphasis;
     for (const node of nodes) {
@@ -469,6 +486,8 @@ class NexoGraphView extends ItemView {
     this.footerEl = footer;
     if (!this.footerSummary) this.footerSummary = footer.createSpan();
     if (!this.footerLimit) this.footerLimit = footer.createSpan();
+    if (!this.searchStatus) this.searchStatus = footer.createSpan({ cls: 'nexo-search-status', attr: { role: 'status', 'aria-live': 'polite' } });
+    this.searchStatus.textContent = searchSummary(nodes, search.value);
     const scopeLabel = this.localMode ? `within ${this.anchorPath.split('/').pop() || 'local graph'}` : 'in vault';
     this.footerSummary.textContent = `${nodes.length.toLocaleString()} shown · ${inScope.toLocaleString()} ${scopeLabel} · ${edges.length.toLocaleString()} links`;
     const limits = [];
