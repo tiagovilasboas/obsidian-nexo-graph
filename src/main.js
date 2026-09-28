@@ -23,7 +23,7 @@ class NexoGraphView extends ItemView {
     super(leaf);
     this.plugin = plugin;
     this.timer = null;
-    this.scale = 1.08;
+    this.scale = 1.12;
     this.panX = 0;
     this.panY = 0;
     this.localMode = false;
@@ -111,7 +111,7 @@ class NexoGraphView extends ItemView {
     minus.addEventListener('click', () => this.zoomGraph(0.8));
     plus.addEventListener('click', () => this.zoomGraph(1.25));
     reset.addEventListener('click', () => {
-      this.scale = 1.08;
+      this.scale = 1.12;
       this.panX = 0;
       this.panY = 0;
       this.applyGraphTransform();
@@ -200,8 +200,8 @@ class NexoGraphView extends ItemView {
       arrow.appendChild(svgElement('path', { d: 'M 0 0 L 7 3.5 L 0 7 z', fill: color }));
       defs.appendChild(arrow);
     });
-    atmosphere.appendChild(svgElement('circle', { cx: coreX, cy: coreY, r: 352, class: 'nexo-field-boundary' }));
-    atmosphere.appendChild(svgElement('circle', { cx: coreX, cy: coreY, r: 270, class: 'nexo-field-ring' }));
+    atmosphere.appendChild(svgElement('circle', { cx: coreX, cy: coreY, r: 329, class: 'nexo-field-boundary' }));
+    atmosphere.appendChild(svgElement('circle', { cx: coreX, cy: coreY, r: 250, class: 'nexo-field-ring' }));
     atmosphere.appendChild(svgElement('circle', { cx: coreX, cy: coreY, r: 156, fill: 'url(#nexo-halo-core)' }));
     const core = svgElement('g', { class: 'nexo-core', role: 'presentation' });
     core.appendChild(svgElement('path', { d: `M ${coreX - 22} ${coreY + 12} L ${coreX - 5} ${coreY - 2} L ${coreX + 14} ${coreY - 17} M ${coreX - 5} ${coreY - 2} L ${coreX + 21} ${coreY + 13}`, class: 'nexo-core-branches' }));

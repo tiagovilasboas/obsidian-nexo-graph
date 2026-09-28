@@ -254,7 +254,7 @@ function positionNodes(nodes, edges = []) {
   if (!nodes.length) return;
   const [centerX, centerY] = CORE_CENTER;
   const innerRadius = CORE_EXCLUSION_RADIUS + 38;
-  const outerRadius = 350;
+  const outerRadius = 328;
   const ordered = [...nodes].sort((a, b) => a.path.localeCompare(b.path));
   const positions = new Map();
   const nodeIndexes = new Map(ordered.map((node, index) => [node.path, index]));
