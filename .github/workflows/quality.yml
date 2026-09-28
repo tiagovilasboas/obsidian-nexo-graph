@@ -20,5 +20,7 @@ jobs:
           node scripts/bundle.mjs --check
       - name: Run graph engine tests
         run: node --test tests/*.test.js
+      - name: Check CSS accessibility and motion contract
+        run: node scripts/check-css-contract.mjs
       - name: Validate manifest contract
         run: node scripts/check-manifest.mjs
