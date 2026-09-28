@@ -68,6 +68,13 @@ Cada incremento precisa de um **guia** (documentação, comportamento esperado o
 - **Classificação:** behaviour e maintainability; guia inferencial/documental + sensores computacional e inferencial.
 - **Entregue parcialmente:** sensor determinístico rejeita colisões entre caixas de texto estimadas e contra boxes sintéticos reservados para captions de grupos ativos e o título do core; os boxes usam estimativa conservadora de fonte mono e não provam a geometria final do browser. Guias/testes ativam supressão por colisão a partir de 32 notas e removem grupos sem notas da legenda. Um sensor sintético mede interseções entre curvas amostradas, inclusive em vértices interiores da amostra, ignora extremidades das curvas e exclui pares com endpoint lógico compartilhado; pode omitir tangências, sobreposições e cruzamentos pequenos entre amostras, e contar quase-tangências como contato. Smoke visual no Obsidian passou em vault privado com 40 notas/98 links; baseline visual sintético versionado/renderizado continua pendente.
 
+### NEXO-007 — Hierarquia de links cross-domain — P1 · entregue, QA visual pendente
+
+- **Guia:** o contrato visual mantém todos os links amostrados e suas rotas determinísticas; em repouso, links cross-domain usam opacidade menor ou igual à dos links locais. Curvatura, stroke e foco/busca preservam sua leitura quando o usuário investiga uma relação.
+- **Sensor computacional:** contrato de CSS bloqueia links cross-domain mais opacos do que links locais e exige que links dimmed permaneçam abaixo de ambos; fixture de engine confirma contagem e pares de links resolvidos sem alteração pela hierarquia de apresentação.
+- **Sensor inferencial:** repetir a revisão em vault sintético denso nas larguras normal e estreita, registrando apenas screenshots públicas e o resultado visual.
+- **Classificação:** behaviour; guia inferencial/documental + sensores computacional e inferencial. O sensor computacional verifica hierarquia declarada e verdade dos links, mas não mede estética no SVG renderizado.
+
 ### NEXO-006 — Robustez de release e documentação — P1 · parcial
 
 - **Guia:** instruções de desenvolvimento e release refletem a versão/tag e a origem de cada asset.

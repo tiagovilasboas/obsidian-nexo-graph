@@ -12,14 +12,14 @@ Signal Field is Nexo Graph's current visual language. It arranges configured fol
 
 ## Geometry and density
 
-The engine places configured notes deterministically in sectors around the fixed neutral core. Only populated configured groups receive an outer sector, halo, and label; one or two active groups use a horizontal orbit, while three or four are distributed around the core. Unclassified `Other` notes remain neutral on a ring outside the central mark. There is no force simulation or layout physics. The view caps the rendered graph at 500 notes and 1,600 links, sampling across groups and group pairs so one large group cannot hide every smaller one. At 32 or more visible notes, label candidates are ranked by degree and path, then placed only if their estimated text boxes do not collide with each other, populated group captions, or the core title. Search matches and the focused note can still reveal labels on demand. Caption and core-title boxes use conservative monospace estimates, so they reduce collisions without proving final browser font geometry. Footer legends omit groups with no visible notes, while filters retain them with a zero count. Cross-domain links use curved routes that avoid the core.
+The engine places configured notes deterministically in sectors around the fixed neutral core. Only populated configured groups receive an outer sector, halo, and label; one or two active groups use a horizontal orbit, while three or four are distributed around the core. Unclassified `Other` notes remain neutral on a ring outside the central mark. There is no force simulation or layout physics. The view caps the rendered graph at 500 notes and 1,600 links, sampling across groups and group pairs so one large group cannot hide every smaller one. At 32 or more visible notes, label candidates are ranked by degree and path, then placed only if their estimated text boxes do not collide with each other, populated group captions, or the core title. Search matches and the focused note can still reveal labels on demand. Caption and core-title boxes use conservative monospace estimates, so they reduce collisions without proving final browser font geometry. Footer legends omit groups with no visible notes, while filters retain them with a zero count. Cross-domain links use curved routes that avoid the core. At rest, they use lower opacity than within-domain links so a dense mesh does not dominate the field; curvature and stroke still distinguish them. Focus and search dim unrelated links so an inspected relationship remains visible.
 
 ## Visual and interaction contract
 
 - Four configurable green hues identify folder groups; neutral notes and the central core remain separate from those categories.
 - Search, group filters, zoom, pan, local neighborhood depth, focused-note neighbors and contextual open are part of the current view. On a focused note, Enter opens it, Space toggles persistent selection, and Escape clears selection and search.
 - Search and interaction reveal information on demand instead of labeling every node in a dense graph.
-- Cross-domain links remain visually distinct from quieter within-domain links.
+- Cross-domain links remain visually distinct by route and stroke while staying quieter than within-domain links at rest.
 - Motion is limited to the Signal Field background and must honor `prefers-reduced-motion`.
 - Graph layout does not change Obsidian's native graph settings or edit notes.
 
@@ -30,7 +30,7 @@ Every graph change follows Harness Engineering's dual loop:
 | Concern | Guia | Sensor | Classificação |
 | --- | --- | --- | --- |
 | Data and group semantics | This document and settings descriptions | Engine fixtures, Obsidian API stub checks, and manifest/CI checks | Computational; architecture fitness and behaviour |
-| Visual legibility | Density-aware labels from 32 notes, populated-only legend, and reserved boxes for captions/core title | Threshold/legend unit tests, estimated collisions with labels and reserved boxes, sampled quadratic-edge crossings on synthetic fixtures, plus Obsidian visual review | Computational and inferential; behaviour |
+| Visual legibility | Density-aware labels from 32 notes, populated-only legend, reserved boxes for captions/core title, and cross-domain edges quieter at rest | Threshold/legend unit tests, estimated collisions with labels and reserved boxes, sampled quadratic-edge crossings on synthetic fixtures, CSS edge-hierarchy contract, plus Obsidian visual review | Computational and inferential; behaviour |
 | Keyboard and motion | Interaction contract, accessible control names, and unchecked filter labels at or above 4.5:1 contrast | Keyboard transition tests, API event/settings tests, reduced-motion and filter-contrast stylesheet checks, manual keyboard review | Computational and inferential; behaviour |
 | Distribution | README and release checklist | Bundle, test, manifest, safe release-tag input, tag asset validation, clean install | Computational and inferential; maintainability |
 

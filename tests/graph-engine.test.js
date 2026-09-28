@@ -72,6 +72,23 @@ test('merges reciprocal links into one bidirectional edge', () => {
   assert.deepEqual(reversedCache.edges, data.edges);
 });
 
+test('NEXO-007 presentation hierarchy preserves resolved link truth', () => {
+  const data = graphData(app(
+    ['pages/pessoal/a.md', 'pages/carreira/b.md', 'inbox/c.md'],
+    {
+      'pages/pessoal/a.md': { 'pages/carreira/b.md': 1, 'inbox/c.md': 1 },
+      'pages/carreira/b.md': { 'inbox/c.md': 1 }
+    }
+  ), rules);
+
+  assert.equal(data.linksInScope, 3);
+  assert.deepEqual(data.edges, [
+    ['pages/pessoal/a.md', 'pages/carreira/b.md', false],
+    ['pages/pessoal/a.md', 'inbox/c.md', false],
+    ['pages/carreira/b.md', 'inbox/c.md', false]
+  ]);
+});
+
 test('graph data reflects new rule notes and edited resolved links on the next render', () => {
   const groups = [{ name: 'Rules', prefixes: ['rules/'] }];
   const paths = ['rules/existing.md', 'docs/readme.md'];
