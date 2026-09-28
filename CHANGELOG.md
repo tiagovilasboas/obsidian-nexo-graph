@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Reduce node size and soften node fills; use a thinner, translucent visual hierarchy for selection and neighbors.
 - Clarify that the published 0.3.0 release does not yet include the repository's 0.4.0 source changes.
 - Pass published release tags to the asset verifier as quoted data instead of interpolating event input into shell source.
 - Suppress lower-priority automatic labels when their estimated text boxes collide in dense graphs.

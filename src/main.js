@@ -1,5 +1,5 @@
 const { ItemView, Menu, Plugin, PluginSettingTab, Setting } = require('obsidian');
-const { CORE_CENTER, CORE_EXCLUSION_RADIUS, MAX_EDGES, MAX_NODES, edgeRoute, graphData, handleNodeKey, labelPlan, positionNodes, reservedLabelBoxes, searchMatches, searchSummary, shouldShowAllLabels, visibleLegendGroups } = require('./graph-engine');
+const { CORE_CENTER, CORE_EXCLUSION_RADIUS, MAX_EDGES, MAX_NODES, edgeRoute, graphData, handleNodeKey, labelPlan, nodeRadius, positionNodes, reservedLabelBoxes, searchMatches, searchSummary, shouldShowAllLabels, visibleLegendGroups } = require('./graph-engine');
 
 const VIEW_TYPE = 'nexo-graph-view';
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -264,7 +264,7 @@ class NexoGraphView extends ItemView {
     for (const node of nodes) {
       const group = svgElement('g', { class: 'nexo-node', transform: `translate(${node.x} ${node.y})`, tabindex: '0', role: 'button', 'aria-label': `Open ${node.name}; Space selects, Enter opens` });
       group.style.setProperty('--nexo-node-color', visualGroups[node.group]?.color || '#729680');
-      const radius = Math.min(10, 3.5 + Math.sqrt(node.degree) * 1.2);
+      const radius = nodeRadius(node.degree);
       group.appendChild(svgElement('circle', { r: radius }));
       const labelPosition = labels.positions.get(node.path) || { x: 0, y: -radius - 7, anchor: 'middle' };
       const label = svgElement('text', {

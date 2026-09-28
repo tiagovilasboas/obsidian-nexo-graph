@@ -6,6 +6,10 @@ const CORE_CENTER = [600, 400];
 const CORE_EXCLUSION_RADIUS = 86;
 const CORE_TITLE_BOX = { left: 488, top: 464, right: 712, bottom: 484, kind: 'core-title' };
 
+function nodeRadius(degree) {
+  return Math.min(8, 3.1 + Math.sqrt(Math.max(0, degree)) * 0.9);
+}
+
 function groupFor(path, rules) {
   const normalized = path.toLowerCase();
   const index = rules.findIndex(rule => {
@@ -78,7 +82,7 @@ function labelPlan(nodes, perGroupLimit = 4, clearance = 3, reservedBoxes = []) 
   for (const [groupIndex, group] of [...groups].sort(([left], [right]) => left - right)) {
     group.sort((a, b) => b.degree - a.degree || a.path.localeCompare(b.path));
     group.forEach((node, rank) => {
-      const radius = Math.min(10, 3.5 + Math.sqrt(node.degree) * 1.2);
+      const radius = nodeRadius(node.degree);
       const width = Math.max(8, node.name.length * 6.6);
       const directionX = node.x - CORE_CENTER[0];
       const directionY = node.y - CORE_CENTER[1];
@@ -606,7 +610,7 @@ class NexoGraphView extends ItemView {
     for (const node of nodes) {
       const group = svgElement('g', { class: 'nexo-node', transform: `translate(${node.x} ${node.y})`, tabindex: '0', role: 'button', 'aria-label': `Open ${node.name}; Space selects, Enter opens` });
       group.style.setProperty('--nexo-node-color', visualGroups[node.group]?.color || '#729680');
-      const radius = Math.min(10, 3.5 + Math.sqrt(node.degree) * 1.2);
+      const radius = nodeRadius(node.degree);
       group.appendChild(svgElement('circle', { r: radius }));
       const labelPosition = labels.positions.get(node.path) || { x: 0, y: -radius - 7, anchor: 'middle' };
       const label = svgElement('text', {
