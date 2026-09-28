@@ -19,7 +19,7 @@
 - Filters groups and can focus on notes connected to the last active note at one, two, or three link hops.
 - Highlights a note's neighbors on hover/focus, shows link direction, and offers a context-menu action to open a note.
 - Keyboard users can open that context menu with **Shift+F10** or the Context Menu key while a note is focused; reciprocal links share one edge with arrows at both ends.
-- Keeps group settings in the vault's plugin data and updates when links or files change.
+- Keeps group settings in the vault's plugin data and updates when files are created, edited, renamed, or removed and when Obsidian refreshes link metadata.
 - Supports vault-specific ignored path prefixes so trash and archived backups can stay out of the visualization without changing notes; the footer reports the excluded count.
 
 ## Signal Field
@@ -37,7 +37,7 @@ The graph uses a deterministic layout that adapts each group's radius to its not
 | Operations | `pages/ops/` | Lime `#b8ff5a` |
 | Meta | `pages/meta/` | Aqua `#00e5a0` |
 
-Change one or more comma-separated prefixes and colors, and set ignored paths, in **Settings → Community plugins → Nexo Graph**. Nexo Graph works without the Nexo theme, though the two share a palette.
+Change one or more comma-separated prefixes and colors, and set ignored paths, in **Settings → Community plugins → Nexo Graph**. A folder prefix classifies and colors notes; it does not create graph edges. Connections come from Obsidian's resolved Markdown links, such as `[[checkout]]`. Nexo Graph works without the Nexo theme, though the two share a palette.
 
 Use the group toggles above the graph to focus on selected areas. Search matches notes in the current graph scope and announces the match count, including when no notes match. Open Nexo Graph while viewing a note, then choose **Local** and a hop depth to explore its neighborhood.
 

@@ -72,6 +72,28 @@ test('merges reciprocal links into one bidirectional edge', () => {
   assert.deepEqual(reversedCache.edges, data.edges);
 });
 
+test('graph data reflects new rule notes and edited resolved links on the next render', () => {
+  const groups = [{ name: 'Rules', prefixes: ['rules/'] }];
+  const paths = ['rules/existing.md', 'docs/readme.md'];
+  const graph = app(paths);
+  const initial = graphData(graph, groups);
+  assert.equal(initial.nodes.length, 2);
+  assert.deepEqual(initial.groupCounts, [1, 1]);
+  assert.equal(initial.linksInScope, 0);
+
+  paths.push('rules/new-rule.md');
+  graph.metadataCache.resolvedLinks = {
+    'rules/new-rule.md': { 'docs/readme.md': 1 }
+  };
+  const updated = graphData(graph, groups);
+
+  assert.equal(updated.nodes.length, 3);
+  assert.deepEqual(updated.groupCounts, [2, 1]);
+  assert.equal(updated.nodes.find(node => node.path === 'rules/new-rule.md').group, 0);
+  assert.deepEqual(updated.edges, [['rules/new-rule.md', 'docs/readme.md', false]]);
+  assert.equal(updated.linksInScope, 1);
+});
+
 test('local traversal includes exactly the configured undirected depth', () => {
   const graph = app(
     ['a.md', 'b.md', 'c.md', 'd.md', 'outside.md'],
