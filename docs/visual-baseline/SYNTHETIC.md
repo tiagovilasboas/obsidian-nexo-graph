@@ -15,11 +15,13 @@ Record Obsidian version, Nexo Graph version, theme mode, viewport/pane width, no
 
 The engine tests enforce deterministic selection/positions, the 500-note and 1,600-link limits, group-pair sampling, and a generous runtime budget on a synthetic fixture. This is a code-level test result, not a device-level rendering or memory claim. See `tests/graph-engine.test.js` for the executable contract.
 
+`scripts/graph-visual-metrics.mjs` measures proper crossings between sampled quadratic SVG edge paths in a synthetic fixture. It excludes edge pairs that share a graph endpoint and prints deterministic JSON. The curves are approximated with 24 line segments by default; tangencies, collinear overlap, and crossings between sample points may be missed. This metric is a computacional regression sensor and is not a rendered screenshot baseline or a measure of perceived quality.
+
 ## Not yet captured
 
 - Rendered small and medium screenshots from a synthetic Obsidian vault.
 - Obsidian UI review of a dense synthetic vault at normal and narrow pane sizes.
-- Automated label collision, edge crossing, and minimum node-clearance measures.
+- Rendered automated label collision and minimum node-clearance measures. The current crossing approximation is implemented, but no rendered Obsidian fixture is yet connected to its output.
 - Keyboard/screen-reader observations from the rendered Obsidian view.
 
 The private `voomp-kb` was previously used for a local smoke check; that does not substitute for this synthetic public baseline, and its screenshots/content remain untracked.

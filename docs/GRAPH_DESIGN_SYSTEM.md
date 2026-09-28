@@ -30,11 +30,11 @@ Every graph change follows Harness Engineering's dual loop:
 | Concern | Guia | Sensor | Classificação |
 | --- | --- | --- | --- |
 | Data and group semantics | This document and settings descriptions | Engine fixtures, Obsidian API stub checks, and manifest/CI checks | Computational; architecture fitness and behaviour |
-| Visual legibility | Density-aware labels from 32 notes and populated-only legend | Threshold/legend unit tests, synthetic collision estimates plus Obsidian visual review | Computational and inferential; behaviour |
+| Visual legibility | Density-aware labels from 32 notes and populated-only legend; crossing metric documents that shared graph endpoints are excluded | Threshold/legend unit tests, estimated label collisions, sampled quadratic-edge crossings on synthetic fixtures, plus Obsidian visual review | Computational and inferential; behaviour |
 | Keyboard and motion | Interaction contract and accessible control names | Keyboard transition tests, API event/settings tests, reduced-motion stylesheet check, manual keyboard review | Computational and inferential; behaviour |
 | Distribution | README and release checklist | Bundle, test, manifest, safe release-tag input, tag asset validation, clean install | Computational and inferential; maintainability |
 
-CI is a computacional sensor for syntax, bundle consistency, engine tests, and manifest validity. A CI pass does not replace rendered visual/accessibility review in Obsidian. Do not use private RAG note names or screenshots as public fixtures.
+CI is a computacional sensor for syntax, bundle consistency, engine tests, manifest validity, and the deterministic synthetic crossing fixture. The crossing sensor approximates SVG quadratic curves with sampled segments; it can miss tangencies, overlaps, and crossings between sample points. Its synthetic metrics do not establish that a rendered graph is visually attractive or legible. A CI pass does not replace rendered visual/accessibility review in Obsidian. Do not use private RAG note names or screenshots as public fixtures.
 
 ## Evolution rules
 
