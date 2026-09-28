@@ -213,6 +213,7 @@ test('NEXO-004 renders an SVG graph and exposes selected state through focus and
 
     const svg = descendants(view.contentEl, element => element.tagName === 'svg')[0];
     const nodes = descendants(view.contentEl, element => element.classList.contains('nexo-node'));
+    const edges = descendants(view.contentEl, element => element.tagName === 'path' && element.parentElement?.classList.contains('nexo-edges'));
     assert.equal(svg.getAttribute('role'), 'group');
     assert.equal(svg.getAttribute('aria-label'), 'Interactive graph of linked notes');
     assert.equal(nodes.length, 2);
@@ -222,11 +223,15 @@ test('NEXO-004 renders an SVG graph and exposes selected state through focus and
 
     nodes[0].dispatch('focus');
     assert.equal(nodes[1].classList.contains('is-neighbor'), true);
+    assert.equal(edges.length, 1);
+    assert.equal(edges[0].classList.contains('is-emphasized'), true);
+    assert.equal(edges[0].classList.contains('is-dimmed'), false);
     const select = nodes[0].dispatch('keydown', { key: ' ' });
     assert.equal(select.defaultPrevented, true);
     assert.equal(nodes[0].getAttribute('aria-pressed'), 'true');
     nodes[0].dispatch('keydown', { key: 'Escape' });
     assert.equal(nodes[0].getAttribute('aria-pressed'), 'false');
+    assert.equal(edges[0].classList.contains('is-emphasized'), false);
 
     nodes[0].dispatch('keydown', { key: 'Enter' });
     assert.equal(app.opened.length, 1);

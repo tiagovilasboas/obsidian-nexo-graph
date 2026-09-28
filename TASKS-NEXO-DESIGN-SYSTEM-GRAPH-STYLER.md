@@ -1,6 +1,6 @@
 # Nexo Graph — backlog de maturidade
 
-> Escopo sincronizado com `main` / Signal Field em 2026-09-28. Este backlog descreve apenas comportamento presente ou trabalho explicitamente pendente; o Graph Styler, presets de tema e layout físico não fazem parte do produto atual.
+> Escopo iniciado em `feat/neural-circular-field` sobre Signal Field em 2026-09-28. Este backlog descreve apenas comportamento presente ou trabalho explicitamente pendente; o Graph Styler e presets de tema não fazem parte do produto atual.
 
 ## Princípios e contrato de Harness Engineering
 
@@ -8,13 +8,13 @@ Cada incremento precisa de um **guia** (documentação, comportamento esperado o
 
 ## Estado atual verificado
 
-- [x] Engine SVG determinística; posições distribuídas em âncoras fixas, sem simulação física contínua.
+- [x] Engine SVG determinística; campo circular com distribuição global e relaxamento limitado por nota/conexão, sem animação contínua.
 - [x] Quatro grupos configuráveis por prefixos e cores; notas sem correspondência ficam em `Other`.
 - [x] Busca, filtros com contagem, zoom/pan, exploração local até três hops e menu contextual.
 - [x] Links extraídos de `metadataCache.resolvedLinks`; prefixo de pasta apenas classifica e colore.
 - [x] Atualização do grafo após eventos de vault e metadata cache.
 - [x] Limites de 500 nós e 1.600 links com amostragem determinística.
-- [x] Signal Field com core neutro, domínios ativos, curvas cross-domain e rótulos limitados em grafos moderados/densos.
+- [x] Signal Field com core neutro, malha neural circular, curvas cross-domain e rótulos limitados em grafos moderados/densos.
 - [x] CI para sintaxe, bundle, testes da engine e contrato do manifesto.
 - [x] CI compara a superfície pública de API registrada com o `minAppVersion` declarado.
 - [x] Release workflow passa a tag publicada como dado quoted; teste impede interpolação direta no shell.
@@ -24,7 +24,7 @@ Cada incremento precisa de um **guia** (documentação, comportamento esperado o
 - [x] Testes de contrato com fake DOM para renderização SVG/foco, teclado, menu contextual, pointer e debounce de atualização; integração DOM/runtime real do Obsidian continua limitada ao smoke manual.
 - [x] Gate computacional para caixas estimadas de rótulos automáticos e margem do core/viewBox.
 - [ ] Baseline visual sintético público em Obsidian; a inspeção privada no vault real não substitui fixtures visuais sintéticas versionadas. A métrica computacional de cruzamento de arestas foi entregue, mas ainda não está conectada a uma captura/renderização real.
-- [x] Centros/halos adaptados ao conjunto de grupos ativos por teste determinístico; falta revisão visual em Obsidian.
+- [x] Layout neural circular com grupos misturados, influência leve das conexões, afastamento do core e limite de raio por testes determinísticos; revisão visual em Obsidian permanece pendente.
 - [x] Nome dos quatro grupos configurável pela UI; cobertura de persistência por UI/API ainda pendente.
 - [ ] Instalação limpa/release verificada visualmente no Obsidian para a versão atual.
 
@@ -37,13 +37,13 @@ Cada incremento precisa de um **guia** (documentação, comportamento esperado o
 - **Classificação:** comportamento e architecture fitness; guia computacional/documental + sensor computacional.
 - **Entregue:** nome por vault editável; filtros, legenda e rótulo do campo refletem a configuração ao salvar; teste de migração/persistência por stubs passa. Compatibilidade de runtime ainda depende de smoke test real.
 
-### NEXO-002 — Signal Field adaptativo a grupos com conteúdo — P0 · implementação entregue; QA visual pendente
+### NEXO-002 — Signal Field como malha neural circular — P0 · implementação em revisão
 
-- **Guia:** contrato de layout descreve distribuição determinística dos domínios ativos e posição estável do core.
-- **Sensor computacional:** fixtures de 1, 2, 3 e 4 grupos ativos garantem determinismo, distâncias mínimas e ausência de halo/rótulo vazio.
-- **Sensor inferencial:** revisão no Obsidian com vault sintético pequeno e médio confirma hierarquia e espaço útil; ainda pendente.
+- **Guia:** contrato de layout descreve distribuição circular determinística, atração leve dos links, repulsão local e espaço livre para o core.
+- **Sensor computacional:** fixtures garantem determinismo entre ordens de entrada, grupos distribuídos pelos quatro quadrantes, clearance do core, limite circular e orçamento de 500 notas/1.600 links.
+- **Sensor inferencial:** revisar no Obsidian fixtures sintéticas pequenas, médias e densas, em largura normal e estreita; ainda pendente.
 - **Classificação:** behaviour e architecture fitness; guia inferencial/documental + sensores computacional e inferencial.
-- **Aceite computacional:** grupos vazios não recebem centro/halo/rótulo, centros repetem entre renders, e notas `Other` ficam fora do miolo central; testes entregues. Visual de Obsidian ainda precisa validação.
+- **Aceite computacional:** grupos não se segregam em ilhas, posições repetem em renders equivalentes, core fica livre e contorno permanece circular; testes entregues. Visual no Obsidian ainda precisa validação.
 
 ### NEXO-003 — Contrato de acessibilidade e movimento — P0 · sensores computacionais entregues; revisão manual pendente
 
@@ -63,10 +63,11 @@ Cada incremento precisa de um **guia** (documentação, comportamento esperado o
 ### NEXO-005 — Legibilidade e desempenho em grafos densos — P1 · parcial
 
 - **Guia:** documenta limites atuais e critérios visuais que não prometem ausência total de colisões.
-- **Sensor computacional:** fixtures sintéticas medem clearance do core/viewBox, limites de nós/arestas, colisão estimada entre labels e contra boxes reservados de captions/core, cruzamentos aproximados de curvas SVG quadráticas e orçamento de renderização.
+- **Sensor computacional:** fixtures sintéticas medem clearance do core/viewBox, limites de nós/arestas, colisão estimada entre labels e box do core, cruzamentos aproximados de curvas SVG quadráticas e orçamento de renderização.
 - **Sensor inferencial:** screenshots apenas sintéticos em tamanhos pequeno/médio e revisão visual sem conteúdo do RAG. Revisão privada no Obsidian em 2026-09-28 encontrou rótulos congestionados em 40 notas; após recarga completa, confirmou a renderização mais limpa e a legenda sem domínio vazio. Nenhuma captura ou nome de nota do vault foi versionado.
+- **Progresso visual desta branch:** o perfil sintético denso (500 notas/1.600 links) foi aberto no Obsidian 1.13.7 em largura padrão e mostrou um campo circular contínuo; ainda faltam os perfis pequeno/médio, largura estreita e baseline pública renderizada.
 - **Classificação:** behaviour e maintainability; guia inferencial/documental + sensores computacional e inferencial.
-- **Entregue parcialmente:** sensor determinístico rejeita colisões entre caixas de texto estimadas e contra boxes sintéticos reservados para captions de grupos ativos e o título do core; os boxes usam estimativa conservadora de fonte mono e não provam a geometria final do browser. Guias/testes ativam supressão por colisão a partir de 32 notas e removem grupos sem notas da legenda. Um sensor sintético mede interseções entre curvas amostradas, inclusive em vértices interiores da amostra, ignora extremidades das curvas e exclui pares com endpoint lógico compartilhado; pode omitir tangências, sobreposições e cruzamentos pequenos entre amostras, e contar quase-tangências como contato. Smoke visual no Obsidian passou em vault privado com 40 notas/98 links; baseline visual sintético versionado/renderizado continua pendente.
+- **Entregue parcialmente:** sensor determinístico rejeita colisões entre caixas de texto estimadas e contra a caixa do título do core; as caixas usam estimativa conservadora de fonte mono e não provam a geometria final do browser. Guias/testes ativam supressão por colisão a partir de 32 notas e removem grupos sem notas da legenda. Um sensor sintético mede interseções entre curvas amostradas, inclusive em vértices interiores da amostra, ignora extremidades das curvas e exclui pares com endpoint lógico compartilhado; pode omitir tangências, sobreposições e cruzamentos pequenos entre amostras, e contar quase-tangências como contato. Smoke visual no Obsidian passou em vault privado com 40 notas/98 links; baseline visual sintético versionado/renderizado continua pendente.
 
 ### NEXO-007 — Hierarquia de links cross-domain — P1 · entregue, QA visual pendente
 

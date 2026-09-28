@@ -1,6 +1,6 @@
 # Nexo Graph — Signal Field design contract
 
-Signal Field is Nexo Graph's current visual language. It arranges configured folder domains around a neutral core, draws resolved note links as curved paths, and uses color to distinguish configured groups. The graph renders with SVG and deterministic geometry through Obsidian's public plugin API.
+Signal Field is Nexo Graph's current visual language. It arranges all configured folder domains in one circular neural field around a neutral core, draws resolved note links as curved paths, and uses color to distinguish configured groups. The graph renders with SVG and deterministic geometry through Obsidian's public plugin API.
 
 ## Data and classification
 
@@ -12,7 +12,7 @@ Signal Field is Nexo Graph's current visual language. It arranges configured fol
 
 ## Geometry and density
 
-The engine places configured notes deterministically in sectors around the fixed neutral core. Only populated configured groups receive an outer sector, halo, and label; one or two active groups use a horizontal orbit, while three or four are distributed around the core. Unclassified `Other` notes remain neutral on a ring outside the central mark. There is no force simulation or layout physics. The view caps the rendered graph at 500 notes and 1,600 links, sampling across groups and group pairs so one large group cannot hide every smaller one. At 32 or more visible notes, label candidates are ranked by degree and path, then placed only if their estimated text boxes do not collide with each other, populated group captions, or the core title. Search matches and the focused note can still reveal labels on demand. Caption and core-title boxes use conservative monospace estimates, so they reduce collisions without proving final browser font geometry. Footer legends omit groups with no visible notes, while filters retain them with a zero count. Cross-domain links use curved routes that avoid the core. At rest, they use lower opacity than within-domain links so a dense mesh does not dominate the field; curvature and stroke still distinguish them. Focus and search dim unrelated links so an inspected relationship remains visible.
+The engine seeds notes in one deterministic circular distribution, independent of folder group, then runs 20 bounded relaxation passes: close notes repel, and resolved-link neighbors receive a light attraction. A radial clamp keeps the neutral core clear and the overall silhouette circular. This is a finite layout pass per render, not an ongoing animation. The view caps the rendered graph at 500 notes and 1,600 links, sampling across groups and group pairs so one large group cannot hide every smaller one. At 32 or more visible notes, label candidates are ranked by degree and path, then placed only if their estimated text boxes do not collide with each other or the core title. Search matches and the focused note can still reveal labels on demand. The core-title box uses a conservative monospace estimate, so it reduces collisions without proving final browser font geometry. Footer legends omit groups with no visible notes, while filters retain them with a zero count. Cross-domain links use curved routes that avoid the core. At rest, they use lower opacity than within-domain links so a dense mesh does not dominate the field; curvature and stroke still distinguish them. Focus and search dim unrelated links so an inspected relationship remains visible.
 
 ## Visual and interaction contract
 
@@ -30,7 +30,7 @@ Every graph change follows Harness Engineering's dual loop:
 | Concern | Guia | Sensor | Classificação |
 | --- | --- | --- | --- |
 | Data and group semantics | This document and settings descriptions | Engine fixtures, Obsidian API stub checks, and manifest/CI checks | Computational; architecture fitness and behaviour |
-| Visual legibility | Density-aware labels from 32 notes, populated-only legend, reserved boxes for captions/core title, and cross-domain edges quieter at rest | Threshold/legend unit tests, estimated collisions with labels and reserved boxes, sampled quadratic-edge crossings on synthetic fixtures, CSS edge-hierarchy contract, plus Obsidian visual review | Computational and inferential; behaviour |
+| Visual legibility | Density-aware labels from 32 notes, populated-only legend, a reserved core-title box, quiet links at rest, and incident links emphasized for the focused note | Threshold/legend unit tests, estimated collisions with labels and core-title box, sampled quadratic-edge crossings on synthetic fixtures, CSS edge-hierarchy contract, plus Obsidian visual review | Computational and inferential; behaviour |
 | Keyboard and motion | Interaction contract, accessible control names, an interactive SVG group with note buttons, and unchecked filter labels at or above 4.5:1 contrast | Keyboard transition tests, API event/settings tests, fake-DOM SVG semantic checks, reduced-motion and filter-contrast stylesheet checks, manual keyboard review | Computational and inferential; behaviour |
 | Distribution | README and release checklist | Bundle, test, manifest, safe release-tag input, tag asset validation, clean install | Computational and inferential; maintainability |
 
@@ -38,7 +38,7 @@ CI is a computacional sensor for syntax, bundle consistency, engine tests, manif
 
 ## Evolution rules
 
-1. Preserve deterministic placement unless user evidence and synthetic measurements justify a layout change.
+1. Preserve deterministic placement and circular core clearance; use synthetic measurements to justify any layout change.
 2. Do not claim semantic clusters based only on folder prefixes.
 3. Keep notes/links within the documented caps and expose sampling in the UI.
 4. Every new interaction has a keyboard path, visible focus, and a sensor.

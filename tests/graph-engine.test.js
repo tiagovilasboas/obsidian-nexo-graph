@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { CORE_CENTER, CORE_EXCLUSION_RADIUS, DOMAIN_ORBIT_RADIUS, GROUP_RADIUS, MAX_EDGES, MAX_NODES, activeGroupCenters, edgeRoute, graphData, groupFor, handleNodeKey, labelPlan, positionNodes, reservedLabelBoxes, searchMatches, searchSummary, shouldShowAllLabels, visibleLegendGroups } = require('../src/graph-engine');
+const { CORE_CENTER, CORE_EXCLUSION_RADIUS, MAX_EDGES, MAX_NODES, edgeRoute, graphData, groupFor, handleNodeKey, labelPlan, positionNodes, reservedLabelBoxes, searchMatches, searchSummary, shouldShowAllLabels, visibleLegendGroups } = require('../src/graph-engine');
 
 const rules = [
   { name: 'Personal', prefix: 'pages/pessoal/' },
@@ -249,44 +249,48 @@ test('node positioning is deterministic for an unchanged graph', () => {
   assert.deepEqual(first.map(({ path, x, y }) => [path, x, y]), second.map(({ path, x, y }) => [path, x, y]));
 });
 
-test('active domains adapt around a fixed neutral core without reserving empty sectors', () => {
+test('resolved links gently pull connected notes together', () => {
+  const edge = ['agents/a.md', 'rules/b.md', false];
+  const independent = edge.slice(0, 2).map((path, group) => ({ path, group, degree: 1 }));
+  const connected = independent.map(node => ({ ...node }));
+  positionNodes(independent);
+  positionNodes(connected, [edge]);
+  const distance = nodes => Math.hypot(nodes[0].x - nodes[1].x, nodes[0].y - nodes[1].y);
+  assert.ok(distance(connected) < distance(independent), 'linked note pair should be more compact than its unlinked baseline');
+});
+
+test('neural field mixes configured groups in one deterministic circular layout', () => {
   assert.deepEqual(CORE_CENTER, [600, 400]);
-  assert.equal(activeGroupCenters([]).size, 0);
-  const one = activeGroupCenters([2]);
-  assert.deepEqual([...one.keys()], [2]);
-  assert.deepEqual(one.get(2), [CORE_CENTER[0] + DOMAIN_ORBIT_RADIUS, CORE_CENTER[1]]);
-
-  const two = activeGroupCenters([0, 3]);
-  assert.equal(two.size, 2);
-  assert.ok(two.get(0)[0] > CORE_CENTER[0] && two.get(3)[0] < CORE_CENTER[0]);
-  assert.equal(two.get(0)[1], CORE_CENTER[1]);
-
-  const three = activeGroupCenters([0, 1, 2]);
-  assert.equal(three.size, 3);
-  assert.equal(new Set([...three.values()].map(center => center.map(Math.round).join(':'))).size, 3);
-
-  const four = activeGroupCenters([3, 1, 0, 2]);
-  assert.equal(four.size, 4);
-  assert.deepEqual([...four.keys()], [0, 1, 2, 3]);
-  assert.equal(new Set([...four.values()].map(center => center.map(Math.round).join(':'))).size, 4);
-  assert.deepEqual([...four], [...activeGroupCenters([0, 1, 2, 3])]);
-  for (const layout of [one, two, three, four]) {
-    for (const [x, y] of layout.values()) {
-      assert.ok(Math.hypot(x - CORE_CENTER[0], y - CORE_CENTER[1]) - GROUP_RADIUS >= CORE_EXCLUSION_RADIUS, 'domain nodes must keep the central exclusion area clear');
-      assert.ok(x - GROUP_RADIUS >= 0 && x + GROUP_RADIUS <= 1200, 'domain nodes must remain in the horizontal viewBox');
-      assert.ok(y - GROUP_RADIUS >= 0 && y + GROUP_RADIUS <= 800, 'domain nodes must remain in the vertical viewBox');
-    }
+  const nodes = Array.from({ length: 120 }, (_, index) => ({ path: `group-${index % 4}/note-${index}.md`, group: index % 4, degree: 3 }));
+  const first = nodes.map(node => ({ ...node }));
+  const second = nodes.map(node => ({ ...node })).reverse();
+  positionNodes(first);
+  positionNodes(second);
+  const firstByPath = new Map(first.map(node => [node.path, node]));
+  const secondByPath = new Map(second.map(node => [node.path, node]));
+  for (const [path, node] of firstByPath) {
+    assert.deepEqual([node.x, node.y], [secondByPath.get(path).x, secondByPath.get(path).y]);
+    const radius = Math.hypot(node.x - CORE_CENTER[0], node.y - CORE_CENTER[1]);
+    assert.ok(radius >= CORE_EXCLUSION_RADIUS + 38, `${path} must clear the neutral core`);
+    assert.ok(radius <= 328.01, `${path} must stay within the circular field`);
+    assert.ok(node.x >= 0 && node.x <= 1200 && node.y >= 0 && node.y <= 800, `${path} must stay in the SVG viewBox`);
+  }
+  for (let group = 0; group < 4; group++) {
+    const quadrants = new Set(first.filter(node => node.group === group).map(node =>
+      `${node.x >= CORE_CENTER[0] ? 'r' : 'l'}${node.y >= CORE_CENTER[1] ? 'b' : 't'}`
+    ));
+    assert.equal(quadrants.size, 4, `group ${group} should remain distributed around the field`);
   }
   const customNames = [{ name: 'Rules', prefixes: ['rules/'] }, { name: 'Agents', prefixes: ['agents/'] }];
   assert.equal(groupFor('rules/review.md', customNames), 0, 'renaming a group must not change prefix classification');
   assert.equal(groupFor('agents/code-review.md', customNames), 1);
-  assert.ok(GROUP_RADIUS < 170, 'domain fields must leave visual space around the Nexo core');
 });
 
-test('unclassified notes remain on a neutral ring outside the central mark', () => {
+test('unclassified notes keep their neutral category while joining the shared mesh', () => {
   const nodes = Array.from({ length: 12 }, (_, index) => ({ path: `inbox/${index}.md`, group: 4, degree: 0 }));
   positionNodes(nodes);
-  assert.ok(nodes.every(node => Math.hypot(node.x - CORE_CENTER[0], node.y - CORE_CENTER[1]) >= CORE_EXCLUSION_RADIUS + 20));
+  assert.ok(nodes.every(node => node.group === 4));
+  assert.ok(nodes.every(node => Math.hypot(node.x - CORE_CENTER[0], node.y - CORE_CENTER[1]) >= CORE_EXCLUSION_RADIUS + 38 - 0.01));
 });
 
 test('dense graph label plan is deterministic and suppresses estimated label collisions', () => {
@@ -321,16 +325,12 @@ test('dense graph label plan is deterministic and suppresses estimated label col
   }
 });
 
-test('label plan reserves synthetic group captions and the core title before placing note labels', () => {
-  const centers = activeGroupCenters([0]);
-  const groups = [{ name: 'SYNTHETIC ZONE' }];
-  const reserved = reservedLabelBoxes(centers, groups);
-  const caption = reserved.find(box => box.kind === 'group-caption');
+test('label plan reserves the core title before placing note labels', () => {
+  const reserved = reservedLabelBoxes();
   const coreTitle = reserved.find(box => box.kind === 'core-title');
-  assert.ok(caption);
   assert.ok(coreTitle);
 
-  const captionNode = { path: 'fixture/caption.md', name: 'Synthetic caption label', group: 0, degree: 4, x: centers.get(0)[0], y: caption.top + 12 };
+  const captionNode = { path: 'fixture/caption.md', name: 'Synthetic caption label', group: 0, degree: 4, x: 900, y: 400 };
   const coreNode = { path: 'fixture/core.md', name: 'Synthetic core label', group: 4, degree: 4, x: CORE_CENTER[0], y: CORE_CENTER[1] + 50 };
   const unreserved = labelPlan([captionNode, coreNode]);
   const first = labelPlan([captionNode, coreNode], 4, 3, reserved);
@@ -338,7 +338,7 @@ test('label plan reserves synthetic group captions and the core title before pla
 
   assert.deepEqual(unreserved.visible, new Set(['fixture/caption.md', 'fixture/core.md']));
   assert.deepEqual(first.reservedBoxes, reserved);
-  assert.deepEqual(first.visible, new Set());
+  assert.deepEqual(first.visible, new Set(['fixture/caption.md']));
   assert.deepEqual(first, second);
   assert.equal(first.positions.size, 2, 'suppressed labels retain a deterministic fallback position for focus and search');
 });
@@ -385,13 +385,14 @@ test('neural mesh routes cross-domain links around the visible core', () => {
   assert.equal(other.crossDomain, true);
 });
 
-test('crowded group positions remain inside its documented radius', () => {
+test('crowded single-group graph remains inside the circular field', () => {
   const paths = Array.from({ length: MAX_NODES }, (_, index) => `pages/pessoal/note-${index}.md`);
   const nodes = graphData(app(paths), rules).nodes;
   positionNodes(nodes);
-  const [centerX, centerY] = activeGroupCenters([0]).get(0);
-  const maxRadius = Math.max(...nodes.map(node => Math.hypot(node.x - centerX, node.y - centerY)));
-  assert.ok(maxRadius <= GROUP_RADIUS, `group radius was ${maxRadius.toFixed(1)}`);
+  const maxRadius = Math.max(...nodes.map(node => Math.hypot(node.x - CORE_CENTER[0], node.y - CORE_CENTER[1])));
+  const minRadius = Math.min(...nodes.map(node => Math.hypot(node.x - CORE_CENTER[0], node.y - CORE_CENTER[1])));
+  assert.ok(maxRadius <= 328.01, `outer field radius was ${maxRadius.toFixed(1)}`);
+  assert.ok(minRadius >= CORE_EXCLUSION_RADIUS + 38 - 0.01, `core clearance was ${minRadius.toFixed(1)}`);
 });
 
 test('documented maximum-size graph extraction, layout, and label planning stay within a runtime budget', () => {
