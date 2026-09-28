@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { GROUP_CENTERS, GROUP_RADIUS, MAX_EDGES, MAX_NODES, edgeRoute, graphData, groupFor, positionNodes, searchMatches, searchSummary } = require('../src/graph-engine');
+const { CORE_EXCLUSION_RADIUS, GROUP_CENTERS, GROUP_RADIUS, LABEL_CLEARANCE, MAX_EDGES, MAX_NODES, edgeRoute, graphData, groupFor, positionNodes, searchMatches, searchSummary } = require('../src/graph-engine');
 
 const rules = [
   { name: 'Personal', prefix: 'pages/pessoal/' },
@@ -174,7 +174,13 @@ test('Signal Field routes cross-domain links around the Nexo core', () => {
 
   const opposite = edgeRoute(top, bottom);
   assert.equal(opposite.crossDomain, true);
-  assert.match(opposite.d, /C -120 165, -120 635/);
+  const laneX = GROUP_CENTERS[4][0] - CORE_EXCLUSION_RADIUS - LABEL_CLEARANCE;
+  assert.match(opposite.d, new RegExp(`C 520 241, ${laneX} 328, ${laneX} 400`));
+
+  const left = { path: 'pages/meta/left.md', group: 3, x: 270, y: 400 };
+  const cross = edgeRoute(right, left);
+  const laneY = GROUP_CENTERS[4][1] - CORE_EXCLUSION_RADIUS - 4;
+  assert.match(cross.d, new RegExp(`C 844 352, 674 ${laneY}, 600 ${laneY}`));
 
   const local = edgeRoute(top, peer);
   assert.equal(local.crossDomain, false);
