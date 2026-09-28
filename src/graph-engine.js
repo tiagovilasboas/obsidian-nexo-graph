@@ -6,7 +6,6 @@ const CORE_CENTER = [600, 400];
 const DOMAIN_ORBIT_RADIUS = 290;
 const GROUP_RADIUS = 146;
 const CORE_EXCLUSION_RADIUS = 86;
-const LABEL_CLEARANCE = 56;
 
 function groupFor(path, rules) {
   const normalized = path.toLowerCase();
@@ -61,15 +60,60 @@ function activeGroupCenters(groupIndexes) {
   if (!groups.length) return centers;
 
   const count = groups.length;
-  const startAngle = count === 1 || count === 2 ? 0 : count === 3 ? -Math.PI / 6 : -Math.PI / 4;
+  const startAngle = count === 1 || count === 2 ? 0 : count === 3 ? -Math.PI / 2 : -Math.PI / 4;
+  const orbitRadius = count === 3 ? 238 : DOMAIN_ORBIT_RADIUS;
   groups.forEach((group, index) => {
     const angle = startAngle + index * (Math.PI * 2 / count);
     centers.set(group, [
-      CORE_CENTER[0] + Math.cos(angle) * DOMAIN_ORBIT_RADIUS,
-      CORE_CENTER[1] + Math.sin(angle) * DOMAIN_ORBIT_RADIUS
+      CORE_CENTER[0] + Math.cos(angle) * orbitRadius,
+      CORE_CENTER[1] + Math.sin(angle) * orbitRadius
     ]);
   });
   return centers;
+}
+
+function labelPlan(nodes, perGroupLimit = 4, clearance = 3) {
+  const groupIndexes = [...new Set(nodes.map(node => node.group))];
+  const centers = activeGroupCenters(groupIndexes);
+  const groups = new Map();
+  for (const node of nodes) {
+    if (!groups.has(node.group)) groups.set(node.group, []);
+    groups.get(node.group).push(node);
+  }
+
+  const positions = new Map();
+  const visible = new Set();
+  const boxes = [];
+  for (const [groupIndex, group] of [...groups].sort(([left], [right]) => left - right)) {
+    group.sort((a, b) => b.degree - a.degree || a.path.localeCompare(b.path));
+    const center = centers.get(groupIndex) || CORE_CENTER;
+    group.forEach((node, rank) => {
+      const radius = Math.min(10, 3.5 + Math.sqrt(node.degree) * 1.2);
+      const width = Math.max(8, node.name.length * 6.6);
+      const directionX = groupIndex < 4 ? center[0] - CORE_CENTER[0] : node.x - CORE_CENTER[0];
+      const directionY = groupIndex < 4 ? center[1] - CORE_CENTER[1] : node.y - CORE_CENTER[1];
+      const horizontal = Math.abs(directionX) >= Math.abs(directionY);
+      const outward = horizontal ? Math.sign(directionX) || 1 : Math.sign(directionY) || 1;
+      const position = horizontal
+        ? { x: outward * (radius + 8), y: rank % 2 ? 12 : -5, anchor: outward > 0 ? 'start' : 'end' }
+        : { x: rank % 2 ? 5 : -5, y: outward * (radius + (outward > 0 ? 15 : 7)), anchor: 'middle' };
+      positions.set(node.path, position);
+      if (rank >= perGroupLimit) return;
+
+      const left = node.x + position.x - (position.anchor === 'start' ? 0 : position.anchor === 'end' ? width : width / 2);
+      const top = node.y + position.y - 9;
+      const box = { path: node.path, left, top, right: left + width, bottom: top + 14 };
+      const collides = boxes.some(other =>
+        box.left < other.right + clearance && box.right + clearance > other.left &&
+        box.top < other.bottom + clearance && box.bottom + clearance > other.top
+      );
+      if (!collides) {
+        visible.add(node.path);
+        boxes.push(box);
+      }
+    });
+  }
+  return { positions, visible, boxes };
 }
 
 function selectNodesByGroup(candidates, degree, rules) {
@@ -262,4 +306,4 @@ function edgeRoute(source, target) {
   return { crossDomain: true, d: `M ${source.x} ${source.y} Q ${controlX} ${controlY} ${target.x} ${target.y}` };
 }
 
-module.exports = { CORE_CENTER, CORE_EXCLUSION_RADIUS, DOMAIN_ORBIT_RADIUS, GROUP_RADIUS, LABEL_CLEARANCE, MAX_EDGES, MAX_NODES, activeGroupCenters, edgeRoute, graphData, groupFor, handleNodeKey, positionNodes, searchMatches, searchSummary, selectNodesByGroup, selectRepresentativeEdges };
+module.exports = { CORE_CENTER, CORE_EXCLUSION_RADIUS, DOMAIN_ORBIT_RADIUS, GROUP_RADIUS, MAX_EDGES, MAX_NODES, activeGroupCenters, edgeRoute, graphData, groupFor, handleNodeKey, labelPlan, positionNodes, searchMatches, searchSummary, selectNodesByGroup, selectRepresentativeEdges };

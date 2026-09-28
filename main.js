@@ -7,7 +7,6 @@ const CORE_CENTER = [600, 400];
 const DOMAIN_ORBIT_RADIUS = 290;
 const GROUP_RADIUS = 146;
 const CORE_EXCLUSION_RADIUS = 86;
-const LABEL_CLEARANCE = 56;
 
 function groupFor(path, rules) {
   const normalized = path.toLowerCase();
@@ -62,15 +61,60 @@ function activeGroupCenters(groupIndexes) {
   if (!groups.length) return centers;
 
   const count = groups.length;
-  const startAngle = count === 1 || count === 2 ? 0 : count === 3 ? -Math.PI / 6 : -Math.PI / 4;
+  const startAngle = count === 1 || count === 2 ? 0 : count === 3 ? -Math.PI / 2 : -Math.PI / 4;
+  const orbitRadius = count === 3 ? 238 : DOMAIN_ORBIT_RADIUS;
   groups.forEach((group, index) => {
     const angle = startAngle + index * (Math.PI * 2 / count);
     centers.set(group, [
-      CORE_CENTER[0] + Math.cos(angle) * DOMAIN_ORBIT_RADIUS,
-      CORE_CENTER[1] + Math.sin(angle) * DOMAIN_ORBIT_RADIUS
+      CORE_CENTER[0] + Math.cos(angle) * orbitRadius,
+      CORE_CENTER[1] + Math.sin(angle) * orbitRadius
     ]);
   });
   return centers;
+}
+
+function labelPlan(nodes, perGroupLimit = 4, clearance = 3) {
+  const groupIndexes = [...new Set(nodes.map(node => node.group))];
+  const centers = activeGroupCenters(groupIndexes);
+  const groups = new Map();
+  for (const node of nodes) {
+    if (!groups.has(node.group)) groups.set(node.group, []);
+    groups.get(node.group).push(node);
+  }
+
+  const positions = new Map();
+  const visible = new Set();
+  const boxes = [];
+  for (const [groupIndex, group] of [...groups].sort(([left], [right]) => left - right)) {
+    group.sort((a, b) => b.degree - a.degree || a.path.localeCompare(b.path));
+    const center = centers.get(groupIndex) || CORE_CENTER;
+    group.forEach((node, rank) => {
+      const radius = Math.min(10, 3.5 + Math.sqrt(node.degree) * 1.2);
+      const width = Math.max(8, node.name.length * 6.6);
+      const directionX = groupIndex < 4 ? center[0] - CORE_CENTER[0] : node.x - CORE_CENTER[0];
+      const directionY = groupIndex < 4 ? center[1] - CORE_CENTER[1] : node.y - CORE_CENTER[1];
+      const horizontal = Math.abs(directionX) >= Math.abs(directionY);
+      const outward = horizontal ? Math.sign(directionX) || 1 : Math.sign(directionY) || 1;
+      const position = horizontal
+        ? { x: outward * (radius + 8), y: rank % 2 ? 12 : -5, anchor: outward > 0 ? 'start' : 'end' }
+        : { x: rank % 2 ? 5 : -5, y: outward * (radius + (outward > 0 ? 15 : 7)), anchor: 'middle' };
+      positions.set(node.path, position);
+      if (rank >= perGroupLimit) return;
+
+      const left = node.x + position.x - (position.anchor === 'start' ? 0 : position.anchor === 'end' ? width : width / 2);
+      const top = node.y + position.y - 9;
+      const box = { path: node.path, left, top, right: left + width, bottom: top + 14 };
+      const collides = boxes.some(other =>
+        box.left < other.right + clearance && box.right + clearance > other.left &&
+        box.top < other.bottom + clearance && box.bottom + clearance > other.top
+      );
+      if (!collides) {
+        visible.add(node.path);
+        boxes.push(box);
+      }
+    });
+  }
+  return { positions, visible, boxes };
 }
 
 function selectNodesByGroup(candidates, degree, rules) {
@@ -497,17 +541,7 @@ class NexoGraphView extends ItemView {
     const nodeLayer = svgElement('g', { class: 'nexo-nodes' });
     viewport.append(edgeLayer, nodeLayer);
     const edgeElements = [];
-    const nodesByGroup = new Map();
-    for (const node of nodes) {
-      if (!nodesByGroup.has(node.group)) nodesByGroup.set(node.group, []);
-      nodesByGroup.get(node.group).push(node);
-    }
-    const labelCandidates = new Set();
-    for (const group of nodesByGroup.values()) {
-      group.sort((a, b) => b.degree - a.degree || a.path.localeCompare(b.path));
-      group.forEach((node, index) => { node.labelRank = index; });
-      group.slice(0, 4).forEach(node => labelCandidates.add(node.path));
-    }
+    const labels = labelPlan(nodes);
 
     for (const [source, target, bidirectional] of edges) {
       const a = byPath.get(source);
@@ -515,7 +549,7 @@ class NexoGraphView extends ItemView {
       const route = edgeRoute(a, b);
       const edge = svgElement('path', { d: route.d });
       edge.classList.toggle('is-cross-domain', route.crossDomain);
-      edge.style.setProperty('--nexo-edge-color', this.plugin.settings.groups[a.group]?.color || '#3f8e5b');
+      edge.style.setProperty('--nexo-edge-color', visualGroups[a.group]?.color || '#3f8e5b');
       edge.setAttribute('marker-end', `url(#nexo-arrow-${a.group})`);
       if (bidirectional) edge.setAttribute('marker-start', `url(#nexo-arrow-${b.group})`);
       edge.setAttribute('aria-label', bidirectional ? `${a.name} and ${b.name} link to each other` : `${a.name} links to ${b.name}`);
@@ -541,7 +575,7 @@ class NexoGraphView extends ItemView {
         element.classList.toggle('is-neighbor', Boolean(this.emphasisPath && node.path !== this.emphasisPath && related.has(node.path)));
         element.classList.toggle('is-selected', this.selectedPath === node.path);
         element.classList.toggle('is-dimmed', !matchesQuery || !matchesNeighborhood);
-        element.classList.toggle('is-labeled', nodes.length < 80 || labelCandidates.has(node.path) || queryMatches || this.emphasisPath === node.path);
+        element.classList.toggle('is-labeled', nodes.length < 80 || labels.visible.has(node.path) || queryMatches || this.emphasisPath === node.path);
         element.setAttribute('aria-pressed', String(this.selectedPath === node.path));
       }
       for (const [source, target, edge] of edgeElements) {
@@ -553,18 +587,14 @@ class NexoGraphView extends ItemView {
     this.updateGraphEmphasis = updateEmphasis;
     for (const node of nodes) {
       const group = svgElement('g', { class: 'nexo-node', transform: `translate(${node.x} ${node.y})`, tabindex: '0', role: 'button', 'aria-label': `Open ${node.name}; Space selects, Enter opens` });
-      group.style.setProperty('--nexo-node-color', this.plugin.settings.groups[node.group]?.color || '#729680');
+      group.style.setProperty('--nexo-node-color', visualGroups[node.group]?.color || '#729680');
       const radius = Math.min(10, 3.5 + Math.sqrt(node.degree) * 1.2);
       group.appendChild(svgElement('circle', { r: radius }));
-      const labelRank = node.labelRank || 0;
-      const verticalTerritory = node.group === 0 || node.group === 2;
-      const labelAbove = labelRank % 2 === 0;
+      const labelPosition = labels.positions.get(node.path) || { x: 0, y: -radius - 7, anchor: 'middle' };
       const label = svgElement('text', {
-        x: verticalTerritory ? 0 : (node.group === 1 ? radius + 8 : -radius - 8),
-        y: verticalTerritory
-          ? (labelAbove ? -radius - 7 : radius + 15)
-          : (labelAbove ? -5 : 12),
-        'text-anchor': verticalTerritory ? 'middle' : (node.group === 1 ? 'start' : 'end'),
+        x: labelPosition.x,
+        y: labelPosition.y,
+        'text-anchor': labelPosition.anchor,
         class: 'nexo-node-label'
       });
       label.textContent = node.name;

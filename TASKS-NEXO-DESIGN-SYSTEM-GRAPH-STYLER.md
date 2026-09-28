@@ -19,7 +19,8 @@ Cada incremento precisa de um **guia** (documentação, comportamento esperado o
 - [x] Transições de teclado dos nós testadas (Enter abre, Space seleciona/desselciona, Escape limpa, Shift+F10/menu abre).
 - [x] Wiring de eventos do Obsidian e migração/persistência de configurações testados com API stubs.
 - [ ] Testes DOM para renderização SVG/foco, menu contextual, pointer e debounce de atualização.
-- [ ] Métricas automatizadas de colisões/legibilidade em grafo denso e baseline visual sintético.
+- [x] Gate computacional para caixas estimadas de rótulos automáticos e margem do core/viewBox.
+- [ ] Medidas de cruzamentos de aresta e baseline visual sintético em Obsidian.
 - [x] Centros/halos adaptados ao conjunto de grupos ativos por teste determinístico; falta revisão visual em Obsidian.
 - [x] Nome dos quatro grupos configurável pela UI; cobertura de persistência por UI/API ainda pendente.
 - [ ] Instalação limpa/release verificada visualmente no Obsidian para a versão atual.
@@ -56,13 +57,13 @@ Cada incremento precisa de um **guia** (documentação, comportamento esperado o
 - **Classificação:** maintainability e behaviour; guia documental + sensor computacional.
 - **Entregue parcialmente:** Enter/Space/Escape/ContextMenu/Shift+F10, subscriptions de vault/metadata, migração de nomes e saveData/loadData são cobertos por sensores computacionais. Integração DOM/render, menu nativo e debounce ainda pendentes.
 
-### NEXO-005 — Legibilidade e desempenho em grafos densos — P1
+### NEXO-005 — Legibilidade e desempenho em grafos densos — P1 · parcial
 
 - **Guia:** documenta limites atuais e critérios visuais que não prometem ausência total de colisões.
-- **Sensor computacional:** fixture sintética mede distância ao core, limites de nós/arestas, colisão estimada de labels e orçamento de renderização.
+- **Sensor computacional:** fixtures sintéticas medem clearance do core/viewBox, limites de nós/arestas, colisão estimada de labels e orçamento de renderização.
 - **Sensor inferencial:** screenshots apenas sintéticos em tamanhos pequeno/médio e revisão visual sem conteúdo do RAG.
 - **Classificação:** behaviour e maintainability; guia inferencial/documental + sensores computacional e inferencial.
-- **Aceite:** baseline reproduzível, thresholds justificados e regressões detectáveis sem exportar conteúdo privado.
+- **Entregue parcialmente:** sensor determinístico rejeita colisões entre caixas de texto estimadas e protege limites do core/viewBox; faltam cruzamentos de aresta medidos e baseline visual no Obsidian.
 
 ### NEXO-006 — Robustez de release e documentação — P1
 
