@@ -16,6 +16,7 @@ Cada incremento precisa de um **guia** (documentação, comportamento esperado o
 - [x] Limites de 500 nós e 1.600 links com amostragem determinística.
 - [x] Signal Field com core neutro, quatro domínios, curvas cross-domain e rótulos limitados em grafos densos.
 - [x] CI para sintaxe, bundle, testes da engine e contrato do manifesto.
+- [x] Release workflow passa a tag publicada como dado quoted; teste impede interpolação direta no shell.
 - [x] Transições de teclado dos nós testadas (Enter abre, Space seleciona/desselciona, Escape limpa, Shift+F10/menu abre).
 - [x] Wiring de eventos do Obsidian e migração/persistência de configurações testados com API stubs.
 - [ ] Testes DOM para renderização SVG/foco, menu contextual, pointer e debounce de atualização.
@@ -65,13 +66,13 @@ Cada incremento precisa de um **guia** (documentação, comportamento esperado o
 - **Classificação:** behaviour e maintainability; guia inferencial/documental + sensores computacional e inferencial.
 - **Entregue parcialmente:** sensor determinístico rejeita colisões entre caixas de texto estimadas e protege limites do core/viewBox; faltam cruzamentos de aresta medidos e baseline visual no Obsidian.
 
-### NEXO-006 — Robustez de release e documentação — P1
+### NEXO-006 — Robustez de release e documentação — P1 · parcial
 
 - **Guia:** instruções de desenvolvimento e release refletem a versão/tag e a origem de cada asset.
-- **Sensor computacional:** CI confirma que bundle gerado não contém imports locais, assets coincidem com tag e manifesto é compatível com a versão mínima suportada.
+- **Sensor computacional:** bundle e tag assets têm verificadores; contrato do workflow impede interpolação de texto da release no shell. Compatibilidade da versão mínima e smoke test de instalação ainda pendentes.
 - **Sensor inferencial:** instalação limpa e smoke test no Obsidian; registrar versão e resultado sem alegar prova por configuração.
 - **Classificação:** maintainability e architecture fitness; guia documental + sensores computacional e inferencial.
-- **Aceite:** assets publicados são reproduzíveis a partir do tag e a documentação não promete recursos ausentes.
+- **Entregue parcialmente:** assets são validados byte a byte contra tag e o tag não é interpretado como shell; falta automatizar compatibilidade de API e smoke test de instalação limpa.
 
 ## Sequência recomendada
 
