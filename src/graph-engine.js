@@ -4,6 +4,8 @@ const MAX_EDGES = 1600;
 // The diamond gives a reader a stable centre of gravity without force-layout drift.
 const GROUP_CENTERS = [[600, 165], [930, 400], [600, 635], [270, 400], [600, 400]];
 const GROUP_RADIUS = 146;
+const CORE_EXCLUSION_RADIUS = 86;
+const LABEL_CLEARANCE = 56;
 
 function groupFor(path, rules) {
   const normalized = path.toLowerCase();
@@ -184,11 +186,20 @@ function edgeRoute(source, target) {
 
   const pair = [source.group, target.group].sort((a, b) => a - b).join(':');
   if (pair === '0:2') {
-    // Opposite domains travel through an exterior lane so the Nexo core stays readable.
-    return { crossDomain: true, d: `M ${source.x} ${source.y} C -120 ${source.y}, -120 ${target.y}, ${target.x} ${target.y}` };
+    const top = source.group === 0 ? source : target;
+    const bottom = source.group === 2 ? source : target;
+    const laneX = GROUP_CENTERS[4][0] - CORE_EXCLUSION_RADIUS - LABEL_CLEARANCE;
+    const canonical = `M ${top.x} ${top.y} C ${top.x - 80} ${top.y + 76}, ${laneX} ${GROUP_CENTERS[4][1] - 72}, ${laneX} ${GROUP_CENTERS[4][1]} C ${laneX} ${GROUP_CENTERS[4][1] + 72}, ${bottom.x - 80} ${bottom.y - 76}, ${bottom.x} ${bottom.y}`;
+    const reverse = `M ${bottom.x} ${bottom.y} C ${bottom.x - 80} ${bottom.y - 76}, ${laneX} ${GROUP_CENTERS[4][1] + 72}, ${laneX} ${GROUP_CENTERS[4][1]} C ${laneX} ${GROUP_CENTERS[4][1] - 72}, ${top.x - 80} ${top.y + 76}, ${top.x} ${top.y}`;
+    return { crossDomain: true, d: source === top ? canonical : reverse };
   }
   if (pair === '1:3') {
-    return { crossDomain: true, d: `M ${source.x} ${source.y} C ${source.x} -90, ${target.x} -90, ${target.x} ${target.y}` };
+    const right = source.group === 1 ? source : target;
+    const left = source.group === 3 ? source : target;
+    const laneY = GROUP_CENTERS[4][1] - CORE_EXCLUSION_RADIUS - 4;
+    const canonical = `M ${right.x} ${right.y} C ${right.x - 86} ${right.y - 48}, ${GROUP_CENTERS[4][0] + 74} ${laneY}, ${GROUP_CENTERS[4][0]} ${laneY} C ${GROUP_CENTERS[4][0] - 74} ${laneY}, ${left.x + 86} ${left.y - 48}, ${left.x} ${left.y}`;
+    const reverse = `M ${left.x} ${left.y} C ${left.x + 86} ${left.y - 48}, ${GROUP_CENTERS[4][0] - 74} ${laneY}, ${GROUP_CENTERS[4][0]} ${laneY} C ${GROUP_CENTERS[4][0] + 74} ${laneY}, ${right.x - 86} ${right.y - 48}, ${right.x} ${right.y}`;
+    return { crossDomain: true, d: source === right ? canonical : reverse };
   }
 
   const [coreX, coreY] = GROUP_CENTERS[4];
@@ -197,9 +208,9 @@ function edgeRoute(source, target) {
   const midpointX = (firstX + secondX) / 2;
   const midpointY = (firstY + secondY) / 2;
   const distance = Math.max(1, Math.hypot(midpointX - coreX, midpointY - coreY));
-  const controlX = midpointX + (midpointX - coreX) / distance * 132;
-  const controlY = midpointY + (midpointY - coreY) / distance * 132;
+  const controlX = midpointX + (midpointX - coreX) / distance * (GROUP_RADIUS - LABEL_CLEARANCE);
+  const controlY = midpointY + (midpointY - coreY) / distance * (GROUP_RADIUS - LABEL_CLEARANCE);
   return { crossDomain: true, d: `M ${source.x} ${source.y} Q ${controlX} ${controlY} ${target.x} ${target.y}` };
 }
 
-module.exports = { GROUP_CENTERS, GROUP_RADIUS, MAX_EDGES, MAX_NODES, edgeRoute, graphData, groupFor, positionNodes, searchMatches, searchSummary, selectNodesByGroup, selectRepresentativeEdges };
+module.exports = { CORE_EXCLUSION_RADIUS, GROUP_CENTERS, GROUP_RADIUS, LABEL_CLEARANCE, MAX_EDGES, MAX_NODES, edgeRoute, graphData, groupFor, positionNodes, searchMatches, searchSummary, selectNodesByGroup, selectRepresentativeEdges };
