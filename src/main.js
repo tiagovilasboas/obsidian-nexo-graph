@@ -1,5 +1,5 @@
 const { ItemView, Menu, Plugin, PluginSettingTab, Setting } = require('obsidian');
-const { GROUP_CENTERS, MAX_NODES, graphData, positionNodes, searchMatches, searchSummary } = require('./graph-engine');
+const { GROUP_CENTERS, GROUP_RADIUS, MAX_NODES, graphData, positionNodes, searchMatches, searchSummary } = require('./graph-engine');
 
 const VIEW_TYPE = 'nexo-graph-view';
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -176,6 +176,7 @@ class NexoGraphView extends ItemView {
     svg.prepend(defs);
     const atmosphere = svgElement('g', { class: 'nexo-atmosphere' });
     viewport.appendChild(atmosphere);
+    const [coreX, coreY] = GROUP_CENTERS[4];
     GROUP_CENTERS.forEach(([x, y], index) => {
       const color = this.plugin.settings.groups[index]?.color || '#668b72';
       const gradient = svgElement('radialGradient', { id: `nexo-halo-${index}` });
@@ -185,14 +186,31 @@ class NexoGraphView extends ItemView {
       const arrow = svgElement('marker', { id: `nexo-arrow-${index}`, markerWidth: 7, markerHeight: 7, refX: 6, refY: 3.5, viewBox: '0 0 7 7', orient: 'auto', markerUnits: 'userSpaceOnUse' });
       arrow.appendChild(svgElement('path', { d: 'M 0 0 L 7 3.5 L 0 7 z', fill: color }));
       defs.appendChild(arrow);
-      atmosphere.appendChild(svgElement('circle', { cx: x, cy: y, r: index === 4 ? 180 : 260, fill: `url(#nexo-halo-${index})` }));
       if (index < 4) {
-        const caption = svgElement('text', { x, y: y - 195, 'text-anchor': 'middle', class: 'nexo-cluster-label' });
+        atmosphere.appendChild(svgElement('path', {
+          d: `M ${coreX} ${coreY} L ${x} ${y}`,
+          class: 'nexo-field-spoke',
+          'stroke': color
+        }));
+        atmosphere.appendChild(svgElement('circle', { cx: x, cy: y, r: GROUP_RADIUS + 24, class: 'nexo-field-outline', stroke: color }));
+        atmosphere.appendChild(svgElement('circle', { cx: x, cy: y, r: GROUP_RADIUS - 42, class: 'nexo-field-ring', stroke: color }));
+      }
+      atmosphere.appendChild(svgElement('circle', { cx: x, cy: y, r: index === 4 ? 156 : GROUP_RADIUS + 38, fill: `url(#nexo-halo-${index})` }));
+      if (index < 4) {
+        const caption = svgElement('text', { x, y: y - GROUP_RADIUS + 22, 'text-anchor': 'middle', class: 'nexo-cluster-label' });
         caption.style.fill = color;
         caption.textContent = this.plugin.settings.groups[index].name.toUpperCase();
         atmosphere.appendChild(caption);
       }
     });
+    const core = svgElement('g', { class: 'nexo-core', 'aria-hidden': 'true' });
+    core.appendChild(svgElement('circle', { cx: coreX, cy: coreY, r: 54, class: 'nexo-core-ring' }));
+    core.appendChild(svgElement('circle', { cx: coreX, cy: coreY, r: 26, class: 'nexo-core-ring is-inner' }));
+    core.appendChild(svgElement('path', { d: `M ${coreX} ${coreY - 16} L ${coreX + 16} ${coreY} L ${coreX} ${coreY + 16} L ${coreX - 16} ${coreY} Z`, class: 'nexo-core-mark' }));
+    const coreTitle = svgElement('text', { x: coreX, y: coreY + 78, 'text-anchor': 'middle', class: 'nexo-core-label' });
+    coreTitle.textContent = 'NEXO / SIGNAL FIELD';
+    core.appendChild(coreTitle);
+    atmosphere.appendChild(core);
     const edgeLayer = svgElement('g', { class: 'nexo-edges' });
     const nodeLayer = svgElement('g', { class: 'nexo-nodes' });
     viewport.append(edgeLayer, nodeLayer);

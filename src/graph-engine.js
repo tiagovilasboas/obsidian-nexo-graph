@@ -1,6 +1,9 @@
 const MAX_NODES = 500;
 const MAX_EDGES = 1600;
-const GROUP_CENTERS = [[330, 230], [870, 230], [330, 585], [870, 585], [600, 400]];
+// Signal Field keeps the four configured domains around a neutral Nexo core.
+// The diamond gives a reader a stable centre of gravity without force-layout drift.
+const GROUP_CENTERS = [[600, 165], [930, 400], [600, 635], [270, 400], [600, 400]];
+const GROUP_RADIUS = 146;
 
 function groupFor(path, rules) {
   const normalized = path.toLowerCase();
@@ -156,7 +159,7 @@ function positionNodes(nodes) {
   for (const node of nodes) groups[node.group].push(node);
   for (const [groupIndex, group] of groups.entries()) {
     group.sort((a, b) => b.degree - a.degree || a.path.localeCompare(b.path));
-    const spacing = group.length <= 1 ? 13.5 : Math.min(13.5, 167 / Math.sqrt(group.length - 1));
+    const spacing = group.length <= 1 ? 13.5 : Math.min(13.5, (GROUP_RADIUS - 18) / Math.sqrt(group.length - 1));
     group.forEach((node, index) => {
       const radius = index === 0 ? 0 : 18 + spacing * Math.sqrt(index - 1);
       const angle = index * 2.399963229728653 + groupIndex * 0.6;
@@ -166,4 +169,4 @@ function positionNodes(nodes) {
   }
 }
 
-module.exports = { GROUP_CENTERS, MAX_EDGES, MAX_NODES, graphData, groupFor, positionNodes, searchMatches, searchSummary, selectNodesByGroup, selectRepresentativeEdges };
+module.exports = { GROUP_CENTERS, GROUP_RADIUS, MAX_EDGES, MAX_NODES, graphData, groupFor, positionNodes, searchMatches, searchSummary, selectNodesByGroup, selectRepresentativeEdges };

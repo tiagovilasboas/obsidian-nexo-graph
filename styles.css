@@ -3,6 +3,7 @@
   --nexo-panel: #0d1117;
   --nexo-ink: #d8f7df;
   --nexo-muted: #729680;
+  --nexo-signal: #00ff41;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -71,29 +72,48 @@
   flex: 1;
   display: block;
   background:
-    linear-gradient(#00ff4109 1px, transparent 1px),
-    linear-gradient(90deg, #00ff4109 1px, transparent 1px),
-    radial-gradient(circle at 50% 44%, #10241a 0%, #07090a 68%);
-  background-size: 36px 36px, 36px 36px, auto;
+    radial-gradient(ellipse at 50% 50%, #14371f 0%, #0a130d 28%, transparent 52%),
+    radial-gradient(circle at 50% 4%, #00ff4114 0%, transparent 29%),
+    radial-gradient(circle at 96% 50%, #00e5a010 0%, transparent 27%),
+    radial-gradient(circle at 50% 97%, #b8ff5a0c 0%, transparent 27%),
+    radial-gradient(circle at 4% 50%, #84f5b210 0%, transparent 27%),
+    #060807;
   touch-action: none;
   cursor: grab;
 }
 .nexo-map:active { cursor: grabbing; }
 .nexo-backdrop { fill: transparent; }
 .nexo-empty { fill: #729680; font: 13px ui-monospace, monospace; }
-.nexo-cluster-label { font: 700 10px ui-monospace, monospace; letter-spacing: 0.3em; opacity: 0.7; pointer-events: none; }
-.nexo-edges path { fill: none; stroke: var(--nexo-edge-color, #28643c); stroke-width: 1.05; opacity: 0.45; pointer-events: none; }
+.nexo-cluster-label { font: 700 10px ui-monospace, monospace; letter-spacing: 0.3em; opacity: 0.9; pointer-events: none; }
+.nexo-field-spoke { fill: none; stroke-width: 1; stroke-dasharray: 4 10; opacity: 0.3; pointer-events: none; }
+.nexo-field-outline { fill: none; stroke-width: 1; stroke-dasharray: 3 8; opacity: 0.28; pointer-events: none; }
+.nexo-field-ring { fill: none; stroke-width: 1; stroke-dasharray: 1 10; opacity: 0.22; pointer-events: none; }
+.nexo-core-ring { fill: #07180dcc; stroke: #00ff41; stroke-width: 1.2; stroke-dasharray: 3 7; opacity: 0.8; }
+.nexo-core-ring.is-inner { fill: #00ff4112; stroke: #b8ff5a; stroke-dasharray: none; }
+.nexo-core-mark { fill: #00ff41; filter: drop-shadow(0 0 7px #00ff41); }
+.nexo-core-label { fill: #91fdb8; font: 700 9px ui-monospace, monospace; letter-spacing: 0.18em; opacity: 0.86; pointer-events: none; }
+.nexo-edges path { fill: none; stroke: var(--nexo-edge-color, #28643c); stroke-width: 1.15; opacity: 0.53; pointer-events: none; }
 .nexo-edges path.is-dimmed { opacity: 0.05; }
 .nexo-edges path:not(.is-dimmed):hover { opacity: 0.9; }
 .nexo-node { color: var(--nexo-node-color); cursor: pointer; transition: opacity 120ms ease; }
-.nexo-node circle { fill: currentColor; stroke: #07090a; stroke-width: 1.5; filter: drop-shadow(0 0 4px currentColor); }
+.nexo-node circle { fill: currentColor; stroke: #07090a; stroke-width: 1.5; filter: drop-shadow(0 0 5px currentColor); }
 .nexo-node text { fill: #b9d7c2; font: 11px ui-monospace, monospace; pointer-events: none; paint-order: stroke; stroke: #07100a; stroke-width: 3px; stroke-linejoin: round; }
 .nexo-node-label { opacity: 0; transition: opacity 100ms ease; }
 .nexo-node.is-labeled .nexo-node-label { opacity: 1; }
-.nexo-node:hover circle, .nexo-node:focus circle, .nexo-node.is-match circle { stroke: #e1ffb6; stroke-width: 2.5; filter: drop-shadow(0 0 10px currentColor); }
+.nexo-node:hover circle, .nexo-node:focus circle, .nexo-node.is-match circle { stroke: #e1ffb6; stroke-width: 2.5; filter: drop-shadow(0 0 12px currentColor); }
 .nexo-node:hover text, .nexo-node:focus text, .nexo-node.is-match text { fill: #f0fff3; font-weight: 700; }
 .nexo-node.is-neighbor circle { stroke: #c7ff6b; stroke-width: 2; filter: drop-shadow(0 0 8px currentColor); }
 .nexo-node.is-dimmed { opacity: 0.16; }
+.nexo-node:focus-visible { outline: none; }
+.nexo-node:focus-visible circle { stroke: #fff; stroke-width: 3; }
+
+.nexo-controls button:focus-visible,
+.nexo-controls select:focus-visible,
+.nexo-filter input:focus-visible,
+.nexo-search:focus-visible {
+  outline: 2px solid #e1ffb6;
+  outline-offset: 2px;
+}
 
 .nexo-footer {
   display: flex;
