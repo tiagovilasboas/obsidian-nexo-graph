@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { CORE_CENTER, CORE_EXCLUSION_RADIUS, DOMAIN_ORBIT_RADIUS, GROUP_RADIUS, MAX_EDGES, MAX_NODES, activeGroupCenters, edgeRoute, graphData, groupFor, handleNodeKey, labelPlan, positionNodes, searchMatches, searchSummary, shouldShowAllLabels, visibleLegendGroups } = require('../src/graph-engine');
+const { CORE_CENTER, CORE_EXCLUSION_RADIUS, DOMAIN_ORBIT_RADIUS, GROUP_RADIUS, MAX_EDGES, MAX_NODES, activeGroupCenters, edgeRoute, graphData, groupFor, handleNodeKey, labelPlan, positionNodes, reservedLabelBoxes, searchMatches, searchSummary, shouldShowAllLabels, visibleLegendGroups } = require('../src/graph-engine');
 
 const rules = [
   { name: 'Personal', prefix: 'pages/pessoal/' },
@@ -302,6 +302,28 @@ test('dense graph label plan is deterministic and suppresses estimated label col
       assert.equal(overlap, false, `${a.path} overlaps ${b.path}`);
     }
   }
+});
+
+test('label plan reserves synthetic group captions and the core title before placing note labels', () => {
+  const centers = activeGroupCenters([0]);
+  const groups = [{ name: 'SYNTHETIC ZONE' }];
+  const reserved = reservedLabelBoxes(centers, groups);
+  const caption = reserved.find(box => box.kind === 'group-caption');
+  const coreTitle = reserved.find(box => box.kind === 'core-title');
+  assert.ok(caption);
+  assert.ok(coreTitle);
+
+  const captionNode = { path: 'fixture/caption.md', name: 'Synthetic caption label', group: 0, degree: 4, x: centers.get(0)[0], y: caption.top + 12 };
+  const coreNode = { path: 'fixture/core.md', name: 'Synthetic core label', group: 4, degree: 4, x: CORE_CENTER[0], y: CORE_CENTER[1] + 50 };
+  const unreserved = labelPlan([captionNode, coreNode]);
+  const first = labelPlan([captionNode, coreNode], 4, 3, reserved);
+  const second = labelPlan([captionNode, coreNode], 4, 3, reserved);
+
+  assert.deepEqual(unreserved.visible, new Set(['fixture/caption.md', 'fixture/core.md']));
+  assert.deepEqual(first.reservedBoxes, reserved);
+  assert.deepEqual(first.visible, new Set());
+  assert.deepEqual(first, second);
+  assert.equal(first.positions.size, 2, 'suppressed labels retain a deterministic fallback position for focus and search');
 });
 
 test('label density switches before moderate graphs become crowded', () => {

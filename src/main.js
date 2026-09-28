@@ -1,5 +1,5 @@
 const { ItemView, Menu, Plugin, PluginSettingTab, Setting } = require('obsidian');
-const { CORE_CENTER, CORE_EXCLUSION_RADIUS, GROUP_RADIUS, MAX_EDGES, MAX_NODES, edgeRoute, graphData, handleNodeKey, labelPlan, positionNodes, searchMatches, searchSummary, shouldShowAllLabels, visibleLegendGroups } = require('./graph-engine');
+const { CORE_CENTER, CORE_EXCLUSION_RADIUS, GROUP_RADIUS, MAX_EDGES, MAX_NODES, edgeRoute, graphData, handleNodeKey, labelPlan, positionNodes, reservedLabelBoxes, searchMatches, searchSummary, shouldShowAllLabels, visibleLegendGroups } = require('./graph-engine');
 
 const VIEW_TYPE = 'nexo-graph-view';
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -235,7 +235,7 @@ class NexoGraphView extends ItemView {
     const nodeLayer = svgElement('g', { class: 'nexo-nodes' });
     viewport.append(edgeLayer, nodeLayer);
     const edgeElements = [];
-    const labels = labelPlan(nodes);
+    const labels = labelPlan(nodes, 4, 3, reservedLabelBoxes(groupCenters, visualGroups));
 
     for (const [source, target, bidirectional] of edges) {
       const a = byPath.get(source);
