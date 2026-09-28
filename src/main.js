@@ -1,5 +1,5 @@
 const { ItemView, Menu, Plugin, PluginSettingTab, Setting } = require('obsidian');
-const { CORE_CENTER, CORE_EXCLUSION_RADIUS, GROUP_RADIUS, MAX_NODES, edgeRoute, graphData, handleNodeKey, labelPlan, positionNodes, searchMatches, searchSummary, shouldShowAllLabels, visibleLegendGroups } = require('./graph-engine');
+const { CORE_CENTER, CORE_EXCLUSION_RADIUS, GROUP_RADIUS, MAX_EDGES, MAX_NODES, edgeRoute, graphData, handleNodeKey, labelPlan, positionNodes, searchMatches, searchSummary, shouldShowAllLabels, visibleLegendGroups } = require('./graph-engine');
 
 const VIEW_TYPE = 'nexo-graph-view';
 const SVG_NS = 'http://www.w3.org/2000/svg';
