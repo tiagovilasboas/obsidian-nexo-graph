@@ -31,9 +31,9 @@ Cada incremento precisa de um **guia** (documentação, comportamento esperado o
 ### NEXO-001 — Grupos nomeáveis e configuração robusta — P0 · parcial
 
 - **Guia:** UI explica nome, prefixos, cor, precedência de prefixo e grupo `Other`; exemplos incluem `Rules`, `Agents` e `Architecture`.
-- **Sensor computacional:** engine cobre prefixos personalizados e grupos vazios; teste de persistência UI/API para nomes ainda pendente.
+- **Sensor computacional:** testes de API stub cobrem migração de grupos legados, nome customizado, saveData/loadData e caminhos ignorados; confirmação no app instalado ainda pendente.
 - **Classificação:** comportamento e architecture fitness; guia computacional/documental + sensor computacional.
-- **Entregue:** nome por vault editável; filtros, legenda e rótulo do campo refletem a configuração ao salvar. Compatibilidade de persistência ainda depende de smoke test real.
+- **Entregue:** nome por vault editável; filtros, legenda e rótulo do campo refletem a configuração ao salvar; teste de migração/persistência por stubs passa. Compatibilidade de runtime ainda depende de smoke test real.
 
 ### NEXO-002 — Signal Field adaptativo a grupos com conteúdo — P0 · implementação entregue; QA visual pendente
 
@@ -70,9 +70,9 @@ Cada incremento precisa de um **guia** (documentação, comportamento esperado o
 
 - **Guia:** instruções de desenvolvimento e release refletem a versão/tag e a origem de cada asset.
 - **Sensor computacional:** bundle e tag assets têm verificadores; contrato do workflow impede interpolação de texto da release no shell. Compatibilidade da versão mínima e smoke test de instalação ainda pendentes.
-- **Sensor inferencial:** instalação limpa e smoke test no Obsidian; registrar versão e resultado sem alegar prova por configuração.
+- **Sensor inferencial:** instalação limpa e smoke test no Obsidian; registrar versão e resultado sem alegar prova por configuração. Em 2026-09-28, a `main`/manifest está em 0.4.0 e a última release publicada em 0.3.0; README agora informa essa diferença.
 - **Classificação:** maintainability e architecture fitness; guia documental + sensores computacional e inferencial.
-- **Entregue parcialmente:** assets são validados byte a byte contra tag e o tag não é interpretado como shell; falta automatizar compatibilidade de API e smoke test de instalação limpa.
+- **Entregue parcialmente:** assets são validados byte a byte contra tag, o tag não é interpretado como shell, e o README avisa sobre a diferença entre source e latest release; falta automatizar compatibilidade de API e smoke test de instalação limpa. Publicar release continua uma ação separada.
 
 ## Sequência recomendada
 

@@ -51,6 +51,8 @@ Use the group toggles above the graph to focus on selected areas. Search matches
 
 Version 0.1.0 was an early preview. Version 0.2.1 introduced filters and local exploration; 0.3.0 improved graph sampling; 0.4.0 adds multi-prefix folder groups. Community plugin gallery submission is planned; until then, install manually. The manifest includes the funding link for the future listing.
 
+**Release status:** the latest published GitHub release is still **0.3.0**. The repository `main` branch and manifest are at **0.4.0**, but those assets have not been published as a GitHub release yet. The “Latest release” download therefore does not include the 0.4.0 changes. Keep `main.js`, `manifest.json`, and `styles.css` from one version together; do not mix release assets.
+
 ## Privacy and architecture
 
 All rendering happens locally inside Obsidian. The plugin has no network calls, analytics, bundled dependencies, or access to private Graph internals. It uses `getMarkdownFiles()` and `metadataCache.resolvedLinks` from the public API, and only writes its own group settings.
