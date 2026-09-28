@@ -93,12 +93,59 @@ Cada incremento precisa de um **guia** (documentação, comportamento esperado o
 - **Classificação:** maintainability e architecture fitness; guia documental + sensores computacional e inferencial.
 - **Entregue parcialmente:** assets são validados byte a byte contra tag, o tag não é interpretado como shell, API pública registrada é checada contra o piso do manifesto, e o README avisa sobre a diferença entre source e latest release; falta smoke test da instalação limpa na menor versão suportada. Publicar release continua uma ação separada.
 
+## Curadoria UI/UX e acessibilidade visual — 2026-09-28
+
+O Signal Field tem uma identidade reconhecível e uma hierarquia melhor para hover, seleção e núcleo. A revisão do CSS e do render sintético denso (500 notas/1.600 links, Obsidian 1.13.7) encontrou os gaps abaixo. A conta de contraste usa composição sRGB de cores CSS sobre `#0b1b11`; é uma aproximação da parte central do gradiente, não uma medição de pixels renderizados. **Antes dos ajustes desta curadoria**, com `fill-opacity: 0.24`, os nós em repouso ficavam entre **1,37:1** (`Other`) e **1,93:1** (grupos padrão), e o hover verde chegava a cerca de **2,90:1**. Esta branch eleva o preenchimento em repouso para `0.34`, adiciona contorno colorido e destaca foco e `prefers-contrast: more`; a conformidade visual ainda depende de medição do SVG renderizado. O texto do rodapé e a contagem dos filtros ficavam acima de 5:1 no painel analisado. O grafo também usa quatro tons próximos de verde sem outro sinal persistente de categoria. Uma captura após recarga mostrou campo e rótulos cortados; a causa entre estado de zoom, layout e recarga ainda precisa ser reproduzida antes de atribuir o defeito ao enquadramento padrão.
+
+### NEXO-009 — Contraste perceptível dos nós e estados — P0 · aberto
+
+- **Guia:** definir tokens de preenchimento, contorno e brilho para repouso, hover, foco, seleção, vizinhos e dimmed. Pontos que funcionam como controles devem ter um contorno ou outro indicador perceptível; preservar o interior translúcido sem depender só de luminosidade fraca.
+- **Sensor computacional:** medir contraste após composição alfa sobre os extremos do fundo do campo para as cores padrão e estados funcionais; registrar o limiar de 3:1 para informação gráfica necessária e 4,5:1 para texto comum. O verificador deve falhar com valores abaixo do limiar que o produto declarar.
+- **Sensor inferencial:** comparar captures reais no Obsidian em repouso, hover, foco por teclado e seleção, incluindo `prefers-contrast: more`; não declarar conformidade com base apenas no CSS.
+- **Classificação:** guia inferencial/documental + sensores computacional e inferencial; behaviour.
+
+### NEXO-010 — Enquadramento inicial, zoom e reset — P0 · diagnóstico aberto
+
+- **Guia:** especificar qual fração da área útil o círculo deve ocupar e a margem mínima para pontos e rótulos em painel estreito e largo.
+- **Sensor computacional:** com fixtures pequena, média e densa, verificar limites da malha e caixa de rótulos após abrir, zoom, pan e reset, incluindo proporção real do `viewBox`.
+- **Sensor inferencial:** reproduzir no Obsidian a captura cortada após recarga, inspecionar a transformação SVG e confirmar um reset sem corte em larguras estreita e padrão. Registrar o estado anterior para distinguir zoom persistido de enquadramento inicial.
+- **Classificação:** guia inferencial/documental + sensores computacional e inferencial; behaviour e architecture fitness.
+
+### NEXO-011 — Categorias legíveis sem depender só da cor — P1 · aberto
+
+- **Guia:** manter os tons verdes da identidade, mas associar grupos a um segundo sinal consistente na malha e na legenda (por exemplo contorno, textura ou forma discreta). Validar a cor configurada pelo usuário com prévia de contraste.
+- **Sensor computacional:** contrato confirma que cada grupo recebe o mesmo sinal na legenda e nos nós, inclusive `Other`, sem alterar os links semânticos.
+- **Sensor inferencial:** revisar captura em escala de cinza e simulações de deficiências de percepção de cor com fixture sintética, em densidades pequena e média.
+- **Classificação:** guia inferencial/documental + sensores computacional e inferencial; behaviour.
+
+### NEXO-012 — Leitura e alvos de interação em painéis estreitos — P1 · aberto
+
+- **Guia:** definir tipografia, espaçamento e alvos para controles, filtros, nós e legenda em 320 px, 620 px e desktop; considerar zoom de interface a 200%. O alvo transparente atual do nó mede 18 px de diâmetro e os botões de zoom desta branch têm dimensão mínima de 32 × 30 px.
+- **Sensor computacional:** checar tamanho e distribuição dos alvos, overflow e quebra da toolbar em larguras alvo; preservar estados de foco visível.
+- **Sensor inferencial:** revisão no Obsidian com teclado, touch/ponteiro e leitor de tela, incluindo nomes de notas longos e contagens grandes.
+- **Classificação:** guia inferencial/documental + sensores computacional e inferencial; behaviour.
+
+### NEXO-013 — Baseline visual reproduzível — P1 · aberto
+
+- **Guia:** ampliar `docs/visual-baseline/SYNTHETIC.md` para uma matriz pequena/média/densa × largura estreita/padrão × repouso/hover/foco/seleção × tema claro/escuro; incluir contraste aumentado e movimento reduzido.
+- **Sensor computacional:** capturas geradas apenas de fixtures genéricas, associadas a versão, viewport e hash dos assets; diferenças de imagem sinalizam revisão, sem prometer qualidade estética automática.
+- **Sensor inferencial:** curadoria humana das capturas e revisão manual de teclado/leitor de tela; não versionar conteúdo do RAG ou Voomp.
+- **Classificação:** guia documental + sensores computacional e inferencial; maintainability e behaviour.
+
+### NEXO-014 — Tokens e especificidade do CSS — P2 · aberto
+
+- **Guia:** concentrar cores de superfície, texto, estados e espaçamento em tokens semânticos, preservando a identidade Matrix; explicitar o comportamento em tema claro do Obsidian.
+- **Sensor computacional:** detectar declarações de estado duplicadas e regressões de contraste, foco e movimento reduzido; CI continua verificando o bundle e o CSS final.
+- **Sensor inferencial:** revisão lado a lado das vistas no tema claro/escuro e sem o tema Nexo instalado.
+- **Classificação:** guia documental + sensores computacional e inferencial; maintainability e behaviour.
+
 ## Sequência recomendada
 
-1. NEXO-001 + NEXO-002: suportar grupos reais como `Rules` sem deformar a linguagem Signal Field.
-2. NEXO-003 + NEXO-004: fechar acessibilidade e comportamento da view com sensores em CI.
-3. NEXO-005: estabelecer baseline sintético denso e medidas de legibilidade.
-4. NEXO-006: fechar qualidade da distribuição e documentação por release.
+1. NEXO-009 + NEXO-010: corrigir percepção dos controles gráficos e fechar o enquadramento antes de novos efeitos visuais.
+2. NEXO-003 + NEXO-004 + NEXO-012: concluir leitura, foco, alvos e comportamento em painéis estreitos com sensores em CI e revisão no Obsidian.
+3. NEXO-011 + NEXO-013 + NEXO-005: distinguir categorias sem cor isolada e estabelecer baseline visual sintética.
+4. NEXO-001 + NEXO-002 + NEXO-014: consolidar grupos configuráveis, geometria e tokens do design system.
+5. NEXO-006: fechar qualidade da distribuição, smoke de instalação e documentação da release.
 
 ## Fora do escopo aprovado
 

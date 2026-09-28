@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Improve graph node outlines and keyboard focus, show the active Local control, enlarge toolbar targets, and respect increased contrast and reduced motion preferences.
 - Refine the Signal Field core: thinner branches, smaller nodes, softer glow, and quieter label hierarchy.
 - Reduce node size and soften node fills; use a thinner, translucent visual hierarchy for selection and neighbors.
 - Expand the default graph framing, simplify the ambient background, reduce dense-graph node size, soften hover emphasis, and preserve 9 px click targets with a transparent hit area.
