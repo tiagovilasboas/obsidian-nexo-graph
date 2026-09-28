@@ -16,10 +16,11 @@ Cada incremento precisa de um **guia** (documentação, comportamento esperado o
 - [x] Limites de 500 nós e 1.600 links com amostragem determinística.
 - [x] Signal Field com core neutro, domínios ativos, curvas cross-domain e rótulos limitados em grafos moderados/densos.
 - [x] CI para sintaxe, bundle, testes da engine e contrato do manifesto.
+- [x] CI compara a superfície pública de API registrada com o `minAppVersion` declarado.
 - [x] Release workflow passa a tag publicada como dado quoted; teste impede interpolação direta no shell.
 - [x] Transições de teclado dos nós testadas (Enter abre, Space seleciona/desselciona, Escape limpa, Shift+F10/menu abre).
 - [x] Wiring de eventos do Obsidian e migração/persistência de configurações testados com API stubs.
-- [ ] Testes DOM para renderização SVG/foco, menu contextual, pointer e debounce de atualização.
+- [x] Testes de contrato com fake DOM para renderização SVG/foco, teclado, menu contextual, pointer e debounce de atualização; integração DOM/runtime real do Obsidian continua limitada ao smoke manual.
 - [x] Gate computacional para caixas estimadas de rótulos automáticos e margem do core/viewBox.
 - [ ] Medidas de cruzamentos de aresta e baseline visual sintético público em Obsidian; a inspeção privada no vault real não substitui fixtures visuais sintéticas versionadas.
 - [x] Centros/halos adaptados ao conjunto de grupos ativos por teste determinístico; falta revisão visual em Obsidian.
@@ -54,9 +55,9 @@ Cada incremento precisa de um **guia** (documentação, comportamento esperado o
 ### NEXO-004 — Testes de integração da view — P0
 
 - **Guia:** README registra Enter, Space, Escape, Shift+F10, Local mode e atualização de conteúdo.
-- **Sensor computacional:** contrato de teclas, wiring de eventos e migração/persistência passam com stubs; harness DOM para renderização, foco/pointer, menu e debounce ainda pendente.
+- **Sensor computacional:** contrato de teclas, wiring de eventos, migração/persistência e fake DOM para SVG, foco, teclas, seleção, pointer, menu e debounce passam em CI; limite de links também renderizado sob teste.
 - **Classificação:** maintainability e behaviour; guia documental + sensor computacional.
-- **Entregue parcialmente:** Enter/Space/Escape/ContextMenu/Shift+F10, subscriptions de vault/metadata, migração de nomes e saveData/loadData são cobertos por sensores computacionais. Integração DOM/render, menu nativo e debounce ainda pendentes.
+- **Entregue parcialmente:** Enter/Space/Escape/ContextMenu/Shift+F10, subscriptions de vault/metadata, migração de nomes e saveData/loadData são cobertos por sensores computacionais. O fake DOM cobre SVG, foco, pointer e debounce, mas não prova o runtime completo do Obsidian nem o menu nativo real; esse smoke manual continua pendente.
 
 ### NEXO-005 — Legibilidade e desempenho em grafos densos — P1 · parcial
 
@@ -69,10 +70,10 @@ Cada incremento precisa de um **guia** (documentação, comportamento esperado o
 ### NEXO-006 — Robustez de release e documentação — P1 · parcial
 
 - **Guia:** instruções de desenvolvimento e release refletem a versão/tag e a origem de cada asset.
-- **Sensor computacional:** bundle e tag assets têm verificadores; contrato do workflow impede interpolação de texto da release no shell. Compatibilidade da versão mínima e smoke test de instalação ainda pendentes.
+- **Sensor computacional:** bundle e tag assets têm verificadores; contrato do workflow impede interpolação de texto da release no shell; inventário explícito da API pública e piso `@since` rodam na CI. Compatibilidade da versão mínima e smoke test de instalação limpa ainda pendentes.
 - **Sensor inferencial:** instalação limpa e smoke test no Obsidian; registrar versão e resultado sem alegar prova por configuração. Em 2026-09-28, a `main`/manifest está em 0.4.0 e a última release publicada em 0.3.0; README agora informa essa diferença.
 - **Classificação:** maintainability e architecture fitness; guia documental + sensores computacional e inferencial.
-- **Entregue parcialmente:** assets são validados byte a byte contra tag, o tag não é interpretado como shell, e o README avisa sobre a diferença entre source e latest release; falta automatizar compatibilidade de API e smoke test de instalação limpa. Publicar release continua uma ação separada.
+- **Entregue parcialmente:** assets são validados byte a byte contra tag, o tag não é interpretado como shell, API pública registrada é checada contra o piso do manifesto, e o README avisa sobre a diferença entre source e latest release; falta smoke test da instalação limpa na menor versão suportada. Publicar release continua uma ação separada.
 
 ## Sequência recomendada
 

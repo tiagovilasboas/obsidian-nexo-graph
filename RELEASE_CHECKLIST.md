@@ -8,6 +8,7 @@ Use this checklist so the version users install matches the code and the README.
 - Run the repository's quality workflow and require it to pass on the release commit.
 - Confirm `main.js` is generated from `src/main.js` and `src/graph-engine.js` with `node scripts/bundle.mjs --check`.
 - Review the changelog, install instructions, minimum Obsidian version, privacy statement, and the links in the release assets.
+- Run `node scripts/check-api-compatibility.mjs`; update the API compatibility registry and its guide when adding a public Obsidian API call. Run the clean-install smoke test on the lowest version the release claims to support.
 - Confirm the README's Latest release link and stated version match the most recently published release; if `main` is ahead, state which changes are unreleased.
 - Install the candidate files into a clean synthetic vault and open the graph view in Obsidian.
 
