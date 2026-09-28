@@ -155,14 +155,15 @@ test('node positioning is deterministic for an unchanged graph', () => {
   assert.deepEqual(first.map(({ path, x, y }) => [path, x, y]), second.map(({ path, x, y }) => [path, x, y]));
 });
 
-test('Signal Field reserves a neutral center and four distinct domain anchors', () => {
+test('neural constellation reserves a neutral center and four distinct domain anchors', () => {
   assert.equal(GROUP_CENTERS.length, 5);
   assert.deepEqual(GROUP_CENTERS[4], [600, 400]);
   assert.equal(new Set(GROUP_CENTERS.slice(0, 4).map(center => center.join(':'))).size, 4);
+  assert.equal(new Set(GROUP_CENTERS.slice(0, 4).map(([x, y]) => `${x < 600 ? 'left' : 'right'}:${y < 400 ? 'top' : 'bottom'}`)).size, 4);
   assert.ok(GROUP_RADIUS < 170, 'domain fields must leave visual space around the Nexo core');
 });
 
-test('Signal Field routes cross-domain links around the Nexo core', () => {
+test('neural mesh routes cross-domain links around the visible core', () => {
   const top = { path: 'pages/pessoal/top.md', group: 0, x: 600, y: 165 };
   const right = { path: 'pages/carreira/right.md', group: 1, x: 930, y: 400 };
   const bottom = { path: 'pages/ops/bottom.md', group: 2, x: 600, y: 635 };
@@ -174,13 +175,15 @@ test('Signal Field routes cross-domain links around the Nexo core', () => {
 
   const opposite = edgeRoute(top, bottom);
   assert.equal(opposite.crossDomain, true);
-  const laneX = GROUP_CENTERS[4][0] - CORE_EXCLUSION_RADIUS - LABEL_CLEARANCE;
-  assert.match(opposite.d, new RegExp(`C 520 241, ${laneX} 328, ${laneX} 400`));
+  assert.match(opposite.d, /^M 600 165 Q /);
+  const control = opposite.d.match(/ Q ([\d.-]+) ([\d.-]+) /);
+  assert.ok(control);
+  const curveMidpoint = [(600 + 2 * Number(control[1]) + 600) / 4, (165 + 2 * Number(control[2]) + 635) / 4];
+  assert.ok(Math.hypot(curveMidpoint[0] - 600, curveMidpoint[1] - 400) > 30, 'links must leave the visible neuron icon clear');
 
   const left = { path: 'pages/meta/left.md', group: 3, x: 270, y: 400 };
   const cross = edgeRoute(right, left);
-  const laneY = GROUP_CENTERS[4][1] - CORE_EXCLUSION_RADIUS - 4;
-  assert.match(cross.d, new RegExp(`C 844 352, 674 ${laneY}, 600 ${laneY}`));
+  assert.match(cross.d, /^M 930 400 Q /);
 
   const local = edgeRoute(top, peer);
   assert.equal(local.crossDomain, false);

@@ -1,8 +1,8 @@
 const MAX_NODES = 500;
 const MAX_EDGES = 1600;
-// Signal Field keeps the four configured domains around a neutral Nexo core.
-// The diamond gives a reader a stable centre of gravity without force-layout drift.
-const GROUP_CENTERS = [[600, 165], [930, 400], [600, 635], [270, 400], [600, 400]];
+// Irregular domain anchors create a neural constellation around a stable core.
+// Deterministic placement keeps the graph still while its real links carry meaning.
+const GROUP_CENTERS = [[335, 210], [885, 260], [770, 625], [275, 520], [600, 400]];
 const GROUP_RADIUS = 146;
 const CORE_EXCLUSION_RADIUS = 86;
 const LABEL_CLEARANCE = 56;
@@ -161,9 +161,9 @@ function positionNodes(nodes) {
   for (const node of nodes) groups[node.group].push(node);
   for (const [groupIndex, group] of groups.entries()) {
     group.sort((a, b) => b.degree - a.degree || a.path.localeCompare(b.path));
-    const spacing = group.length <= 1 ? 13.5 : Math.min(13.5, (GROUP_RADIUS - 18) / Math.sqrt(group.length - 1));
+    const spacing = group.length <= 1 ? 0 : Math.min(26, (GROUP_RADIUS - 36) / Math.sqrt(group.length - 1));
     group.forEach((node, index) => {
-      const radius = index === 0 ? 0 : 18 + spacing * Math.sqrt(index - 1);
+      const radius = index === 0 ? 0 : 36 + spacing * Math.sqrt(index - 1);
       const angle = index * 2.399963229728653 + groupIndex * 0.6;
       node.x = GROUP_CENTERS[groupIndex][0] + Math.cos(angle) * radius;
       node.y = GROUP_CENTERS[groupIndex][1] + Math.sin(angle) * radius;
@@ -173,43 +173,27 @@ function positionNodes(nodes) {
 
 function edgeRoute(source, target) {
   const local = source.group === target.group || source.group > 3 || target.group > 3;
+  const dx = target.x - source.x;
+  const dy = target.y - source.y;
+  const length = Math.max(1, Math.hypot(dx, dy));
+  const midpointX = (source.x + target.x) / 2;
+  const midpointY = (source.y + target.y) / 2;
+  const normalX = -dy / length;
+  const normalY = dx / length;
+  let hash = 0;
+  for (const character of `${source.path}|${target.path}`) hash = (hash * 31 + character.charCodeAt(0)) >>> 0;
+  const side = hash & 1 ? 1 : -1;
   if (local) {
-    const dx = target.x - source.x;
-    const dy = target.y - source.y;
-    const length = Math.max(1, Math.hypot(dx, dy));
     const bend = Math.min(28, length * 0.07);
-    const side = source.path.localeCompare(target.path) < 0 ? 1 : -1;
     const controlX = (source.x + target.x) / 2 - dy / length * bend * side;
     const controlY = (source.y + target.y) / 2 + dx / length * bend * side;
     return { crossDomain: false, d: `M ${source.x} ${source.y} Q ${controlX} ${controlY} ${target.x} ${target.y}` };
   }
-
-  const pair = [source.group, target.group].sort((a, b) => a - b).join(':');
-  if (pair === '0:2') {
-    const top = source.group === 0 ? source : target;
-    const bottom = source.group === 2 ? source : target;
-    const laneX = GROUP_CENTERS[4][0] - CORE_EXCLUSION_RADIUS - LABEL_CLEARANCE;
-    const canonical = `M ${top.x} ${top.y} C ${top.x - 80} ${top.y + 76}, ${laneX} ${GROUP_CENTERS[4][1] - 72}, ${laneX} ${GROUP_CENTERS[4][1]} C ${laneX} ${GROUP_CENTERS[4][1] + 72}, ${bottom.x - 80} ${bottom.y - 76}, ${bottom.x} ${bottom.y}`;
-    const reverse = `M ${bottom.x} ${bottom.y} C ${bottom.x - 80} ${bottom.y - 76}, ${laneX} ${GROUP_CENTERS[4][1] + 72}, ${laneX} ${GROUP_CENTERS[4][1]} C ${laneX} ${GROUP_CENTERS[4][1] - 72}, ${top.x - 80} ${top.y + 76}, ${top.x} ${top.y}`;
-    return { crossDomain: true, d: source === top ? canonical : reverse };
-  }
-  if (pair === '1:3') {
-    const right = source.group === 1 ? source : target;
-    const left = source.group === 3 ? source : target;
-    const laneY = GROUP_CENTERS[4][1] - CORE_EXCLUSION_RADIUS - 4;
-    const canonical = `M ${right.x} ${right.y} C ${right.x - 86} ${right.y - 48}, ${GROUP_CENTERS[4][0] + 74} ${laneY}, ${GROUP_CENTERS[4][0]} ${laneY} C ${GROUP_CENTERS[4][0] - 74} ${laneY}, ${left.x + 86} ${left.y - 48}, ${left.x} ${left.y}`;
-    const reverse = `M ${left.x} ${left.y} C ${left.x + 86} ${left.y - 48}, ${GROUP_CENTERS[4][0] - 74} ${laneY}, ${GROUP_CENTERS[4][0]} ${laneY} C ${GROUP_CENTERS[4][0] + 74} ${laneY}, ${right.x - 86} ${right.y - 48}, ${right.x} ${right.y}`;
-    return { crossDomain: true, d: source === right ? canonical : reverse };
-  }
-
   const [coreX, coreY] = GROUP_CENTERS[4];
-  const [firstX, firstY] = GROUP_CENTERS[source.group];
-  const [secondX, secondY] = GROUP_CENTERS[target.group];
-  const midpointX = (firstX + secondX) / 2;
-  const midpointY = (firstY + secondY) / 2;
-  const distance = Math.max(1, Math.hypot(midpointX - coreX, midpointY - coreY));
-  const controlX = midpointX + (midpointX - coreX) / distance * (GROUP_RADIUS - LABEL_CLEARANCE);
-  const controlY = midpointY + (midpointY - coreY) / distance * (GROUP_RADIUS - LABEL_CLEARANCE);
+  const centerDistance = Math.hypot(midpointX - coreX, midpointY - coreY);
+  const lane = centerDistance < CORE_EXCLUSION_RADIUS + 20 ? 132 + (hash % 3) * 18 : Math.min(64, Math.max(24, length * 0.12));
+  const controlX = midpointX + normalX * lane * side;
+  const controlY = midpointY + normalY * lane * side;
   return { crossDomain: true, d: `M ${source.x} ${source.y} Q ${controlX} ${controlY} ${target.x} ${target.y}` };
 }
 
