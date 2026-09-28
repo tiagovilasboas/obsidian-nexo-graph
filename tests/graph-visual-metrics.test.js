@@ -47,3 +47,13 @@ test('NEXO-005 metrics are deterministic across edge input order', () => {
   assert.deepEqual(first, second);
   assert.deepEqual(first.crossings, [['alpha', 'beta']]);
 });
+
+test('NEXO-005 accepts exponent coordinates and rejects paths with extra SVG commands', () => {
+  assert.deepEqual(metrics.parseQuadraticPath('M -1e1 0 Q 5 2.5 10 20'), {
+    start: [-10, 0],
+    control: [5, 2.5],
+    end: [10, 20]
+  });
+  assert.throws(() => metrics.parseQuadraticPath('M 0 0 L 1 1 Q 50 0 100 100'), TypeError);
+  assert.throws(() => metrics.parseQuadraticPath('M 0 0 Q 50 0 100 100 Z'), TypeError);
+});

@@ -70,6 +70,8 @@ node scripts/bundle.mjs --check
 node --test tests/*.test.js
 node scripts/check-css-contract.mjs
 node scripts/check-manifest.mjs
+node scripts/check-api-compatibility.mjs
+node scripts/graph-visual-metrics.mjs
 ```
 
 ## Support and feedback

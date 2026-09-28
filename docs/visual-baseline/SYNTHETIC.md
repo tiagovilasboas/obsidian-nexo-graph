@@ -17,7 +17,7 @@ The engine tests enforce deterministic selection/positions, the 500-note and 1,6
 
 `scripts/graph-visual-metrics.mjs` measures proper crossings between sampled quadratic SVG edge paths in a synthetic fixture. It excludes edge pairs that share a graph endpoint and prints deterministic JSON. The curves are approximated with 24 line segments by default; tangencies, collinear overlap, and crossings between sample points may be missed. This metric is a computacional regression sensor and is not a rendered screenshot baseline or a measure of perceived quality.
 
-## Not yet captured
+## Remaining visual and accessibility review
 
 - Rendered small and medium screenshots from a synthetic Obsidian vault.
 - Obsidian UI review of a dense synthetic vault at normal and narrow pane sizes.
