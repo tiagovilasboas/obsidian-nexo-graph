@@ -18,6 +18,7 @@ Cada incremento precisa de um **guia** (documentação, comportamento esperado o
 - [x] CI para sintaxe, bundle, testes da engine e contrato do manifesto.
 - [x] CI compara a superfície pública de API registrada com o `minAppVersion` declarado.
 - [x] Release workflow passa a tag publicada como dado quoted; teste impede interpolação direta no shell.
+- [x] CI calcula contraste sRGB dos labels de filtros desmarcados e bloqueia valores abaixo de 4,5:1.
 - [x] Transições de teclado dos nós testadas (Enter abre, Space seleciona/desselciona, Escape limpa, Shift+F10/menu abre).
 - [x] Wiring de eventos do Obsidian e migração/persistência de configurações testados com API stubs.
 - [x] Testes de contrato com fake DOM para renderização SVG/foco, teclado, menu contextual, pointer e debounce de atualização; integração DOM/runtime real do Obsidian continua limitada ao smoke manual.
@@ -44,10 +45,10 @@ Cada incremento precisa de um **guia** (documentação, comportamento esperado o
 - **Classificação:** behaviour e architecture fitness; guia inferencial/documental + sensores computacional e inferencial.
 - **Aceite computacional:** grupos vazios não recebem centro/halo/rótulo, centros repetem entre renders, e notas `Other` ficam fora do miolo central; testes entregues. Visual de Obsidian ainda precisa validação.
 
-### NEXO-003 — Contrato de acessibilidade e movimento — P0
+### NEXO-003 — Contrato de acessibilidade e movimento — P0 · sensores computacionais entregues; revisão manual pendente
 
 - **Guia:** documenta fluxo de teclado, foco, alternativa a hover e comportamento com `prefers-reduced-motion`.
-- **Sensor computacional:** valida foco visível para todos os controles e ausência de animação não essencial no modo reduzido.
+- **Sensor computacional:** valida foco visível para todos os controles, contraste mínimo de 4,5:1 nos labels de filtros desmarcados e ausência de animação não essencial no modo reduzido; executa na CI.
 - **Sensor inferencial:** revisão manual de teclado e leitor de tela no Obsidian.
 - **Classificação:** behaviour; guia inferencial + sensores computacional e inferencial.
 - **Aceite:** controles/nós são operáveis por teclado, foco não depende de cor sozinha e sinal de fundo não se move em reduced motion.
