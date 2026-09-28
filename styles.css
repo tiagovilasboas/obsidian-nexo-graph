@@ -92,7 +92,9 @@
 .nexo-core-ring.is-inner { fill: #00ff4112; stroke: #b8ff5a; stroke-dasharray: none; }
 .nexo-core-mark { fill: #00ff41; filter: drop-shadow(0 0 7px #00ff41); }
 .nexo-core-label { fill: #91fdb8; font: 700 9px ui-monospace, monospace; letter-spacing: 0.18em; opacity: 0.86; pointer-events: none; }
-.nexo-edges path { fill: none; stroke: var(--nexo-edge-color, #28643c); stroke-width: 1.15; opacity: 0.53; pointer-events: none; }
+.nexo-edges path { fill: none; stroke: var(--nexo-edge-color, #28643c); stroke-width: 1.05; opacity: 0.32; pointer-events: none; }
+.nexo-edges path.is-cross-domain { stroke-width: 1.3; opacity: 0.64; }
+.nexo-edges path.is-cross-domain.is-dimmed { opacity: 0.05; }
 .nexo-edges path.is-dimmed { opacity: 0.05; }
 .nexo-edges path:not(.is-dimmed):hover { opacity: 0.9; }
 .nexo-node { color: var(--nexo-node-color); cursor: pointer; transition: opacity 120ms ease; }
