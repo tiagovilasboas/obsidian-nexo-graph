@@ -16,6 +16,7 @@ Use this checklist so the version users install matches the code and the README.
 - Attach exactly `main.js`, `manifest.json`, and `styles.css` from that tag to the GitHub release.
 - Mark the release as latest only after the assets are uploaded and the notes describe the shipped behavior.
 - Confirm the **Verify release assets** workflow passes. It downloads each asset and compares it byte-for-byte with the tagged source.
+- The published tag is passed to the verifier through an environment variable and a quoted process argument; do not interpolate event text directly into shell source.
 - Install the published assets in a clean vault and confirm the plugin loads, settings persist, graph limits are disclosed, and the help links work.
 
 If post-publish verification fails, publish a corrected version; do not silently replace assets under an existing tag.

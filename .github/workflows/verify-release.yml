@@ -18,4 +18,5 @@ jobs:
       - name: Verify assets against the release tag
         env:
           GH_TOKEN: ${{ github.token }}
-        run: node scripts/verify-release-assets.mjs "${{ github.event.release.tag_name }}"
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: node scripts/verify-release-assets.mjs "$RELEASE_TAG"

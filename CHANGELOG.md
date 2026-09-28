@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Pass published release tags to the asset verifier as quoted data instead of interpolating event input into shell source.
 - Suppress lower-priority automatic labels when their estimated text boxes collide in dense graphs.
 - Add Obsidian API stub checks for live graph refresh events and per-vault settings migration/persistence.
 - Separate node keyboard actions: Enter opens, Space toggles persistent neighbor selection, Escape clears search/selection, and the context-menu shortcut remains available.
