@@ -8,6 +8,9 @@ const CORE_CENTER = [600, 400];
 const DOMAIN_ORBIT_RADIUS = 290;
 const GROUP_RADIUS = 146;
 const CORE_EXCLUSION_RADIUS = 86;
+const GROUP_CAPTION_OFFSET = 22;
+const GROUP_CAPTION_HEIGHT = 14;
+const CORE_TITLE_BOX = { left: 488, top: 464, right: 712, bottom: 484, kind: 'core-title' };
 
 function groupFor(path, rules) {
   const normalized = path.toLowerCase();
@@ -82,7 +85,28 @@ function activeGroupCenters(groupIndexes) {
   return centers;
 }
 
-function labelPlan(nodes, perGroupLimit = 4, clearance = 3) {
+function reservedLabelBoxes(groupCenters, groups) {
+  const boxes = [{ ...CORE_TITLE_BOX }];
+  for (const [groupIndex, [x, y]] of groupCenters) {
+    const name = String(groups[groupIndex]?.name || '').trim();
+    if (!name) continue;
+    // This matches the mono caption approximately; browser font metrics still
+    // require visual QA, so the box is a conservative layout reservation.
+    const width = Math.max(28, name.length * 9);
+    const baseline = y - GROUP_RADIUS + GROUP_CAPTION_OFFSET;
+    boxes.push({
+      left: x - width / 2,
+      top: baseline - GROUP_CAPTION_HEIGHT + 2,
+      right: x + width / 2,
+      bottom: baseline + 3,
+      kind: 'group-caption',
+      group: groupIndex
+    });
+  }
+  return boxes;
+}
+
+function labelPlan(nodes, perGroupLimit = 4, clearance = 3, reservedBoxes = []) {
   const groupIndexes = [...new Set(nodes.map(node => node.group))];
   const centers = activeGroupCenters(groupIndexes);
   const groups = new Map();
@@ -113,7 +137,7 @@ function labelPlan(nodes, perGroupLimit = 4, clearance = 3) {
       const left = node.x + position.x - (position.anchor === 'start' ? 0 : position.anchor === 'end' ? width : width / 2);
       const top = node.y + position.y - 9;
       const box = { path: node.path, left, top, right: left + width, bottom: top + 14 };
-      const collides = boxes.some(other =>
+      const collides = [...reservedBoxes, ...boxes].some(other =>
         box.left < other.right + clearance && box.right + clearance > other.left &&
         box.top < other.bottom + clearance && box.bottom + clearance > other.top
       );
@@ -123,7 +147,7 @@ function labelPlan(nodes, perGroupLimit = 4, clearance = 3) {
       }
     });
   }
-  return { positions, visible, boxes };
+  return { positions, visible, boxes, reservedBoxes };
 }
 
 function selectNodesByGroup(candidates, degree, rules) {
@@ -550,7 +574,7 @@ class NexoGraphView extends ItemView {
     const nodeLayer = svgElement('g', { class: 'nexo-nodes' });
     viewport.append(edgeLayer, nodeLayer);
     const edgeElements = [];
-    const labels = labelPlan(nodes);
+    const labels = labelPlan(nodes, 4, 3, reservedLabelBoxes(groupCenters, visualGroups));
 
     for (const [source, target, bidirectional] of edges) {
       const a = byPath.get(source);
