@@ -24,3 +24,5 @@ jobs:
         run: node scripts/check-css-contract.mjs
       - name: Validate manifest contract
         run: node scripts/check-manifest.mjs
+      - name: Validate Obsidian API minimum version
+        run: node scripts/check-api-compatibility.mjs
