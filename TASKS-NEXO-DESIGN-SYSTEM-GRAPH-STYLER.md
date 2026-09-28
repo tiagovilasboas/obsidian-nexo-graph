@@ -75,6 +75,13 @@ Cada incremento precisa de um **guia** (documentação, comportamento esperado o
 - **Sensor inferencial:** repetir a revisão em vault sintético denso nas larguras normal e estreita, registrando apenas screenshots públicas e o resultado visual.
 - **Classificação:** behaviour; guia inferencial/documental + sensores computacional e inferencial. O sensor computacional verifica hierarquia declarada e verdade dos links, mas não mede estética no SVG renderizado.
 
+### NEXO-008 — Fixtures sintéticas reproduzíveis — P1 · entregue, baseline visual pendente
+
+- **Guia:** `docs/visual-baseline/SYNTHETIC.md` descreve comandos para perfis pequeno, médio e denso e exige diretórios temporários vazios. As notas, pastas e links são genéricos; o gerador nunca recebe dados do RAG/Voomp.
+- **Sensor computacional:** testes determinísticos verificam perfis de 12/24, 96/384 e 500/1.600 notas/links, nomes de caminhos genéricos, configuração do plugin e assets locais copiados para um vault novo. O gerador recusa diretório de saída não vazio e caminhos de fixture que escapariam desse diretório.
+- **Sensor inferencial:** abrir cada perfil no Obsidian, revisar larguras normal/estreita e registrar apenas screenshots públicas junto de versão, viewport e resultado.
+- **Classificação:** maintainability e behaviour; guia documental + sensores computacional e inferencial. A fixture torna a revisão repetível, sem substituí-la por um teste de arquivos.
+
 ### NEXO-006 — Robustez de release e documentação — P1 · parcial
 
 - **Guia:** instruções de desenvolvimento e release refletem a versão/tag e a origem de cada asset.

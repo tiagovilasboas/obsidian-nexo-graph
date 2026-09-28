@@ -2,6 +2,20 @@
 
 This file defines the baseline to capture with generated notes only. No private RAG/Voomp note names, contents, or screenshots belong in this repository.
 
+## Reproducible fixture generator
+
+Create a new, empty temporary directory for each profile. The generator writes only generic folders and `node-###` notes, copies the three local plugin assets, writes Nexo Graph settings, and enables the plugin for that generated vault. It refuses a non-empty output directory and file paths outside that directory.
+
+```sh
+node scripts/create-synthetic-vault.mjs --profile small --groups 1 --output /tmp/nexo-small-one
+node scripts/create-synthetic-vault.mjs --profile small --groups 2 --output /tmp/nexo-small-two
+node scripts/create-synthetic-vault.mjs --profile small --groups 4 --output /tmp/nexo-small-four
+node scripts/create-synthetic-vault.mjs --profile medium --output /tmp/nexo-medium
+node scripts/create-synthetic-vault.mjs --profile dense --output /tmp/nexo-dense
+```
+
+The profiles contain 12 notes / 24 links, 96 notes / 384 links, and 500 notes / 1,600 links respectively. The generator is a computacional fixture sensor for deterministic synthetic input; it does not capture or evaluate a rendered graph.
+
 ## Required captures
 
 - Small vault: 8–20 notes across one, two, and four configured groups.
