@@ -11,15 +11,13 @@
 
 import { pathToFileURL } from 'node:url';
 
-const NUMBER = /-?(?:\d+\.?\d*|\.\d+)(?:e[-+]?\d+)?/gi;
-
-function numbers(path) {
-  return [...String(path).matchAll(NUMBER)].map(match => Number(match[0]));
-}
+const NUMBER = '-?(?:\\d+\\.?\\d*|\\.\\d+)(?:e[-+]?\\d+)?';
+const QUADRATIC_PATH = new RegExp(`^\\s*M\\s+(${NUMBER})\\s+(${NUMBER})\\s+Q\\s+(${NUMBER})\\s+(${NUMBER})\\s+(${NUMBER})\\s+(${NUMBER})\\s*$`, 'i');
 
 export function parseQuadraticPath(path) {
-  const values = numbers(path);
-  if (!/^\s*M\s+/i.test(path) || !/\sQ\s+/i.test(path) || values.length !== 6 || values.some(value => !Number.isFinite(value))) {
+  const match = QUADRATIC_PATH.exec(String(path));
+  const values = match?.slice(1).map(Number);
+  if (!values || values.some(value => !Number.isFinite(value))) {
     throw new TypeError(`Expected an SVG quadratic path in 'M x y Q cx cy x y' form: ${path}`);
   }
   return {
