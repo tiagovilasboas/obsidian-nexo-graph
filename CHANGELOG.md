@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Refine the Signal Field core: thinner branches, smaller nodes, softer glow, and quieter label hierarchy.
 - Reduce node size and soften node fills; use a thinner, translucent visual hierarchy for selection and neighbors.
 - Expand the default graph framing, simplify the ambient background, reduce dense-graph node size, soften hover emphasis, and preserve 9 px click targets with a transparent hit area.
 - Clarify that the published 0.3.0 release does not yet include the repository's 0.4.0 source changes.

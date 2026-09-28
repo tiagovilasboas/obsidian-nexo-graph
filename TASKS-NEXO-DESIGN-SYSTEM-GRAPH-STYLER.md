@@ -16,6 +16,7 @@ Cada incremento precisa de um **guia** (documentação, comportamento esperado o
 - [x] Limites de 500 nós e 1.600 links com amostragem determinística.
 - [x] Signal Field com core neutro, malha neural circular, curvas cross-domain e rótulos limitados em grafos moderados/densos.
 - [x] Hierarquia de nós refinada com raio máximo de 3,7, preenchimento translúcido e área de clique de 9 px; seleção por contorno/halo sem aumentar o ponto visível.
+- [x] Núcleo do Signal Field refinado com conexões mais finas, neurônios menores, brilho contido e rótulo com menor peso visual.
 - [x] CI para sintaxe, bundle, testes da engine e contrato do manifesto.
 - [x] CI compara a superfície pública de API registrada com o `minAppVersion` declarado.
 - [x] Release workflow passa a tag publicada como dado quoted; teste impede interpolação direta no shell.

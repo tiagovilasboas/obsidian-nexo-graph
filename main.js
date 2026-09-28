@@ -551,10 +551,10 @@ class NexoGraphView extends ItemView {
     atmosphere.appendChild(svgElement('circle', { cx: coreX, cy: coreY, r: 156, fill: 'url(#nexo-halo-core)' }));
     const core = svgElement('g', { class: 'nexo-core', role: 'presentation' });
     core.appendChild(svgElement('path', { d: `M ${coreX - 22} ${coreY + 12} L ${coreX - 5} ${coreY - 2} L ${coreX + 14} ${coreY - 17} M ${coreX - 5} ${coreY - 2} L ${coreX + 21} ${coreY + 13}`, class: 'nexo-core-branches' }));
-    core.appendChild(svgElement('circle', { cx: coreX - 22, cy: coreY + 12, r: 5, class: 'nexo-core-neuron is-secondary' }));
-    core.appendChild(svgElement('circle', { cx: coreX - 5, cy: coreY - 2, r: 7, class: 'nexo-core-neuron' }));
-    core.appendChild(svgElement('circle', { cx: coreX + 14, cy: coreY - 17, r: 5, class: 'nexo-core-neuron is-secondary' }));
-    core.appendChild(svgElement('circle', { cx: coreX + 21, cy: coreY + 13, r: 5, class: 'nexo-core-neuron is-secondary' }));
+    core.appendChild(svgElement('circle', { cx: coreX - 22, cy: coreY + 12, r: 3.5, class: 'nexo-core-neuron is-secondary' }));
+    core.appendChild(svgElement('circle', { cx: coreX - 5, cy: coreY - 2, r: 5, class: 'nexo-core-neuron' }));
+    core.appendChild(svgElement('circle', { cx: coreX + 14, cy: coreY - 17, r: 3.5, class: 'nexo-core-neuron is-secondary' }));
+    core.appendChild(svgElement('circle', { cx: coreX + 21, cy: coreY + 13, r: 3.5, class: 'nexo-core-neuron is-secondary' }));
     const coreTitle = svgElement('text', { x: coreX, y: coreY + 78, 'text-anchor': 'middle', class: 'nexo-core-label' });
     coreTitle.textContent = 'NEXO / KNOWLEDGE CORE';
     core.appendChild(coreTitle);
