@@ -1,5 +1,5 @@
 const { ItemView, Menu, Plugin, PluginSettingTab, Setting } = require('obsidian');
-const { CORE_CENTER, CORE_EXCLUSION_RADIUS, GROUP_RADIUS, LABEL_CLEARANCE, MAX_NODES, edgeRoute, graphData, handleNodeKey, positionNodes, searchMatches, searchSummary } = require('./graph-engine');
+const { CORE_CENTER, CORE_EXCLUSION_RADIUS, GROUP_RADIUS, MAX_NODES, edgeRoute, graphData, handleNodeKey, labelPlan, positionNodes, searchMatches, searchSummary } = require('./graph-engine');
 
 const VIEW_TYPE = 'nexo-graph-view';
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -235,17 +235,7 @@ class NexoGraphView extends ItemView {
     const nodeLayer = svgElement('g', { class: 'nexo-nodes' });
     viewport.append(edgeLayer, nodeLayer);
     const edgeElements = [];
-    const nodesByGroup = new Map();
-    for (const node of nodes) {
-      if (!nodesByGroup.has(node.group)) nodesByGroup.set(node.group, []);
-      nodesByGroup.get(node.group).push(node);
-    }
-    const labelCandidates = new Set();
-    for (const group of nodesByGroup.values()) {
-      group.sort((a, b) => b.degree - a.degree || a.path.localeCompare(b.path));
-      group.forEach((node, index) => { node.labelRank = index; });
-      group.slice(0, 4).forEach(node => labelCandidates.add(node.path));
-    }
+    const labels = labelPlan(nodes);
 
     for (const [source, target, bidirectional] of edges) {
       const a = byPath.get(source);
@@ -253,7 +243,7 @@ class NexoGraphView extends ItemView {
       const route = edgeRoute(a, b);
       const edge = svgElement('path', { d: route.d });
       edge.classList.toggle('is-cross-domain', route.crossDomain);
-      edge.style.setProperty('--nexo-edge-color', this.plugin.settings.groups[a.group]?.color || '#3f8e5b');
+      edge.style.setProperty('--nexo-edge-color', visualGroups[a.group]?.color || '#3f8e5b');
       edge.setAttribute('marker-end', `url(#nexo-arrow-${a.group})`);
       if (bidirectional) edge.setAttribute('marker-start', `url(#nexo-arrow-${b.group})`);
       edge.setAttribute('aria-label', bidirectional ? `${a.name} and ${b.name} link to each other` : `${a.name} links to ${b.name}`);
@@ -279,7 +269,7 @@ class NexoGraphView extends ItemView {
         element.classList.toggle('is-neighbor', Boolean(this.emphasisPath && node.path !== this.emphasisPath && related.has(node.path)));
         element.classList.toggle('is-selected', this.selectedPath === node.path);
         element.classList.toggle('is-dimmed', !matchesQuery || !matchesNeighborhood);
-        element.classList.toggle('is-labeled', nodes.length < 80 || labelCandidates.has(node.path) || queryMatches || this.emphasisPath === node.path);
+        element.classList.toggle('is-labeled', nodes.length < 80 || labels.visible.has(node.path) || queryMatches || this.emphasisPath === node.path);
         element.setAttribute('aria-pressed', String(this.selectedPath === node.path));
       }
       for (const [source, target, edge] of edgeElements) {
@@ -291,18 +281,14 @@ class NexoGraphView extends ItemView {
     this.updateGraphEmphasis = updateEmphasis;
     for (const node of nodes) {
       const group = svgElement('g', { class: 'nexo-node', transform: `translate(${node.x} ${node.y})`, tabindex: '0', role: 'button', 'aria-label': `Open ${node.name}; Space selects, Enter opens` });
-      group.style.setProperty('--nexo-node-color', this.plugin.settings.groups[node.group]?.color || '#729680');
+      group.style.setProperty('--nexo-node-color', visualGroups[node.group]?.color || '#729680');
       const radius = Math.min(10, 3.5 + Math.sqrt(node.degree) * 1.2);
       group.appendChild(svgElement('circle', { r: radius }));
-      const labelRank = node.labelRank || 0;
-      const verticalTerritory = node.group === 0 || node.group === 2;
-      const labelAbove = labelRank % 2 === 0;
+      const labelPosition = labels.positions.get(node.path) || { x: 0, y: -radius - 7, anchor: 'middle' };
       const label = svgElement('text', {
-        x: verticalTerritory ? 0 : (node.group === 1 ? radius + 8 : -radius - 8),
-        y: verticalTerritory
-          ? (labelAbove ? -radius - 7 : radius + 15)
-          : (labelAbove ? -5 : 12),
-        'text-anchor': verticalTerritory ? 'middle' : (node.group === 1 ? 'start' : 'end'),
+        x: labelPosition.x,
+        y: labelPosition.y,
+        'text-anchor': labelPosition.anchor,
         class: 'nexo-node-label'
       });
       label.textContent = node.name;

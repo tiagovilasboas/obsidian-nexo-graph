@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { CORE_CENTER, CORE_EXCLUSION_RADIUS, DOMAIN_ORBIT_RADIUS, GROUP_RADIUS, LABEL_CLEARANCE, MAX_EDGES, MAX_NODES, activeGroupCenters, edgeRoute, graphData, groupFor, handleNodeKey, positionNodes, searchMatches, searchSummary } = require('../src/graph-engine');
+const { CORE_CENTER, CORE_EXCLUSION_RADIUS, DOMAIN_ORBIT_RADIUS, GROUP_RADIUS, MAX_EDGES, MAX_NODES, activeGroupCenters, edgeRoute, graphData, groupFor, handleNodeKey, labelPlan, positionNodes, searchMatches, searchSummary } = require('../src/graph-engine');
 
 const rules = [
   { name: 'Personal', prefix: 'pages/pessoal/' },
@@ -253,6 +253,13 @@ test('active domains adapt around a fixed neutral core without reserving empty s
   assert.deepEqual([...four.keys()], [0, 1, 2, 3]);
   assert.equal(new Set([...four.values()].map(center => center.map(Math.round).join(':'))).size, 4);
   assert.deepEqual([...four], [...activeGroupCenters([0, 1, 2, 3])]);
+  for (const layout of [one, two, three, four]) {
+    for (const [x, y] of layout.values()) {
+      assert.ok(Math.hypot(x - CORE_CENTER[0], y - CORE_CENTER[1]) - GROUP_RADIUS >= CORE_EXCLUSION_RADIUS, 'domain nodes must keep the central exclusion area clear');
+      assert.ok(x - GROUP_RADIUS >= 0 && x + GROUP_RADIUS <= 1200, 'domain nodes must remain in the horizontal viewBox');
+      assert.ok(y - GROUP_RADIUS >= 0 && y + GROUP_RADIUS <= 800, 'domain nodes must remain in the vertical viewBox');
+    }
+  }
   const customNames = [{ name: 'Rules', prefixes: ['rules/'] }, { name: 'Agents', prefixes: ['agents/'] }];
   assert.equal(groupFor('rules/review.md', customNames), 0, 'renaming a group must not change prefix classification');
   assert.equal(groupFor('agents/code-review.md', customNames), 1);
@@ -263,6 +270,38 @@ test('unclassified notes remain on a neutral ring outside the central mark', () 
   const nodes = Array.from({ length: 12 }, (_, index) => ({ path: `inbox/${index}.md`, group: 4, degree: 0 }));
   positionNodes(nodes);
   assert.ok(nodes.every(node => Math.hypot(node.x - CORE_CENTER[0], node.y - CORE_CENTER[1]) >= CORE_EXCLUSION_RADIUS + 20));
+});
+
+test('dense graph label plan is deterministic and suppresses estimated label collisions', () => {
+  const nodes = [];
+  for (let group = 0; group < 5; group++) {
+    for (let index = 0; index < 18; index++) {
+      nodes.push({
+        path: `group-${group}/note-${index}.md`,
+        name: `Long synthetic label ${group}-${index}`,
+        group,
+        degree: 36 - index
+      });
+    }
+  }
+  positionNodes(nodes);
+  const first = labelPlan(nodes);
+  const second = labelPlan(nodes);
+  const reversed = labelPlan([...nodes].reverse());
+  assert.deepEqual([...first.visible], [...second.visible]);
+  assert.deepEqual(first.boxes, second.boxes);
+  assert.deepEqual([...first.visible], [...reversed.visible]);
+  assert.deepEqual(first.boxes, reversed.boxes);
+  assert.ok(first.visible.size > 0 && first.visible.size <= 20, `selected ${first.visible.size} labels`);
+
+  for (let left = 0; left < first.boxes.length; left++) {
+    for (let right = left + 1; right < first.boxes.length; right++) {
+      const a = first.boxes[left];
+      const b = first.boxes[right];
+      const overlap = a.left < b.right + 3 && a.right + 3 > b.left && a.top < b.bottom + 3 && a.bottom + 3 > b.top;
+      assert.equal(overlap, false, `${a.path} overlaps ${b.path}`);
+    }
+  }
 });
 
 test('neural mesh routes cross-domain links around the visible core', () => {
@@ -304,7 +343,7 @@ test('crowded group positions remain inside its documented radius', () => {
   assert.ok(maxRadius <= GROUP_RADIUS, `group radius was ${maxRadius.toFixed(1)}`);
 });
 
-test('documented maximum-size graph stays within a generous runtime budget', () => {
+test('documented maximum-size graph extraction, layout, and label planning stay within a runtime budget', () => {
   const paths = Array.from({ length: MAX_NODES }, (_, index) => `notes/${String(index).padStart(3, '0')}.md`);
   const links = {};
   let remainingEdges = MAX_EDGES;
@@ -320,6 +359,7 @@ test('documented maximum-size graph stays within a generous runtime budget', () 
   const startedAt = performance.now();
   const result = graphData(app(paths, links), rules);
   positionNodes(result.nodes);
+  labelPlan(result.nodes);
   const byPath = new Map(result.nodes.map(node => [node.path, node]));
   for (const [source, target] of result.edges) edgeRoute(byPath.get(source), byPath.get(target));
   const elapsedMs = performance.now() - startedAt;

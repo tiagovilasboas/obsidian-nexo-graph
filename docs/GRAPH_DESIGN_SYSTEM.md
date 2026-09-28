@@ -12,7 +12,7 @@ Signal Field is Nexo Graph's current visual language. It arranges configured fol
 
 ## Geometry and density
 
-The engine places configured notes deterministically in sectors around the fixed neutral core. Only populated configured groups receive an outer sector, halo, and label; one or two active groups use a horizontal orbit, while three or four are distributed around the core. Unclassified `Other` notes remain neutral on a ring outside the central mark. There is no force simulation or layout physics. The view caps the rendered graph at 500 notes and 1,600 links, sampling across groups and group pairs so one large folder does not hide every smaller group. In dense graphs, labels are restricted by deterministic degree ranking; search matches and the focused note can reveal labels on demand. Cross-domain links use curved routes that avoid the core.
+The engine places configured notes deterministically in sectors around the fixed neutral core. Only populated configured groups receive an outer sector, halo, and label; one or two active groups use a horizontal orbit, while three or four are distributed around the core. Unclassified `Other` notes remain neutral on a ring outside the central mark. There is no force simulation or layout physics. The view caps the rendered graph at 500 notes and 1,600 links, sampling across groups and group pairs so one large group cannot hide every smaller one. In dense graphs, label candidates are ranked by degree and path, then placed only if their estimated text boxes do not collide; search matches and the focused note can still reveal labels on demand. This is a geometric estimate, not a guarantee of rendered legibility. Cross-domain links use curved routes that avoid the core.
 
 ## Visual and interaction contract
 
@@ -30,7 +30,7 @@ Every graph change follows Harness Engineering's dual loop:
 | Concern | Guia | Sensor | Classificação |
 | --- | --- | --- | --- |
 | Data and group semantics | This document and settings descriptions | Engine fixtures, Obsidian API stub checks, and manifest/CI checks | Computational; architecture fitness and behaviour |
-| Visual legibility | Density, label, and color contract | Synthetic geometry tests plus Obsidian visual review | Computational and inferential; behaviour |
+| Visual legibility | Density, label, and color contract | Synthetic collision estimates plus Obsidian visual review | Computational and inferential; behaviour |
 | Keyboard and motion | Interaction contract and accessible control names | Keyboard transition tests, API event/settings tests, reduced-motion stylesheet check, manual keyboard review | Computational and inferential; behaviour |
 | Distribution | README and release checklist | Bundle, test, manifest, tag asset validation, clean install | Computational and inferential; maintainability |
 
