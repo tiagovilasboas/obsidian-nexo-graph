@@ -34,7 +34,7 @@ Every graph change follows Harness Engineering's dual loop:
 | Keyboard and motion | Interaction contract, accessible control names, and unchecked filter labels at or above 4.5:1 contrast | Keyboard transition tests, API event/settings tests, reduced-motion and filter-contrast stylesheet checks, manual keyboard review | Computational and inferential; behaviour |
 | Distribution | README and release checklist | Bundle, test, manifest, safe release-tag input, tag asset validation, clean install | Computational and inferential; maintainability |
 
-CI is a computacional sensor for syntax, bundle consistency, engine tests, manifest validity, and the deterministic synthetic crossing fixture. The crossing sensor approximates SVG quadratic curves with sampled segments; it can miss tangencies, overlaps, and crossings between sample points. Its synthetic metrics do not establish that a rendered graph is visually attractive or legible. A CI pass does not replace rendered visual/accessibility review in Obsidian. Do not use private RAG note names or screenshots as public fixtures.
+CI is a computacional sensor for syntax, bundle consistency, engine tests, manifest validity, and the deterministic synthetic crossing fixture. The crossing sensor approximates SVG quadratic curves with sampled segments, includes interior sampled-vertex contacts, and ignores actual curve endpoints; it can miss tangencies, overlaps, and small crossings between sample points, and may count near-tangencies as contacts. Its synthetic metrics do not establish that a rendered graph is visually attractive or legible. A CI pass does not replace rendered visual/accessibility review in Obsidian. Do not use private RAG note names or screenshots as public fixtures.
 
 ## Evolution rules
 

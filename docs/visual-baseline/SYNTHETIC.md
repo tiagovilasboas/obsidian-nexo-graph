@@ -15,7 +15,7 @@ Record Obsidian version, Nexo Graph version, theme mode, viewport/pane width, no
 
 The engine tests enforce deterministic selection/positions, the 500-note and 1,600-link limits, group-pair sampling, and a generous runtime budget on a synthetic fixture. This is a code-level test result, not a device-level rendering or memory claim. See `tests/graph-engine.test.js` for the executable contract.
 
-`scripts/graph-visual-metrics.mjs` measures proper crossings between sampled quadratic SVG edge paths in a synthetic fixture. It excludes edge pairs that share a graph endpoint and prints deterministic JSON. The curves are approximated with 24 line segments by default; tangencies, collinear overlap, and crossings between sample points may be missed. This metric is a computacional regression sensor and is not a rendered screenshot baseline or a measure of perceived quality.
+`scripts/graph-visual-metrics.mjs` counts intersections between sampled quadratic SVG edge polylines in a synthetic fixture, including intersections that land exactly on an interior sampled vertex. It ignores contacts at either curve's actual start/end and edge pairs that share a graph endpoint, then prints deterministic JSON. The curves are approximated with 24 line segments by default; tangencies, collinear overlap, and small crossings between sample points may be missed, while near-tangencies may be approximated as contacts. This metric is a computacional regression sensor and is not a rendered screenshot baseline or a measure of perceived quality.
 
 ## Remaining visual and accessibility review
 
