@@ -20,6 +20,8 @@ jobs:
           node scripts/bundle.mjs --check
       - name: Run graph engine tests
         run: node --test tests/*.test.js
+      - name: Report synthetic edge crossing metrics
+        run: node scripts/graph-visual-metrics.mjs
       - name: Check CSS accessibility and motion contract
         run: node scripts/check-css-contract.mjs
       - name: Validate manifest contract

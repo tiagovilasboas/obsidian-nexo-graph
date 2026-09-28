@@ -22,7 +22,7 @@ Cada incremento precisa de um **guia** (documentação, comportamento esperado o
 - [x] Wiring de eventos do Obsidian e migração/persistência de configurações testados com API stubs.
 - [x] Testes de contrato com fake DOM para renderização SVG/foco, teclado, menu contextual, pointer e debounce de atualização; integração DOM/runtime real do Obsidian continua limitada ao smoke manual.
 - [x] Gate computacional para caixas estimadas de rótulos automáticos e margem do core/viewBox.
-- [ ] Medidas de cruzamentos de aresta e baseline visual sintético público em Obsidian; a inspeção privada no vault real não substitui fixtures visuais sintéticas versionadas.
+- [ ] Baseline visual sintético público em Obsidian; a inspeção privada no vault real não substitui fixtures visuais sintéticas versionadas. A métrica computacional de cruzamento de arestas foi entregue, mas ainda não está conectada a uma captura/renderização real.
 - [x] Centros/halos adaptados ao conjunto de grupos ativos por teste determinístico; falta revisão visual em Obsidian.
 - [x] Nome dos quatro grupos configurável pela UI; cobertura de persistência por UI/API ainda pendente.
 - [ ] Instalação limpa/release verificada visualmente no Obsidian para a versão atual.
@@ -62,10 +62,10 @@ Cada incremento precisa de um **guia** (documentação, comportamento esperado o
 ### NEXO-005 — Legibilidade e desempenho em grafos densos — P1 · parcial
 
 - **Guia:** documenta limites atuais e critérios visuais que não prometem ausência total de colisões.
-- **Sensor computacional:** fixtures sintéticas medem clearance do core/viewBox, limites de nós/arestas, colisão estimada de labels e orçamento de renderização.
+- **Sensor computacional:** fixtures sintéticas medem clearance do core/viewBox, limites de nós/arestas, colisão estimada de labels, cruzamentos aproximados de curvas SVG quadráticas e orçamento de renderização.
 - **Sensor inferencial:** screenshots apenas sintéticos em tamanhos pequeno/médio e revisão visual sem conteúdo do RAG. Revisão privada no Obsidian em 2026-09-28 encontrou rótulos congestionados em 40 notas; após recarga completa, confirmou a renderização mais limpa e a legenda sem domínio vazio. Nenhuma captura ou nome de nota do vault foi versionado.
 - **Classificação:** behaviour e maintainability; guia inferencial/documental + sensores computacional e inferencial.
-- **Entregue parcialmente:** sensor determinístico rejeita colisões entre caixas de texto estimadas e protege limites do core/viewBox; guias/testes agora ativam supressão por colisão a partir de 32 notas e removem grupos sem notas da legenda. Smoke visual no Obsidian passou em vault privado com 40 notas/98 links; faltam cruzamentos de aresta medidos e baseline visual sintético versionado.
+- **Entregue parcialmente:** sensor determinístico rejeita colisões entre caixas de texto estimadas e protege limites do core/viewBox; guias/testes agora ativam supressão por colisão a partir de 32 notas e removem grupos sem notas da legenda. Um sensor sintético mede cruzamentos próprios entre curvas aproximadas por segmentos e exclui pares com endpoint compartilhado; pode omitir tangências, sobreposições e interseções entre amostras. Smoke visual no Obsidian passou em vault privado com 40 notas/98 links; baseline visual sintético versionado/renderizado continua pendente.
 
 ### NEXO-006 — Robustez de release e documentação — P1 · parcial
 
