@@ -44,15 +44,18 @@ export function approximateQuadratic(path, segments = 24) {
 function cross([ax, ay], [bx, by]) { return ax * by - ay * bx; }
 function subtract([ax, ay], [bx, by]) { return [ax - bx, ay - by]; }
 
-export function properSegmentIntersection(firstStart, firstEnd, secondStart, secondEnd, epsilon = 1e-9) {
+export function segmentIntersection(firstStart, firstEnd, secondStart, secondEnd, epsilon = 1e-9) {
   const firstVector = subtract(firstEnd, firstStart);
   const secondVector = subtract(secondEnd, secondStart);
   const denominator = cross(firstVector, secondVector);
-  if (Math.abs(denominator) <= epsilon) return false;
+  if (Math.abs(denominator) <= epsilon) return null;
   const offset = subtract(secondStart, firstStart);
   const firstT = cross(offset, secondVector) / denominator;
   const secondT = cross(offset, firstVector) / denominator;
-  return firstT > epsilon && firstT < 1 - epsilon && secondT > epsilon && secondT < 1 - epsilon;
+  // Inclusive endpoints matter: two sampled curves can cross exactly at a
+  // polyline vertex. The edge-pair loop already de-duplicates that contact.
+  if (firstT < -epsilon || firstT > 1 + epsilon || secondT < -epsilon || secondT > 1 + epsilon) return null;
+  return { firstT, secondT };
 }
 
 function sharesEndpoint(left, right) {
@@ -64,7 +67,13 @@ function curveIntersects(leftPath, rightPath, segments) {
   const rightPoints = approximateQuadratic(rightPath, segments);
   for (let left = 0; left < leftPoints.length - 1; left++) {
     for (let right = 0; right < rightPoints.length - 1; right++) {
-      if (properSegmentIntersection(leftPoints[left], leftPoints[left + 1], rightPoints[right], rightPoints[right + 1])) return true;
+      const intersection = segmentIntersection(leftPoints[left], leftPoints[left + 1], rightPoints[right], rightPoints[right + 1]);
+      if (!intersection) continue;
+      const atLeftCurveEndpoint = (left === 0 && intersection.firstT <= 1e-9)
+        || (left === leftPoints.length - 2 && intersection.firstT >= 1 - 1e-9);
+      const atRightCurveEndpoint = (right === 0 && intersection.secondT <= 1e-9)
+        || (right === rightPoints.length - 2 && intersection.secondT >= 1 - 1e-9);
+      if (!atLeftCurveEndpoint && !atRightCurveEndpoint) return true;
     }
   }
   return false;
