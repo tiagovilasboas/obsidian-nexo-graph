@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { MAX_EDGES, MAX_NODES, graphData, groupFor, positionNodes, searchMatches, searchSummary } = require('../src/graph-engine');
+const { GROUP_CENTERS, GROUP_RADIUS, MAX_EDGES, MAX_NODES, graphData, groupFor, positionNodes, searchMatches, searchSummary } = require('../src/graph-engine');
 
 const rules = [
   { name: 'Personal', prefix: 'pages/pessoal/' },
@@ -155,12 +155,20 @@ test('node positioning is deterministic for an unchanged graph', () => {
   assert.deepEqual(first.map(({ path, x, y }) => [path, x, y]), second.map(({ path, x, y }) => [path, x, y]));
 });
 
+test('Signal Field reserves a neutral center and four distinct domain anchors', () => {
+  assert.equal(GROUP_CENTERS.length, 5);
+  assert.deepEqual(GROUP_CENTERS[4], [600, 400]);
+  assert.equal(new Set(GROUP_CENTERS.slice(0, 4).map(center => center.join(':'))).size, 4);
+  assert.ok(GROUP_RADIUS < 170, 'domain fields must leave visual space around the Nexo core');
+});
+
 test('crowded group positions remain inside its documented radius', () => {
   const paths = Array.from({ length: MAX_NODES }, (_, index) => `pages/pessoal/note-${index}.md`);
   const nodes = graphData(app(paths), rules).nodes;
   positionNodes(nodes);
-  const maxRadius = Math.max(...nodes.map(node => Math.hypot(node.x - 330, node.y - 230)));
-  assert.ok(maxRadius <= 185, `group radius was ${maxRadius.toFixed(1)}`);
+  const [centerX, centerY] = GROUP_CENTERS[0];
+  const maxRadius = Math.max(...nodes.map(node => Math.hypot(node.x - centerX, node.y - centerY)));
+  assert.ok(maxRadius <= GROUP_RADIUS, `group radius was ${maxRadius.toFixed(1)}`);
 });
 
 test('documented maximum-size graph stays within a generous runtime budget', () => {

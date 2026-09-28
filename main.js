@@ -1,7 +1,10 @@
 const { ItemView, Menu, Plugin, PluginSettingTab, Setting } = require('obsidian');
 const MAX_NODES = 500;
 const MAX_EDGES = 1600;
-const GROUP_CENTERS = [[330, 230], [870, 230], [330, 585], [870, 585], [600, 400]];
+// Signal Field keeps the four configured domains around a neutral Nexo core.
+// The diamond gives a reader a stable centre of gravity without force-layout drift.
+const GROUP_CENTERS = [[600, 165], [930, 400], [600, 635], [270, 400], [600, 400]];
+const GROUP_RADIUS = 146;
 
 function groupFor(path, rules) {
   const normalized = path.toLowerCase();
@@ -157,7 +160,7 @@ function positionNodes(nodes) {
   for (const node of nodes) groups[node.group].push(node);
   for (const [groupIndex, group] of groups.entries()) {
     group.sort((a, b) => b.degree - a.degree || a.path.localeCompare(b.path));
-    const spacing = group.length <= 1 ? 13.5 : Math.min(13.5, 167 / Math.sqrt(group.length - 1));
+    const spacing = group.length <= 1 ? 13.5 : Math.min(13.5, (GROUP_RADIUS - 18) / Math.sqrt(group.length - 1));
     group.forEach((node, index) => {
       const radius = index === 0 ? 0 : 18 + spacing * Math.sqrt(index - 1);
       const angle = index * 2.399963229728653 + groupIndex * 0.6;
@@ -342,6 +345,7 @@ class NexoGraphView extends ItemView {
     svg.prepend(defs);
     const atmosphere = svgElement('g', { class: 'nexo-atmosphere' });
     viewport.appendChild(atmosphere);
+    const [coreX, coreY] = GROUP_CENTERS[4];
     GROUP_CENTERS.forEach(([x, y], index) => {
       const color = this.plugin.settings.groups[index]?.color || '#668b72';
       const gradient = svgElement('radialGradient', { id: `nexo-halo-${index}` });
@@ -351,14 +355,31 @@ class NexoGraphView extends ItemView {
       const arrow = svgElement('marker', { id: `nexo-arrow-${index}`, markerWidth: 7, markerHeight: 7, refX: 6, refY: 3.5, viewBox: '0 0 7 7', orient: 'auto', markerUnits: 'userSpaceOnUse' });
       arrow.appendChild(svgElement('path', { d: 'M 0 0 L 7 3.5 L 0 7 z', fill: color }));
       defs.appendChild(arrow);
-      atmosphere.appendChild(svgElement('circle', { cx: x, cy: y, r: index === 4 ? 180 : 260, fill: `url(#nexo-halo-${index})` }));
       if (index < 4) {
-        const caption = svgElement('text', { x, y: y - 195, 'text-anchor': 'middle', class: 'nexo-cluster-label' });
+        atmosphere.appendChild(svgElement('path', {
+          d: `M ${coreX} ${coreY} L ${x} ${y}`,
+          class: 'nexo-field-spoke',
+          'stroke': color
+        }));
+        atmosphere.appendChild(svgElement('circle', { cx: x, cy: y, r: GROUP_RADIUS + 24, class: 'nexo-field-outline', stroke: color }));
+        atmosphere.appendChild(svgElement('circle', { cx: x, cy: y, r: GROUP_RADIUS - 42, class: 'nexo-field-ring', stroke: color }));
+      }
+      atmosphere.appendChild(svgElement('circle', { cx: x, cy: y, r: index === 4 ? 156 : GROUP_RADIUS + 38, fill: `url(#nexo-halo-${index})` }));
+      if (index < 4) {
+        const caption = svgElement('text', { x, y: y - GROUP_RADIUS + 22, 'text-anchor': 'middle', class: 'nexo-cluster-label' });
         caption.style.fill = color;
         caption.textContent = this.plugin.settings.groups[index].name.toUpperCase();
         atmosphere.appendChild(caption);
       }
     });
+    const core = svgElement('g', { class: 'nexo-core', 'aria-hidden': 'true' });
+    core.appendChild(svgElement('circle', { cx: coreX, cy: coreY, r: 54, class: 'nexo-core-ring' }));
+    core.appendChild(svgElement('circle', { cx: coreX, cy: coreY, r: 26, class: 'nexo-core-ring is-inner' }));
+    core.appendChild(svgElement('path', { d: `M ${coreX} ${coreY - 16} L ${coreX + 16} ${coreY} L ${coreX} ${coreY + 16} L ${coreX - 16} ${coreY} Z`, class: 'nexo-core-mark' }));
+    const coreTitle = svgElement('text', { x: coreX, y: coreY + 78, 'text-anchor': 'middle', class: 'nexo-core-label' });
+    coreTitle.textContent = 'NEXO / SIGNAL FIELD';
+    core.appendChild(coreTitle);
+    atmosphere.appendChild(core);
     const edgeLayer = svgElement('g', { class: 'nexo-edges' });
     const nodeLayer = svgElement('g', { class: 'nexo-nodes' });
     viewport.append(edgeLayer, nodeLayer);

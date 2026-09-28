@@ -8,6 +8,8 @@
 
 [![Buy me a coffee](https://raw.githubusercontent.com/tiagovilasboas/tiagovilasboas/main/assets/buy-me-a-coffee.svg)](https://buymeacoffee.com/tiagovilasboas)
 
+![Synthetic preview of Nexo Signal Field](docs/signal-field-demo.svg)
+
 ## What it does
 
 - Opens a dedicated graph view from the ribbon or command palette.
@@ -18,6 +20,10 @@
 - Highlights a note's neighbors on hover/focus, shows link direction, and offers a context-menu action to open a note.
 - Keyboard users can open that context menu with **Shift+F10** or the Context Menu key while a note is focused; reciprocal links share one edge with arrows at both ends.
 - Keeps group settings in the vault's plugin data and updates when links or files change.
+
+## Signal Field
+
+Signal Field is Nexo Graph's visual language: four folder domains orbit a neutral Nexo core, with quiet contours and curved links that make cross-domain relationships readable before every label is visible. The layout is deterministic, so a note stays in the same territory between renders. The preview above uses invented fixture data only; it contains no vault content.
 
 The graph uses a deterministic layout that adapts each group's radius to its note count. For large vaults, it shows up to 500 notes: within each folder group, notes are ranked by link count and selected in round-robin passes so a large group cannot hide smaller groups. It shows up to 1,600 links, selected in passes across observed group pairs; cross-group links come first, then endpoint link count and path order break ties. The footer reports when either cap applies. In graphs with 80 or more visible notes, labels are limited to the four highest-degree notes per group; search matches and the focused note reveal their labels on demand. Zoom and pan remain available to inspect crowded groups. It does not modify notes, Obsidian's native Graph settings, or `.obsidian/graph.json`.
 
