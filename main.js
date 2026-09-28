@@ -1,6 +1,7 @@
 const { ItemView, Menu, Plugin, PluginSettingTab, Setting } = require('obsidian');
 const MAX_NODES = 500;
 const MAX_EDGES = 1600;
+const LABEL_ALL_THRESHOLD = 32;
 // Active domains orbit a stable, neutral core. Coordinates are recomputed
 // deterministically so empty configured groups do not reserve visual space.
 const CORE_CENTER = [600, 400];
@@ -29,6 +30,14 @@ function searchSummary(nodes, query) {
   if (!normalized) return `${nodes.length} searchable ${nodes.length === 1 ? 'note' : 'notes'}`;
   if (!matches.length) return `No notes match “${normalized}”`;
   return `${matches.length} matching ${matches.length === 1 ? 'note' : 'notes'}`;
+}
+
+function shouldShowAllLabels(nodeCount) {
+  return nodeCount < LABEL_ALL_THRESHOLD;
+}
+
+function visibleLegendGroups(groups, counts) {
+  return groups.filter((_, index) => (counts[index] || 0) > 0);
 }
 
 function handleNodeKey(event, actions) {
@@ -575,7 +584,7 @@ class NexoGraphView extends ItemView {
         element.classList.toggle('is-neighbor', Boolean(this.emphasisPath && node.path !== this.emphasisPath && related.has(node.path)));
         element.classList.toggle('is-selected', this.selectedPath === node.path);
         element.classList.toggle('is-dimmed', !matchesQuery || !matchesNeighborhood);
-        element.classList.toggle('is-labeled', nodes.length < 80 || labels.visible.has(node.path) || queryMatches || this.emphasisPath === node.path);
+        element.classList.toggle('is-labeled', shouldShowAllLabels(nodes.length) || labels.visible.has(node.path) || queryMatches || this.emphasisPath === node.path);
         element.setAttribute('aria-pressed', String(this.selectedPath === node.path));
       }
       for (const [source, target, edge] of edgeElements) {
@@ -686,16 +695,15 @@ class NexoGraphView extends ItemView {
     if (inScope > MAX_NODES) limits.push(`Showing ${MAX_NODES} notes in rounds across folder groups, ranked by connections within each group`);
     if (linksInScope > edges.length) limits.push(`Showing ${MAX_EDGES} links in rounds across folder-group pairs, ranked by endpoint connections`);
     this.footerLimit.textContent = limits.join('. ') + (limits.length ? '. Filter groups or use Local mode to narrow the graph.' : '');
-    if (!this.legendEl) {
-      const legend = footer.createDiv({ cls: 'nexo-legend' });
-      this.legendEl = legend;
-      this.plugin.settings.groups.forEach(rule => {
-        const item = legend.createSpan();
-        item.style.setProperty('--nexo-node-color', rule.color);
-        item.createSpan({ cls: 'nexo-dot' });
-        item.createSpan({ text: rule.name });
-      });
-    }
+    if (!this.legendEl) this.legendEl = footer.createDiv({ cls: 'nexo-legend' });
+    this.legendEl.empty();
+    const legendGroups = visibleLegendGroups([...this.plugin.settings.groups, { name: 'Other', color: '#668b72' }], groupCounts);
+    legendGroups.forEach(rule => {
+      const item = this.legendEl.createSpan();
+      item.style.setProperty('--nexo-node-color', rule.color || '#668b72');
+      item.createSpan({ cls: 'nexo-dot' });
+      item.createSpan({ text: rule.name });
+    });
   }
 }
 

@@ -1,5 +1,6 @@
 const MAX_NODES = 500;
 const MAX_EDGES = 1600;
+const LABEL_ALL_THRESHOLD = 32;
 // Active domains orbit a stable, neutral core. Coordinates are recomputed
 // deterministically so empty configured groups do not reserve visual space.
 const CORE_CENTER = [600, 400];
@@ -28,6 +29,14 @@ function searchSummary(nodes, query) {
   if (!normalized) return `${nodes.length} searchable ${nodes.length === 1 ? 'note' : 'notes'}`;
   if (!matches.length) return `No notes match “${normalized}”`;
   return `${matches.length} matching ${matches.length === 1 ? 'note' : 'notes'}`;
+}
+
+function shouldShowAllLabels(nodeCount) {
+  return nodeCount < LABEL_ALL_THRESHOLD;
+}
+
+function visibleLegendGroups(groups, counts) {
+  return groups.filter((_, index) => (counts[index] || 0) > 0);
 }
 
 function handleNodeKey(event, actions) {
@@ -306,4 +315,4 @@ function edgeRoute(source, target) {
   return { crossDomain: true, d: `M ${source.x} ${source.y} Q ${controlX} ${controlY} ${target.x} ${target.y}` };
 }
 
-module.exports = { CORE_CENTER, CORE_EXCLUSION_RADIUS, DOMAIN_ORBIT_RADIUS, GROUP_RADIUS, MAX_EDGES, MAX_NODES, activeGroupCenters, edgeRoute, graphData, groupFor, handleNodeKey, labelPlan, positionNodes, searchMatches, searchSummary, selectNodesByGroup, selectRepresentativeEdges };
+module.exports = { CORE_CENTER, CORE_EXCLUSION_RADIUS, DOMAIN_ORBIT_RADIUS, GROUP_RADIUS, MAX_EDGES, MAX_NODES, activeGroupCenters, edgeRoute, graphData, groupFor, handleNodeKey, labelPlan, positionNodes, searchMatches, searchSummary, selectNodesByGroup, selectRepresentativeEdges, shouldShowAllLabels, visibleLegendGroups };
