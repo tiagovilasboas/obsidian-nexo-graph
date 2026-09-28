@@ -42,6 +42,10 @@ Change each group's name, one or more comma-separated prefixes and color, and se
 
 Use the group toggles above the graph to focus on selected areas. Search matches notes in the current graph scope and announces the match count, including when no notes match. Open Nexo Graph while viewing a note, then choose **Local** and a hop depth to explore its neighborhood.
 
+### Accessibility
+
+Search, zoom controls, Local mode, hop depth, and group filters keep visible keyboard focus. Checked and unchecked filters preserve at least 4.5:1 text contrast against their panel. Focused nodes expose the same neighbor context as hover; **Enter**, **Space**, **Escape**, **Shift+F10**, and the Context Menu key cover the node actions described above. The Signal Field has no continuous animation, and node transitions are disabled when the operating system requests reduced motion. Manual keyboard and screen-reader review in Obsidian remains part of release QA.
+
 ## Install
 
 1. Download `manifest.json`, `main.js`, and `styles.css` from the [latest release](../../releases/latest).
