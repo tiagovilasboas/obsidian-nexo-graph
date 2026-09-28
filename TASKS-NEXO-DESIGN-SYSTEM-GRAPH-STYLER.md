@@ -18,26 +18,26 @@ Cada incremento precisa de um **guia** (documentação, comportamento esperado o
 - [x] CI para sintaxe, bundle, testes da engine e contrato do manifesto.
 - [ ] Testes de integração DOM/API Obsidian para teclado, foco, menu contextual, eventos e persistência.
 - [ ] Métricas automatizadas de colisões/legibilidade em grafo denso e baseline visual sintético.
-- [ ] Centros/halos adaptados ao conjunto de grupos ativos; a geometria atual reserva quatro setores mesmo quando vazios.
-- [ ] Nome dos grupos configurável pela UI; hoje nomes vêm dos grupos padrão e a UI expõe prefixos e cores.
+- [x] Centros/halos adaptados ao conjunto de grupos ativos por teste determinístico; falta revisão visual em Obsidian.
+- [x] Nome dos quatro grupos configurável pela UI; cobertura de persistência por UI/API ainda pendente.
 - [ ] Instalação limpa/release verificada visualmente no Obsidian para a versão atual.
 
 ## Próximas tarefas
 
-### NEXO-001 — Grupos nomeáveis e configuração robusta — P0
+### NEXO-001 — Grupos nomeáveis e configuração robusta — P0 · parcial
 
 - **Guia:** UI explica nome, prefixos, cor, precedência de prefixo e grupo `Other`; exemplos incluem `Rules`, `Agents` e `Architecture`.
-- **Sensor computacional:** testes cobrem migração de configuração legada, nomes/prefixos personalizados, grupos vazios e persistência em `saveData/loadData`.
+- **Sensor computacional:** engine cobre prefixos personalizados e grupos vazios; teste de persistência UI/API para nomes ainda pendente.
 - **Classificação:** comportamento e architecture fitness; guia computacional/documental + sensor computacional.
-- **Aceite:** grupos podem ser renomeados por vault sem perder settings legados e atualizam filtros, legenda, core view e classificação.
+- **Entregue:** nome por vault editável; filtros, legenda e rótulo do campo refletem a configuração ao salvar. Compatibilidade de persistência ainda depende de smoke test real.
 
-### NEXO-002 — Signal Field adaptativo a grupos com conteúdo — P0
+### NEXO-002 — Signal Field adaptativo a grupos com conteúdo — P0 · implementação entregue; QA visual pendente
 
 - **Guia:** contrato de layout descreve distribuição determinística dos domínios ativos e posição estável do core.
 - **Sensor computacional:** fixtures de 1, 2, 3 e 4 grupos ativos garantem determinismo, distâncias mínimas e ausência de halo/rótulo vazio.
-- **Sensor inferencial:** revisão no Obsidian com vault sintético pequeno e médio confirma hierarquia e espaço útil.
+- **Sensor inferencial:** revisão no Obsidian com vault sintético pequeno e médio confirma hierarquia e espaço útil; ainda pendente.
 - **Classificação:** behaviour e architecture fitness; guia inferencial/documental + sensores computacional e inferencial.
-- **Aceite:** grupos vazios não reservam espaço dominante; o layout continua estável entre renders e não encobre o core.
+- **Aceite computacional:** grupos vazios não recebem centro/halo/rótulo, centros repetem entre renders, e notas `Other` ficam fora do miolo central; testes entregues. Visual de Obsidian ainda precisa validação.
 
 ### NEXO-003 — Contrato de acessibilidade e movimento — P0
 

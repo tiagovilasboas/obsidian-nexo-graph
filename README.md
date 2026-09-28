@@ -37,7 +37,7 @@ The graph uses a deterministic layout that adapts each group's radius to its not
 | Operations | `pages/ops/` | Lime `#b8ff5a` |
 | Meta | `pages/meta/` | Aqua `#00e5a0` |
 
-Change one or more comma-separated prefixes and colors, and set ignored paths, in **Settings → Community plugins → Nexo Graph**. A folder prefix classifies and colors notes; it does not create graph edges. Connections come from Obsidian's resolved Markdown links, such as `[[checkout]]`. Nexo Graph works without the Nexo theme, though the two share a palette.
+Change each group's name, one or more comma-separated prefixes and color, and set ignored paths in **Settings → Community plugins → Nexo Graph**. Only groups with matching notes occupy a labeled Signal Field domain; unmatched notes stay neutral near the core. A folder prefix classifies and colors notes; it does not create graph edges. Connections come from Obsidian's resolved Markdown links, such as `[[checkout]]`. Nexo Graph works without the Nexo theme, though the two share a palette.
 
 Use the group toggles above the graph to focus on selected areas. Search matches notes in the current graph scope and announces the match count, including when no notes match. Open Nexo Graph while viewing a note, then choose **Local** and a hop depth to explore its neighborhood.
 

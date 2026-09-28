@@ -5,7 +5,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 const source = readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');
 const engine = readFileSync(new URL('../src/graph-engine.js', import.meta.url), 'utf8')
   .replace(/\nmodule\.exports = \{[^\n]+\};?\s*$/, '\n');
-const engineImport = "const { CORE_EXCLUSION_RADIUS, GROUP_CENTERS, GROUP_RADIUS, LABEL_CLEARANCE, MAX_NODES, edgeRoute, graphData, positionNodes, searchMatches, searchSummary } = require('./graph-engine');";
+const engineImport = "const { CORE_CENTER, CORE_EXCLUSION_RADIUS, GROUP_RADIUS, LABEL_CLEARANCE, MAX_NODES, edgeRoute, graphData, positionNodes, searchMatches, searchSummary } = require('./graph-engine');";
 
 if (!source.includes(engineImport)) {
   throw new Error('Expected graph-engine import was not found in src/main.js');

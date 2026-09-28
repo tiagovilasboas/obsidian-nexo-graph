@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { CORE_EXCLUSION_RADIUS, GROUP_CENTERS, GROUP_RADIUS, LABEL_CLEARANCE, MAX_EDGES, MAX_NODES, edgeRoute, graphData, groupFor, positionNodes, searchMatches, searchSummary } = require('../src/graph-engine');
+const { CORE_CENTER, CORE_EXCLUSION_RADIUS, DOMAIN_ORBIT_RADIUS, GROUP_RADIUS, LABEL_CLEARANCE, MAX_EDGES, MAX_NODES, activeGroupCenters, edgeRoute, graphData, groupFor, positionNodes, searchMatches, searchSummary } = require('../src/graph-engine');
 
 const rules = [
   { name: 'Personal', prefix: 'pages/pessoal/' },
@@ -205,12 +205,37 @@ test('node positioning is deterministic for an unchanged graph', () => {
   assert.deepEqual(first.map(({ path, x, y }) => [path, x, y]), second.map(({ path, x, y }) => [path, x, y]));
 });
 
-test('neural constellation reserves a neutral center and four distinct domain anchors', () => {
-  assert.equal(GROUP_CENTERS.length, 5);
-  assert.deepEqual(GROUP_CENTERS[4], [600, 400]);
-  assert.equal(new Set(GROUP_CENTERS.slice(0, 4).map(center => center.join(':'))).size, 4);
-  assert.equal(new Set(GROUP_CENTERS.slice(0, 4).map(([x, y]) => `${x < 600 ? 'left' : 'right'}:${y < 400 ? 'top' : 'bottom'}`)).size, 4);
+test('active domains adapt around a fixed neutral core without reserving empty sectors', () => {
+  assert.deepEqual(CORE_CENTER, [600, 400]);
+  assert.equal(activeGroupCenters([]).size, 0);
+  const one = activeGroupCenters([2]);
+  assert.deepEqual([...one.keys()], [2]);
+  assert.deepEqual(one.get(2), [CORE_CENTER[0] + DOMAIN_ORBIT_RADIUS, CORE_CENTER[1]]);
+
+  const two = activeGroupCenters([0, 3]);
+  assert.equal(two.size, 2);
+  assert.ok(two.get(0)[0] > CORE_CENTER[0] && two.get(3)[0] < CORE_CENTER[0]);
+  assert.equal(two.get(0)[1], CORE_CENTER[1]);
+
+  const three = activeGroupCenters([0, 1, 2]);
+  assert.equal(three.size, 3);
+  assert.equal(new Set([...three.values()].map(center => center.map(Math.round).join(':'))).size, 3);
+
+  const four = activeGroupCenters([3, 1, 0, 2]);
+  assert.equal(four.size, 4);
+  assert.deepEqual([...four.keys()], [0, 1, 2, 3]);
+  assert.equal(new Set([...four.values()].map(center => center.map(Math.round).join(':'))).size, 4);
+  assert.deepEqual([...four], [...activeGroupCenters([0, 1, 2, 3])]);
+  const customNames = [{ name: 'Rules', prefixes: ['rules/'] }, { name: 'Agents', prefixes: ['agents/'] }];
+  assert.equal(groupFor('rules/review.md', customNames), 0, 'renaming a group must not change prefix classification');
+  assert.equal(groupFor('agents/code-review.md', customNames), 1);
   assert.ok(GROUP_RADIUS < 170, 'domain fields must leave visual space around the Nexo core');
+});
+
+test('unclassified notes remain on a neutral ring outside the central mark', () => {
+  const nodes = Array.from({ length: 12 }, (_, index) => ({ path: `inbox/${index}.md`, group: 4, degree: 0 }));
+  positionNodes(nodes);
+  assert.ok(nodes.every(node => Math.hypot(node.x - CORE_CENTER[0], node.y - CORE_CENTER[1]) >= CORE_EXCLUSION_RADIUS + 20));
 });
 
 test('neural mesh routes cross-domain links around the visible core', () => {
@@ -238,13 +263,16 @@ test('neural mesh routes cross-domain links around the visible core', () => {
   const local = edgeRoute(top, peer);
   assert.equal(local.crossDomain, false);
   assert.match(local.d, /^M 600 165 Q /);
+
+  const other = edgeRoute({ path: 'inbox/loose.md', group: 4, x: 700, y: 430 }, top);
+  assert.equal(other.crossDomain, true);
 });
 
 test('crowded group positions remain inside its documented radius', () => {
   const paths = Array.from({ length: MAX_NODES }, (_, index) => `pages/pessoal/note-${index}.md`);
   const nodes = graphData(app(paths), rules).nodes;
   positionNodes(nodes);
-  const [centerX, centerY] = GROUP_CENTERS[0];
+  const [centerX, centerY] = activeGroupCenters([0]).get(0);
   const maxRadius = Math.max(...nodes.map(node => Math.hypot(node.x - centerX, node.y - centerY)));
   assert.ok(maxRadius <= GROUP_RADIUS, `group radius was ${maxRadius.toFixed(1)}`);
 });
