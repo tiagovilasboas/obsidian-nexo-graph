@@ -17,7 +17,7 @@ The engine places configured notes deterministically in sectors around the fixed
 ## Visual and interaction contract
 
 - Four configurable green hues identify folder groups; neutral notes and the central core remain separate from those categories.
-- Search, group filters, zoom, pan, local neighborhood depth, focused-note neighbors and contextual open are part of the current view. On a focused note, Enter opens it, Space toggles persistent selection, and Escape clears selection and search.
+- Search, group filters, zoom, pan, local neighborhood depth, focused-note neighbors and contextual open are part of the current view. The SVG is named as an interactive graph group so its keyboard-operable note buttons are not represented as a single image. On a focused note, Enter opens it, Space toggles persistent selection, and Escape clears selection and search.
 - Search and interaction reveal information on demand instead of labeling every node in a dense graph.
 - Cross-domain links remain visually distinct by route and stroke while staying quieter than within-domain links at rest.
 - Motion is limited to the Signal Field background and must honor `prefers-reduced-motion`.
@@ -31,7 +31,7 @@ Every graph change follows Harness Engineering's dual loop:
 | --- | --- | --- | --- |
 | Data and group semantics | This document and settings descriptions | Engine fixtures, Obsidian API stub checks, and manifest/CI checks | Computational; architecture fitness and behaviour |
 | Visual legibility | Density-aware labels from 32 notes, populated-only legend, reserved boxes for captions/core title, and cross-domain edges quieter at rest | Threshold/legend unit tests, estimated collisions with labels and reserved boxes, sampled quadratic-edge crossings on synthetic fixtures, CSS edge-hierarchy contract, plus Obsidian visual review | Computational and inferential; behaviour |
-| Keyboard and motion | Interaction contract, accessible control names, and unchecked filter labels at or above 4.5:1 contrast | Keyboard transition tests, API event/settings tests, reduced-motion and filter-contrast stylesheet checks, manual keyboard review | Computational and inferential; behaviour |
+| Keyboard and motion | Interaction contract, accessible control names, an interactive SVG group with note buttons, and unchecked filter labels at or above 4.5:1 contrast | Keyboard transition tests, API event/settings tests, fake-DOM SVG semantic checks, reduced-motion and filter-contrast stylesheet checks, manual keyboard review | Computational and inferential; behaviour |
 | Distribution | README and release checklist | Bundle, test, manifest, safe release-tag input, tag asset validation, clean install | Computational and inferential; maintainability |
 
 CI is a computacional sensor for syntax, bundle consistency, engine tests, manifest validity, and the deterministic synthetic crossing fixture. The crossing sensor approximates SVG quadratic curves with sampled segments, includes interior sampled-vertex contacts, and ignores actual curve endpoints; it can miss tangencies, overlaps, and small crossings between sample points, and may count near-tangencies as contacts. Its synthetic metrics do not establish that a rendered graph is visually attractive or legible. A CI pass does not replace rendered visual/accessibility review in Obsidian. Do not use private RAG note names or screenshots as public fixtures.
