@@ -4,6 +4,7 @@
   --nexo-ink: #d8f7df;
   --nexo-muted: #729680;
   --nexo-signal: #00ff41;
+  color-scheme: dark;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -47,10 +48,11 @@
 
 .nexo-search:focus { border-color: #00e5a0 !important; box-shadow: 0 0 0 2px #00e5a033 !important; }
 .nexo-controls { display: flex; gap: 5px; }
-.nexo-controls button { min-width: 29px; padding: 3px 7px; color: #8fffc2; background: #132019; border: 1px solid #28513a; border-radius: 8px; }
-.nexo-controls button:hover { color: #07090a; background: #00e5a0; }
+.nexo-controls button { min-width: 32px; min-height: 30px; padding: 3px 7px; color: #8fffc2; background: #132019; border: 1px solid #28513a; border-radius: 8px; }
+.nexo-controls button:hover:not(:disabled) { color: #07090a; background: #00e5a0; }
+.nexo-controls button[aria-pressed="true"] { color: #07100a; background: #b8ff5a; border-color: #e1ffb6; box-shadow: 0 0 0 1px #b8ff5a66, 0 0 10px #b8ff5a33; }
 .nexo-controls button:disabled { opacity: 0.45; cursor: not-allowed; }
-.nexo-controls select { max-width: 88px; padding: 3px 5px; color: #8fffc2; background: #132019; border: 1px solid #28513a; border-radius: 8px; font: 11px ui-monospace, monospace; }
+.nexo-controls select { max-width: 88px; min-height: 30px; padding: 3px 5px; color: #8fffc2; background: #132019; border: 1px solid #28513a; border-radius: 8px; font: 11px ui-monospace, monospace; }
 
 .nexo-filters {
   display: flex;
@@ -94,7 +96,7 @@
 .nexo-edges path.is-emphasized { stroke-width: 1.15; opacity: 0.42; }
 .nexo-edges path:not(.is-dimmed):hover { opacity: 0.52; }
 .nexo-node { color: var(--nexo-node-color); cursor: pointer; transition: opacity 120ms ease; }
-.nexo-node circle:not(.nexo-node-hit-area) { fill: currentColor; fill-opacity: 0.24; stroke: #07120b; stroke-width: 0.45; transition: fill-opacity 140ms ease, stroke 140ms ease, stroke-width 140ms ease, filter 140ms ease; }
+.nexo-node circle:not(.nexo-node-hit-area) { fill: currentColor; fill-opacity: 0.34; stroke: currentColor; stroke-width: 0.65; transition: fill-opacity 140ms ease, stroke 140ms ease, stroke-width 140ms ease, filter 140ms ease; }
 .nexo-node .nexo-node-hit-area { fill: transparent; stroke: none; pointer-events: all; }
 .nexo-node text { fill: #b9d7c2; font: 11px ui-monospace, monospace; pointer-events: none; paint-order: stroke; stroke: #07100a; stroke-width: 3px; stroke-linejoin: round; }
 .nexo-node-label { opacity: 0; transition: opacity 100ms ease; }
@@ -106,7 +108,7 @@
 .nexo-node.is-selected circle:not(.nexo-node-hit-area) { fill-opacity: 0.12; stroke: #fff; stroke-width: 1.2; filter: drop-shadow(0 0 3px currentColor); }
 .nexo-node.is-dimmed { opacity: 0.16; }
 .nexo-node:focus-visible { outline: none; }
-.nexo-node:focus-visible circle { stroke: #fff; stroke-width: 1.8; }
+.nexo-node:focus-visible circle { fill-opacity: 0.58; stroke: #fff; stroke-width: 1.8; filter: drop-shadow(0 0 4px #e1ffb6); }
 .nexo-node:focus-visible .nexo-node-hit-area { stroke: none; }
 .nexo-node.is-selected circle { fill-opacity: 0.12; stroke: #fff; stroke-width: 1.2; filter: drop-shadow(0 0 3px currentColor); }
 .nexo-node.is-selected .nexo-node-hit-area { fill: transparent; stroke: none; filter: none; }
@@ -145,5 +147,15 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .nexo-node, .nexo-node-label { transition: none; }
+  .nexo-node,
+  .nexo-node-label,
+  .nexo-node circle:not(.nexo-node-hit-area) { transition: none; }
+}
+
+@media (prefers-contrast: more) {
+  .nexo-edges path { opacity: 0.09; }
+  .nexo-node circle:not(.nexo-node-hit-area) { fill-opacity: 0.45; stroke-width: 0.9; }
+  .nexo-node.is-selected circle:not(.nexo-node-hit-area) { fill-opacity: 0.12; stroke-width: 1.5; }
+  .nexo-node:focus-visible circle:not(.nexo-node-hit-area) { fill-opacity: 0.58; stroke-width: 1.8; }
+  .nexo-node.is-dimmed { opacity: 0.28; }
 }
