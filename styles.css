@@ -93,7 +93,7 @@
 .nexo-core-neuron.is-secondary { fill: #07180d; }
 .nexo-core-label { fill: #91fdb8; font: 700 9px ui-monospace, monospace; letter-spacing: 0.18em; opacity: 0.86; pointer-events: none; }
 .nexo-edges path { fill: none; stroke: var(--nexo-edge-color, #28643c); stroke-width: 1.05; opacity: 0.32; pointer-events: none; }
-.nexo-edges path.is-cross-domain { stroke-width: 1.1; opacity: 0.4; }
+.nexo-edges path.is-cross-domain { stroke-width: 1.1; opacity: 0.28; }
 .nexo-edges path.is-cross-domain.is-dimmed { opacity: 0.05; }
 .nexo-edges path.is-dimmed { opacity: 0.05; }
 .nexo-edges path:not(.is-dimmed):hover { opacity: 0.9; }

@@ -33,6 +33,12 @@ function filterStateContrast(css) {
   return contrast(blend(rgb(text), rgb(background), opacity), rgb(background));
 }
 
+function ruleOpacity(css, selector) {
+  const escapedSelector = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const opacity = Number(css.match(new RegExp(`${escapedSelector}\\s*\\{[^}]*\\bopacity\\s*:\\s*([\\d.]+)`, 'i'))?.[1]);
+  return Number.isFinite(opacity) && opacity >= 0 && opacity <= 1 ? opacity : null;
+}
+
 export function checkCssContract(css) {
   const failures = [];
 
@@ -61,6 +67,19 @@ if (spokeRule && spokeRule[1].trim().toLowerCase() !== 'none') {
   const inactiveFilterContrast = filterStateContrast(css);
   if (inactiveFilterContrast === null || inactiveFilterContrast < 4.5) {
     failures.push('Unchecked group-filter text must maintain at least 4.5:1 contrast against its filter background.');
+  }
+  const localEdgeOpacity = ruleOpacity(css, '.nexo-edges path');
+  const crossDomainEdgeOpacity = ruleOpacity(css, '.nexo-edges path.is-cross-domain');
+  const dimmedEdgeOpacity = ruleOpacity(css, '.nexo-edges path.is-dimmed');
+  if (localEdgeOpacity === null || crossDomainEdgeOpacity === null || dimmedEdgeOpacity === null) {
+    failures.push('Graph edge hierarchy must declare valid local, cross-domain, and dimmed opacity values.');
+  } else {
+    if (crossDomainEdgeOpacity > localEdgeOpacity) {
+      failures.push('Cross-domain graph edges must not be more prominent than local edges at rest.');
+    }
+    if (dimmedEdgeOpacity >= Math.min(localEdgeOpacity, crossDomainEdgeOpacity)) {
+      failures.push('Dimmed graph edges must remain quieter than graph edges at rest.');
+    }
   }
   return failures;
 }
