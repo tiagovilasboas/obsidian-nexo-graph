@@ -16,6 +16,7 @@ Cada incremento precisa de um **guia** (documentação, comportamento esperado o
 - [x] Limites de 500 nós e 1.600 links com amostragem determinística.
 - [x] Signal Field com core neutro, quatro domínios, curvas cross-domain e rótulos limitados em grafos densos.
 - [x] CI para sintaxe, bundle, testes da engine e contrato do manifesto.
+- [x] Transições de teclado dos nós testadas (Enter abre, Space seleciona/desselciona, Escape limpa, Shift+F10/menu abre).
 - [ ] Testes de integração DOM/API Obsidian para teclado, foco, menu contextual, eventos e persistência.
 - [ ] Métricas automatizadas de colisões/legibilidade em grafo denso e baseline visual sintético.
 - [x] Centros/halos adaptados ao conjunto de grupos ativos por teste determinístico; falta revisão visual em Obsidian.
@@ -50,9 +51,9 @@ Cada incremento precisa de um **guia** (documentação, comportamento esperado o
 ### NEXO-004 — Testes de integração da view — P0
 
 - **Guia:** README registra Enter, Space, Escape, Shift+F10, Local mode e atualização de conteúdo.
-- **Sensor computacional:** harness mínimo de DOM + API Obsidian testa eventos, debounce, teclas, persistência e menu sem dependência de runtime privado.
+- **Sensor computacional:** contrato puro de transição de teclas passou; harness DOM + API Obsidian para renderização, eventos, debounce e persistência ainda pendente.
 - **Classificação:** maintainability e behaviour; guia documental + sensor computacional.
-- **Aceite:** fluxos da view têm regressão automatizada e continuam usando apenas a API pública documentada.
+- **Entregue parcialmente:** Enter/Space/Escape/ContextMenu/Shift+F10 cobertos por sensor computacional e fluxo atualizado no guia. Integração DOM/API e persistência ainda pendentes.
 
 ### NEXO-005 — Legibilidade e desempenho em grafos densos — P1
 

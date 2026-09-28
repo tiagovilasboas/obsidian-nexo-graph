@@ -17,7 +17,7 @@ The engine places configured notes deterministically in sectors around the fixed
 ## Visual and interaction contract
 
 - Four configurable green hues identify folder groups; neutral notes and the central core remain separate from those categories.
-- Search, group filters, zoom, pan, local neighborhood depth, focused-note neighbors and contextual open are part of the current view.
+- Search, group filters, zoom, pan, local neighborhood depth, focused-note neighbors and contextual open are part of the current view. On a focused note, Enter opens it, Space toggles persistent selection, and Escape clears selection and search.
 - Search and interaction reveal information on demand instead of labeling every node in a dense graph.
 - Cross-domain links remain visually distinct from quieter within-domain links.
 - Motion is limited to the Signal Field background and must honor `prefers-reduced-motion`.
@@ -31,7 +31,7 @@ Every graph change follows Harness Engineering's dual loop:
 | --- | --- | --- | --- |
 | Data and group semantics | This document and settings descriptions | Engine fixtures and manifest/CI checks | Computational; architecture fitness and behaviour |
 | Visual legibility | Density, label, and color contract | Synthetic geometry tests plus Obsidian visual review | Computational and inferential; behaviour |
-| Keyboard and motion | Interaction contract and accessible control names | DOM/API tests, reduced-motion stylesheet check, manual keyboard review | Computational and inferential; behaviour |
+| Keyboard and motion | Interaction contract and accessible control names | Keyboard transition tests, reduced-motion stylesheet check, manual keyboard review | Computational and inferential; behaviour |
 | Distribution | README and release checklist | Bundle, test, manifest, tag asset validation, clean install | Computational and inferential; maintainability |
 
 CI is a computacional sensor for syntax, bundle consistency, engine tests, and manifest validity. A CI pass does not replace rendered visual/accessibility review in Obsidian. Do not use private RAG note names or screenshots as public fixtures.
