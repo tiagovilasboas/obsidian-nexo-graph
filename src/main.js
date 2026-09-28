@@ -1,5 +1,5 @@
 const { ItemView, Menu, Plugin, PluginSettingTab, Setting } = require('obsidian');
-const { GROUP_CENTERS, MAX_NODES, graphData, positionNodes } = require('./graph-engine');
+const { GROUP_CENTERS, MAX_NODES, graphData, positionNodes, searchMatches, searchSummary } = require('./graph-engine');
 
 const VIEW_TYPE = 'nexo-graph-view';
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -80,6 +80,7 @@ class NexoGraphView extends ItemView {
     this.footerEl = null;
     this.footerSummary = null;
     this.footerLimit = null;
+    this.searchStatus = null;
     this.legendEl = null;
     root.addClass('nexo-graph');
     const toolbar = root.createDiv({ cls: 'nexo-toolbar' });
@@ -226,6 +227,7 @@ class NexoGraphView extends ItemView {
     const nodeElements = [];
     const updateEmphasis = () => {
       const query = search.value.trim().toLowerCase();
+      const matchingPaths = new Set(searchMatches(nodes, query).map(node => node.path));
       const related = new Set(this.emphasisPath ? [this.emphasisPath] : []);
       if (this.emphasisPath) {
         for (const [source, target] of edgeElements) {
@@ -234,7 +236,7 @@ class NexoGraphView extends ItemView {
         }
       }
       for (const [node, element] of nodeElements) {
-        const queryMatches = Boolean(query && (node.name.toLowerCase().includes(query) || node.path.toLowerCase().includes(query)));
+        const queryMatches = Boolean(query && matchingPaths.has(node.path));
         const matchesQuery = !query || queryMatches;
         const matchesNeighborhood = !this.emphasisPath || related.has(node.path);
         element.classList.toggle('is-match', Boolean(query && matchesQuery));
@@ -246,6 +248,7 @@ class NexoGraphView extends ItemView {
         const incident = !this.emphasisPath || source === this.emphasisPath || target === this.emphasisPath;
         edge.classList.toggle('is-dimmed', !incident);
       }
+      if (this.searchStatus) this.searchStatus.textContent = searchSummary(nodes, query);
     };
     this.updateGraphEmphasis = updateEmphasis;
     for (const node of nodes) {
@@ -317,6 +320,8 @@ class NexoGraphView extends ItemView {
     this.footerEl = footer;
     if (!this.footerSummary) this.footerSummary = footer.createSpan();
     if (!this.footerLimit) this.footerLimit = footer.createSpan();
+    if (!this.searchStatus) this.searchStatus = footer.createSpan({ cls: 'nexo-search-status', attr: { role: 'status', 'aria-live': 'polite' } });
+    this.searchStatus.textContent = searchSummary(nodes, search.value);
     const scopeLabel = this.localMode ? `within ${this.anchorPath.split('/').pop() || 'local graph'}` : 'in vault';
     this.footerSummary.textContent = `${nodes.length.toLocaleString()} shown · ${inScope.toLocaleString()} ${scopeLabel} · ${edges.length.toLocaleString()} links`;
     const limits = [];

@@ -13,7 +13,7 @@
 - Opens a dedicated graph view from the ribbon or command palette.
 - Reads Markdown files and resolved links through Obsidian's public plugin API.
 - Places notes in four visual groups based on folder prefixes; unmatched notes form a neutral center.
-- Supports search highlighting, zoom, drag to pan, and click or keyboard activation to open a note.
+- Supports case-insensitive search highlighting by note name or path, with a live match count and an explicit no-match message, plus zoom and drag to pan.
 - Filters groups and can focus on notes connected to the last active note at one, two, or three link hops.
 - Highlights a note's neighbors on hover/focus, shows link direction, and offers a context-menu action to open a note.
 - Keyboard users can open that context menu with **Shift+F10** or the Context Menu key while a note is focused; reciprocal links share one edge with arrows at both ends.
@@ -32,7 +32,7 @@ The graph uses a deterministic layout that adapts each group's radius to its not
 
 Change prefixes and colors in **Settings → Community plugins → Nexo Graph**. Nexo Graph works without the Nexo theme, though the two share a palette.
 
-Use the group toggles above the graph to focus on selected areas. Open Nexo Graph while viewing a note, then choose **Local** and a hop depth to explore its neighborhood.
+Use the group toggles above the graph to focus on selected areas. Search matches notes in the current graph scope and announces the match count, including when no notes match. Open Nexo Graph while viewing a note, then choose **Local** and a hop depth to explore its neighborhood.
 
 ## Install
 

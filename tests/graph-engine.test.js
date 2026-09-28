@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { MAX_EDGES, MAX_NODES, graphData, groupFor, positionNodes } = require('../src/graph-engine');
+const { MAX_EDGES, MAX_NODES, graphData, groupFor, positionNodes, searchMatches, searchSummary } = require('../src/graph-engine');
 
 const rules = [
   { name: 'Personal', prefix: 'pages/pessoal/' },
@@ -67,6 +67,30 @@ test('group filters limit the graph without changing group classification', () =
 
   assert.deepEqual(data.nodes.map(node => [node.path, node.group]), [['pages/carreira/cv.md', 1]]);
   assert.equal(data.inScope, 1);
+});
+
+test('search matches note names and paths case-insensitively after trimming input', () => {
+  const nodes = [
+    { name: 'Checkout', path: 'pages/ops/checkout.md' },
+    { name: 'Billing', path: 'pages/carreira/billing.md' }
+  ];
+
+  assert.deepEqual(searchMatches(nodes, '  CHECK  '), [nodes[0]]);
+  assert.deepEqual(searchMatches(nodes, 'CARREIRA'), [nodes[1]]);
+  assert.deepEqual(searchMatches(nodes, 'missing'), []);
+  assert.equal(searchMatches(nodes, '  '), nodes);
+});
+
+test('search status announces visible counts and a clear no-match state', () => {
+  const nodes = [
+    { name: 'Checkout', path: 'pages/ops/checkout.md' },
+    { name: 'Billing', path: 'pages/carreira/billing.md' }
+  ];
+
+  assert.equal(searchSummary(nodes, ''), '2 searchable notes');
+  assert.equal(searchSummary(nodes, ' checkout '), '1 matching note');
+  assert.equal(searchSummary(nodes, 'unknown'), 'No notes match “unknown”');
+  assert.equal(searchSummary([], ''), '0 searchable notes');
 });
 
 test('node and edge limits select a deterministic result', () => {
