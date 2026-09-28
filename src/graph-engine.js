@@ -31,6 +31,30 @@ function searchSummary(nodes, query) {
   return `${matches.length} matching ${matches.length === 1 ? 'note' : 'notes'}`;
 }
 
+function handleNodeKey(event, actions) {
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    actions.open();
+    return true;
+  }
+  if (event.key === ' ') {
+    event.preventDefault();
+    actions.toggleSelection();
+    return true;
+  }
+  if (event.key === 'Escape') {
+    event.preventDefault();
+    actions.clearSelection();
+    return true;
+  }
+  if (event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')) {
+    event.preventDefault();
+    actions.showContextMenu();
+    return true;
+  }
+  return false;
+}
+
 function activeGroupCenters(groupIndexes) {
   const groups = [...new Set(groupIndexes.filter(index => Number.isInteger(index) && index >= 0 && index < 4))].sort((a, b) => a - b);
   const centers = new Map();
@@ -238,4 +262,4 @@ function edgeRoute(source, target) {
   return { crossDomain: true, d: `M ${source.x} ${source.y} Q ${controlX} ${controlY} ${target.x} ${target.y}` };
 }
 
-module.exports = { CORE_CENTER, CORE_EXCLUSION_RADIUS, DOMAIN_ORBIT_RADIUS, GROUP_RADIUS, LABEL_CLEARANCE, MAX_EDGES, MAX_NODES, activeGroupCenters, edgeRoute, graphData, groupFor, positionNodes, searchMatches, searchSummary, selectNodesByGroup, selectRepresentativeEdges };
+module.exports = { CORE_CENTER, CORE_EXCLUSION_RADIUS, DOMAIN_ORBIT_RADIUS, GROUP_RADIUS, LABEL_CLEARANCE, MAX_EDGES, MAX_NODES, activeGroupCenters, edgeRoute, graphData, groupFor, handleNodeKey, positionNodes, searchMatches, searchSummary, selectNodesByGroup, selectRepresentativeEdges };

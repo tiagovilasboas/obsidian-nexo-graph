@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Separate node keyboard actions: Enter opens, Space toggles persistent neighbor selection, Escape clears search/selection, and the context-menu shortcut remains available.
+- Keep keyboard selections visually and accessibly exposed after focus moves.
 - Let vault owners name the four configurable graph groups, with the names reflected in filters, legend, and populated Signal Field domains.
 - Place only populated configured groups around the neutral core; keep unclassified notes neutral outside the central mark.
 - Keep Signal Field placement deterministic and route cross-domain links around the core as active group geometry changes.

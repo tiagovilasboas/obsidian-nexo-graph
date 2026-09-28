@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { CORE_CENTER, CORE_EXCLUSION_RADIUS, DOMAIN_ORBIT_RADIUS, GROUP_RADIUS, LABEL_CLEARANCE, MAX_EDGES, MAX_NODES, activeGroupCenters, edgeRoute, graphData, groupFor, positionNodes, searchMatches, searchSummary } = require('../src/graph-engine');
+const { CORE_CENTER, CORE_EXCLUSION_RADIUS, DOMAIN_ORBIT_RADIUS, GROUP_RADIUS, LABEL_CLEARANCE, MAX_EDGES, MAX_NODES, activeGroupCenters, edgeRoute, graphData, groupFor, handleNodeKey, positionNodes, searchMatches, searchSummary } = require('../src/graph-engine');
 
 const rules = [
   { name: 'Personal', prefix: 'pages/pessoal/' },
@@ -141,6 +141,33 @@ test('search status announces visible counts and a clear no-match state', () => 
   assert.equal(searchSummary(nodes, ' checkout '), '1 matching note');
   assert.equal(searchSummary(nodes, 'unknown'), 'No notes match “unknown”');
   assert.equal(searchSummary([], ''), '0 searchable notes');
+});
+
+test('graph node keyboard contract separates open, selection, clear, and context actions', () => {
+  const calls = [];
+  const actions = {
+    open: () => calls.push('open'),
+    toggleSelection: () => calls.push('toggle'),
+    clearSelection: () => calls.push('clear'),
+    showContextMenu: () => calls.push('context')
+  };
+  const event = (key, shiftKey = false) => ({ key, shiftKey, prevented: false, preventDefault() { this.prevented = true; } });
+
+  for (const [key, expected] of [['Enter', 'open'], [' ', 'toggle'], ['Escape', 'clear'], ['ContextMenu', 'context']]) {
+    const input = event(key);
+    assert.equal(handleNodeKey(input, actions), true);
+    assert.deepEqual(calls.pop(), expected);
+    assert.equal(input.prevented, true);
+  }
+  const shiftF10 = event('F10', true);
+  assert.equal(handleNodeKey(shiftF10, actions), true);
+  assert.equal(calls.pop(), 'context');
+  assert.equal(shiftF10.prevented, true);
+
+  const unrelated = event('ArrowRight');
+  assert.equal(handleNodeKey(unrelated, actions), false);
+  assert.equal(unrelated.prevented, false);
+  assert.deepEqual(calls, []);
 });
 
 test('node and edge limits select a deterministic result', () => {

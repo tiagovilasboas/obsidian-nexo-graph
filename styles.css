@@ -105,6 +105,7 @@
 .nexo-node:hover circle, .nexo-node:focus circle, .nexo-node.is-match circle { stroke: #e1ffb6; stroke-width: 2.5; filter: drop-shadow(0 0 12px currentColor); }
 .nexo-node:hover text, .nexo-node:focus text, .nexo-node.is-match text { fill: #f0fff3; font-weight: 700; }
 .nexo-node.is-neighbor circle { stroke: #c7ff6b; stroke-width: 2; filter: drop-shadow(0 0 8px currentColor); }
+.nexo-node.is-selected circle { stroke: #fff; stroke-width: 3; filter: drop-shadow(0 0 11px currentColor); }
 .nexo-node.is-dimmed { opacity: 0.16; }
 .nexo-node:focus-visible { outline: none; }
 .nexo-node:focus-visible circle { stroke: #fff; stroke-width: 3; }

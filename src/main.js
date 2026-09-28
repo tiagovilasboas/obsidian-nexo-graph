@@ -1,5 +1,5 @@
 const { ItemView, Menu, Plugin, PluginSettingTab, Setting } = require('obsidian');
-const { CORE_CENTER, CORE_EXCLUSION_RADIUS, GROUP_RADIUS, LABEL_CLEARANCE, MAX_NODES, edgeRoute, graphData, positionNodes, searchMatches, searchSummary } = require('./graph-engine');
+const { CORE_CENTER, CORE_EXCLUSION_RADIUS, GROUP_RADIUS, LABEL_CLEARANCE, MAX_NODES, edgeRoute, graphData, handleNodeKey, positionNodes, searchMatches, searchSummary } = require('./graph-engine');
 
 const VIEW_TYPE = 'nexo-graph-view';
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -30,6 +30,7 @@ class NexoGraphView extends ItemView {
     this.localDepth = 1;
     this.anchorPath = '';
     this.query = '';
+    this.selectedPath = '';
     this.visibleGroups = new Set([0, 1, 2, 3, 4]);
     this.emphasisPath = '';
     this.svgEl = null;
@@ -161,6 +162,8 @@ class NexoGraphView extends ItemView {
       depth: this.localDepth,
       visibleGroups: this.visibleGroups
     });
+    if (this.selectedPath && !nodes.some(node => node.path === this.selectedPath)) this.selectedPath = '';
+    if (this.selectedPath) this.emphasisPath = this.selectedPath;
     this.groupFilterControls?.forEach(({ checkbox, count, name }, index) => {
       const total = groupCounts[index] || 0;
       count.textContent = `(${total})`;
@@ -274,8 +277,10 @@ class NexoGraphView extends ItemView {
         const matchesNeighborhood = !this.emphasisPath || related.has(node.path);
         element.classList.toggle('is-match', Boolean(query && matchesQuery));
         element.classList.toggle('is-neighbor', Boolean(this.emphasisPath && node.path !== this.emphasisPath && related.has(node.path)));
+        element.classList.toggle('is-selected', this.selectedPath === node.path);
         element.classList.toggle('is-dimmed', !matchesQuery || !matchesNeighborhood);
         element.classList.toggle('is-labeled', nodes.length < 80 || labelCandidates.has(node.path) || queryMatches || this.emphasisPath === node.path);
+        element.setAttribute('aria-pressed', String(this.selectedPath === node.path));
       }
       for (const [source, target, edge] of edgeElements) {
         const incident = !this.emphasisPath || source === this.emphasisPath || target === this.emphasisPath;
@@ -285,7 +290,7 @@ class NexoGraphView extends ItemView {
     };
     this.updateGraphEmphasis = updateEmphasis;
     for (const node of nodes) {
-      const group = svgElement('g', { class: 'nexo-node', transform: `translate(${node.x} ${node.y})`, tabindex: '0', role: 'button', 'aria-label': `Open ${node.name}` });
+      const group = svgElement('g', { class: 'nexo-node', transform: `translate(${node.x} ${node.y})`, tabindex: '0', role: 'button', 'aria-label': `Open ${node.name}; Space selects, Enter opens` });
       group.style.setProperty('--nexo-node-color', this.plugin.settings.groups[node.group]?.color || '#729680');
       const radius = Math.min(10, 3.5 + Math.sqrt(node.degree) * 1.2);
       group.appendChild(svgElement('circle', { r: radius }));
@@ -313,22 +318,35 @@ class NexoGraphView extends ItemView {
         menu.showAtMouseEvent(event);
       };
       group.addEventListener('click', open);
-      group.addEventListener('keydown', event => {
-        if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); open(); }
-        if (event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')) {
+      group.addEventListener('keydown', event => handleNodeKey(event, {
+        open,
+        toggleSelection: () => {
+          this.selectedPath = this.selectedPath === node.path ? '' : node.path;
+          this.emphasisPath = this.selectedPath;
+          updateEmphasis();
+        },
+        clearSelection: () => {
+          this.selectedPath = '';
+          this.emphasisPath = '';
+          if (search.value) {
+            search.value = '';
+            this.query = '';
+          }
+          updateEmphasis();
+        },
+        showContextMenu: () => {
           const bounds = group.getBoundingClientRect();
           showContextMenu(new MouseEvent('contextmenu', {
             bubbles: true,
             clientX: bounds.left + bounds.width / 2,
             clientY: bounds.top + bounds.height / 2
           }));
-          event.preventDefault();
         }
-      });
+      }));
       group.addEventListener('pointerenter', () => { this.emphasisPath = node.path; updateEmphasis(); });
-      group.addEventListener('pointerleave', () => { if (this.emphasisPath === node.path) this.emphasisPath = ''; updateEmphasis(); });
+      group.addEventListener('pointerleave', () => { if (this.emphasisPath === node.path) this.emphasisPath = this.selectedPath; updateEmphasis(); });
       group.addEventListener('focus', () => { this.emphasisPath = node.path; updateEmphasis(); });
-      group.addEventListener('blur', () => { if (this.emphasisPath === node.path) this.emphasisPath = ''; updateEmphasis(); });
+      group.addEventListener('blur', () => { if (this.emphasisPath === node.path) this.emphasisPath = this.selectedPath; updateEmphasis(); });
       group.addEventListener('contextmenu', showContextMenu);
       nodeLayer.appendChild(group);
       nodeElements.push([node, group]);

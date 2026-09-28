@@ -15,6 +15,9 @@ if (!/\.nexo-controls\s+button:focus-visible[\s\S]*?outline\s*:\s*2px/i.test(css
 if (!/\.nexo-filter\s+input:focus-visible[\s\S]*?outline\s*:\s*2px/i.test(css)) {
   failures.push('Group filters must expose a visible keyboard focus outline.');
 }
+if (!/\.nexo-node\.is-selected\s+circle\s*\{[^}]*stroke\s*:\s*#fff/i.test(css)) {
+  failures.push('Selected graph nodes must remain visually distinct after keyboard focus moves.');
+}
 if (!/@media\s*\(prefers-reduced-motion:\s*reduce\)[\s\S]*?\.nexo-node[\s\S]*?transition:\s*none/i.test(css)) {
   failures.push('Node transitions must be disabled for reduced-motion users.');
 }

@@ -19,6 +19,7 @@
 - Filters groups and can focus on notes connected to the last active note at one, two, or three link hops.
 - Highlights a note's neighbors on hover/focus, shows link direction, and offers a context-menu action to open a note.
 - Keyboard users can open that context menu with **Shift+F10** or the Context Menu key while a note is focused; reciprocal links share one edge with arrows at both ends.
+- On a focused note, **Enter** opens it, **Space** selects or deselects it and its neighbors, and **Escape** clears selection and search. Selection remains visible after keyboard focus moves.
 - Keeps group settings in the vault's plugin data and updates when files are created, edited, renamed, or removed and when Obsidian refreshes link metadata.
 - Supports vault-specific ignored path prefixes so trash and archived backups can stay out of the visualization without changing notes; the footer reports the excluded count.
 
