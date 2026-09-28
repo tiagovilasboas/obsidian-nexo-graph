@@ -9,7 +9,10 @@ const LABEL_CLEARANCE = 56;
 
 function groupFor(path, rules) {
   const normalized = path.toLowerCase();
-  const index = rules.findIndex(rule => rule.prefix && normalized.startsWith(rule.prefix.toLowerCase()));
+  const index = rules.findIndex(rule => {
+    const prefixes = Array.isArray(rule.prefixes) ? rule.prefixes : [rule.prefix];
+    return prefixes.some(prefix => typeof prefix === 'string' && prefix.trim() && normalized.startsWith(prefix.trim().toLowerCase()));
+  });
   return index < 0 ? rules.length : index;
 }
 
@@ -90,7 +93,11 @@ function selectRepresentativeEdges(edgePairs, nodes, limit = MAX_EDGES) {
 }
 
 function graphData(app, rules, options = {}) {
-  const files = app.vault.getMarkdownFiles();
+  const allFiles = app.vault.getMarkdownFiles();
+  const ignoredPrefixes = Array.isArray(options.ignoredPrefixes) ? options.ignoredPrefixes : [];
+  const files = allFiles.filter(file => !ignoredPrefixes.some(prefix =>
+    typeof prefix === 'string' && prefix.trim() && file.path.toLowerCase().startsWith(prefix.trim().toLowerCase())
+  ));
   const byPath = new Map(files.map(file => [file.path, file]));
   const degree = new Map(files.map(file => [file.path, 0]));
   const allEdges = [];
@@ -153,7 +160,7 @@ function graphData(app, rules, options = {}) {
       else edgePairs.set(key, { source, target, bidirectional: false });
   }
   const edges = selectRepresentativeEdges(edgePairs, nodes).map(edge => [edge.source, edge.target, edge.bidirectional]);
-  return { nodes, edges, total: files.length, inScope: candidates.length, linksInScope: edgePairs.size };
+  return { nodes, edges, total: allFiles.length, ignoredCount: allFiles.length - files.length, inScope: candidates.length, linksInScope: edgePairs.size };
 }
 
 function positionNodes(nodes) {

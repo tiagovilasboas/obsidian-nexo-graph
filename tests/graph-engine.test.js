@@ -29,6 +29,34 @@ test('groups paths case-insensitively and places unmatched notes in Other', () =
   ]);
 });
 
+test('supports multiple folder prefixes per group and keeps single-prefix compatibility', () => {
+  const grouped = [
+    { name: 'Career', prefixes: ['pages/carreira/', 'pages/staff/'] },
+    { name: 'Operations', prefix: 'pages/ops/' }
+  ];
+
+  assert.equal(groupFor('pages/staff/impact.md', grouped), 0);
+  assert.equal(groupFor('PAGES/CARREIRA/cv.md', grouped), 0);
+  assert.equal(groupFor('pages/ops/runbook.md', grouped), 1);
+  assert.equal(groupFor('pages/meta/harness.md', grouped), 2);
+});
+
+test('omits configured path prefixes and their links from the default graph scope', () => {
+  const result = graphData(app(
+    ['pages/ops/active.md', '_trash/old.md', 'pages/ops/archived/note.md'],
+    {
+      'pages/ops/active.md': { '_trash/old.md': 1, 'pages/ops/archived/note.md': 1 },
+      '_trash/old.md': { 'pages/ops/active.md': 1 }
+    }
+  ), rules, { ignoredPrefixes: [' _TRASH/', 'pages/ops/archived/'] });
+
+  assert.deepEqual(result.nodes.map(node => node.path), ['pages/ops/active.md']);
+  assert.deepEqual(result.edges, []);
+  assert.equal(result.total, 3);
+  assert.equal(result.ignoredCount, 2);
+  assert.equal(result.inScope, 1);
+});
+
 test('merges reciprocal links into one bidirectional edge', () => {
   const data = graphData(app(
     ['a.md', 'b.md'],

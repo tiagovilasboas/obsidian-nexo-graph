@@ -10,7 +10,10 @@ const LABEL_CLEARANCE = 56;
 
 function groupFor(path, rules) {
   const normalized = path.toLowerCase();
-  const index = rules.findIndex(rule => rule.prefix && normalized.startsWith(rule.prefix.toLowerCase()));
+  const index = rules.findIndex(rule => {
+    const prefixes = Array.isArray(rule.prefixes) ? rule.prefixes : [rule.prefix];
+    return prefixes.some(prefix => typeof prefix === 'string' && prefix.trim() && normalized.startsWith(prefix.trim().toLowerCase()));
+  });
   return index < 0 ? rules.length : index;
 }
 
@@ -91,7 +94,11 @@ function selectRepresentativeEdges(edgePairs, nodes, limit = MAX_EDGES) {
 }
 
 function graphData(app, rules, options = {}) {
-  const files = app.vault.getMarkdownFiles();
+  const allFiles = app.vault.getMarkdownFiles();
+  const ignoredPrefixes = Array.isArray(options.ignoredPrefixes) ? options.ignoredPrefixes : [];
+  const files = allFiles.filter(file => !ignoredPrefixes.some(prefix =>
+    typeof prefix === 'string' && prefix.trim() && file.path.toLowerCase().startsWith(prefix.trim().toLowerCase())
+  ));
   const byPath = new Map(files.map(file => [file.path, file]));
   const degree = new Map(files.map(file => [file.path, 0]));
   const allEdges = [];
@@ -154,7 +161,7 @@ function graphData(app, rules, options = {}) {
       else edgePairs.set(key, { source, target, bidirectional: false });
   }
   const edges = selectRepresentativeEdges(edgePairs, nodes).map(edge => [edge.source, edge.target, edge.bidirectional]);
-  return { nodes, edges, total: files.length, inScope: candidates.length, linksInScope: edgePairs.size };
+  return { nodes, edges, total: allFiles.length, ignoredCount: allFiles.length - files.length, inScope: candidates.length, linksInScope: edgePairs.size };
 }
 
 function positionNodes(nodes) {
@@ -348,7 +355,8 @@ class NexoGraphView extends ItemView {
     if (!search) return;
     this.svgEl?.remove();
 
-    const { nodes, edges, inScope, linksInScope } = graphData(this.app, this.plugin.settings.groups, {
+    const { nodes, edges, ignoredCount, inScope, linksInScope } = graphData(this.app, this.plugin.settings.groups, {
+      ignoredPrefixes: this.plugin.settings.ignoredPrefixes,
       localMode: this.localMode,
       anchorPath: this.anchorPath,
       depth: this.localDepth,
@@ -552,7 +560,8 @@ class NexoGraphView extends ItemView {
     if (!this.searchStatus) this.searchStatus = footer.createSpan({ cls: 'nexo-search-status', attr: { role: 'status', 'aria-live': 'polite' } });
     this.searchStatus.textContent = searchSummary(nodes, search.value);
     const scopeLabel = this.localMode ? `within ${this.anchorPath.split('/').pop() || 'local graph'}` : 'in vault';
-    this.footerSummary.textContent = `${nodes.length.toLocaleString()} shown · ${inScope.toLocaleString()} ${scopeLabel} · ${edges.length.toLocaleString()} links`;
+    const ignoredLabel = ignoredCount ? ` · ${ignoredCount.toLocaleString()} excluded by path filters` : '';
+    this.footerSummary.textContent = `${nodes.length.toLocaleString()} shown · ${inScope.toLocaleString()} ${scopeLabel}${ignoredLabel} · ${edges.length.toLocaleString()} links`;
     const limits = [];
     if (inScope > MAX_NODES) limits.push(`Showing ${MAX_NODES} notes in rounds across folder groups, ranked by connections within each group`);
     if (linksInScope > edges.length) limits.push(`Showing ${MAX_EDGES} links in rounds across folder-group pairs, ranked by endpoint connections`);
@@ -576,11 +585,22 @@ class NexoGraphSettings extends PluginSettingTab {
     const container = this.containerEl;
     container.empty();
     container.createEl('h2', { text: 'Nexo Graph' });
-    container.createEl('p', { text: 'Assign a folder prefix and color to each signal group. The first matching prefix wins. These settings stay in this vault.' });
+    container.createEl('p', { text: 'Assign one or more comma-separated folder prefixes and a color to each signal group. The first matching group wins. These settings stay in this vault.' });
+    new Setting(container).setName('Ignore path prefixes').setDesc('Comma-separated paths to keep out of the graph, such as trash or archived backups.').addText(input => input
+      .setPlaceholder('_trash/, archive/')
+      .setValue(this.plugin.settings.ignoredPrefixes.join(', '))
+      .onChange(async value => {
+        this.plugin.settings.ignoredPrefixes = value.split(',').map(prefix => prefix.trim()).filter(Boolean);
+        await this.plugin.saveSettings();
+      }));
     this.plugin.settings.groups.forEach((rule, index) => {
-      new Setting(container).setName(`${rule.name} folder prefix`).setDesc('Example: pages/pessoal/').addText(input => input
-        .setValue(rule.prefix)
-        .onChange(async value => { rule.prefix = value.trim(); await this.plugin.saveSettings(); }));
+      new Setting(container).setName(`${rule.name} folder prefixes`).setDesc('Comma-separated. Example: pages/pessoal/, pages/ideas/').addText(input => input
+        .setValue((Array.isArray(rule.prefixes) ? rule.prefixes : [rule.prefix]).filter(Boolean).join(', '))
+        .onChange(async value => {
+          rule.prefixes = value.split(',').map(prefix => prefix.trim()).filter(Boolean);
+          rule.prefix = rule.prefixes[0] || '';
+          await this.plugin.saveSettings();
+        }));
       new Setting(container).setName(`${rule.name} color`).addColorPicker(input => input
         .setValue(rule.color)
         .onChange(async value => { rule.color = value; await this.plugin.saveSettings(); }));
@@ -591,7 +611,10 @@ class NexoGraphSettings extends PluginSettingTab {
 module.exports = class NexoGraphPlugin extends Plugin {
   async onload() {
     const saved = await this.loadData();
-    this.settings = { groups: DEFAULT_SETTINGS.groups.map((rule, index) => ({ ...rule, ...(saved?.groups?.[index] || {}) })) };
+    this.settings = {
+      groups: DEFAULT_SETTINGS.groups.map((rule, index) => ({ ...rule, ...(saved?.groups?.[index] || {}) })),
+      ignoredPrefixes: Array.isArray(saved?.ignoredPrefixes) ? saved.ignoredPrefixes : []
+    };
     this.lastActivePath = this.app.workspace.getActiveFile()?.path || '';
     this.registerEvent(this.app.workspace.on('active-leaf-change', leaf => {
       if (leaf?.view?.getViewType() === VIEW_TYPE) return;
