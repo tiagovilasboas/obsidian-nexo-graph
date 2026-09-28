@@ -213,8 +213,11 @@ test('NEXO-004 renders an SVG graph and exposes selected state through focus and
 
     const svg = descendants(view.contentEl, element => element.tagName === 'svg')[0];
     const nodes = descendants(view.contentEl, element => element.classList.contains('nexo-node'));
-    assert.equal(svg.getAttribute('role'), 'img');
+    assert.equal(svg.getAttribute('role'), 'group');
+    assert.equal(svg.getAttribute('aria-label'), 'Interactive graph of linked notes');
     assert.equal(nodes.length, 2);
+    assert.equal(nodes[0].getAttribute('role'), 'button');
+    assert.equal(nodes[0].getAttribute('tabindex'), '0');
     assert.match(nodes[0].getAttribute('aria-label'), /Space selects, Enter opens/);
 
     nodes[0].dispatch('focus');

@@ -510,7 +510,7 @@ class NexoGraphView extends ItemView {
     });
     const groupCenters = positionNodes(nodes);
     const byPath = new Map(nodes.map(node => [node.path, node]));
-    const svg = svgElement('svg', { viewBox: '0 0 1200 800', role: 'img', 'aria-label': 'Graph of linked notes' });
+    const svg = svgElement('svg', { viewBox: '0 0 1200 800', role: 'group', 'aria-label': 'Interactive graph of linked notes' });
     svg.classList.add('nexo-map');
     root.insertBefore(svg, this.footerEl || null);
     this.svgEl = svg;
