@@ -23,7 +23,7 @@ class NexoGraphView extends ItemView {
     super(leaf);
     this.plugin = plugin;
     this.timer = null;
-    this.scale = 1;
+    this.scale = 1.12;
     this.panX = 0;
     this.panY = 0;
     this.localMode = false;
@@ -111,7 +111,7 @@ class NexoGraphView extends ItemView {
     minus.addEventListener('click', () => this.zoomGraph(0.8));
     plus.addEventListener('click', () => this.zoomGraph(1.25));
     reset.addEventListener('click', () => {
-      this.scale = 1;
+      this.scale = 1.12;
       this.panX = 0;
       this.panY = 0;
       this.applyGraphTransform();
@@ -265,6 +265,7 @@ class NexoGraphView extends ItemView {
       const group = svgElement('g', { class: 'nexo-node', transform: `translate(${node.x} ${node.y})`, tabindex: '0', role: 'button', 'aria-label': `Open ${node.name}; Space selects, Enter opens` });
       group.style.setProperty('--nexo-node-color', visualGroups[node.group]?.color || '#729680');
       const radius = nodeRadius(node.degree);
+      group.appendChild(svgElement('circle', { r: 9, class: 'nexo-node-hit-area', 'aria-hidden': 'true' }));
       group.appendChild(svgElement('circle', { r: radius }));
       const labelPosition = labels.positions.get(node.path) || { x: 0, y: -radius - 7, anchor: 'middle' };
       const label = svgElement('text', {
