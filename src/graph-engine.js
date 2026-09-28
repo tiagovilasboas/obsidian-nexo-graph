@@ -6,7 +6,7 @@ const CORE_EXCLUSION_RADIUS = 86;
 const CORE_TITLE_BOX = { left: 488, top: 464, right: 712, bottom: 484, kind: 'core-title' };
 
 function nodeRadius(degree) {
-  return Math.min(8, 3.1 + Math.sqrt(Math.max(0, degree)) * 0.9);
+  return Math.min(3.7, 1.4 + Math.sqrt(Math.max(0, degree)) * 0.34);
 }
 
 function groupFor(path, rules) {
@@ -254,7 +254,7 @@ function positionNodes(nodes, edges = []) {
   if (!nodes.length) return;
   const [centerX, centerY] = CORE_CENTER;
   const innerRadius = CORE_EXCLUSION_RADIUS + 38;
-  const outerRadius = 328;
+  const outerRadius = 350;
   const ordered = [...nodes].sort((a, b) => a.path.localeCompare(b.path));
   const positions = new Map();
   const nodeIndexes = new Map(ordered.map((node, index) => [node.path, index]));

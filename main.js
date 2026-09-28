@@ -7,7 +7,7 @@ const CORE_EXCLUSION_RADIUS = 86;
 const CORE_TITLE_BOX = { left: 488, top: 464, right: 712, bottom: 484, kind: 'core-title' };
 
 function nodeRadius(degree) {
-  return Math.min(8, 3.1 + Math.sqrt(Math.max(0, degree)) * 0.9);
+  return Math.min(3.7, 1.4 + Math.sqrt(Math.max(0, degree)) * 0.34);
 }
 
 function groupFor(path, rules) {
@@ -255,7 +255,7 @@ function positionNodes(nodes, edges = []) {
   if (!nodes.length) return;
   const [centerX, centerY] = CORE_CENTER;
   const innerRadius = CORE_EXCLUSION_RADIUS + 38;
-  const outerRadius = 328;
+  const outerRadius = 350;
   const ordered = [...nodes].sort((a, b) => a.path.localeCompare(b.path));
   const positions = new Map();
   const nodeIndexes = new Map(ordered.map((node, index) => [node.path, index]));
@@ -369,7 +369,7 @@ class NexoGraphView extends ItemView {
     super(leaf);
     this.plugin = plugin;
     this.timer = null;
-    this.scale = 1;
+    this.scale = 1.08;
     this.panX = 0;
     this.panY = 0;
     this.localMode = false;
@@ -457,7 +457,7 @@ class NexoGraphView extends ItemView {
     minus.addEventListener('click', () => this.zoomGraph(0.8));
     plus.addEventListener('click', () => this.zoomGraph(1.25));
     reset.addEventListener('click', () => {
-      this.scale = 1;
+      this.scale = 1.08;
       this.panX = 0;
       this.panY = 0;
       this.applyGraphTransform();
@@ -546,8 +546,8 @@ class NexoGraphView extends ItemView {
       arrow.appendChild(svgElement('path', { d: 'M 0 0 L 7 3.5 L 0 7 z', fill: color }));
       defs.appendChild(arrow);
     });
-    atmosphere.appendChild(svgElement('circle', { cx: coreX, cy: coreY, r: 329, class: 'nexo-field-boundary' }));
-    atmosphere.appendChild(svgElement('circle', { cx: coreX, cy: coreY, r: 250, class: 'nexo-field-ring' }));
+    atmosphere.appendChild(svgElement('circle', { cx: coreX, cy: coreY, r: 352, class: 'nexo-field-boundary' }));
+    atmosphere.appendChild(svgElement('circle', { cx: coreX, cy: coreY, r: 270, class: 'nexo-field-ring' }));
     atmosphere.appendChild(svgElement('circle', { cx: coreX, cy: coreY, r: 156, fill: 'url(#nexo-halo-core)' }));
     const core = svgElement('g', { class: 'nexo-core', role: 'presentation' });
     core.appendChild(svgElement('path', { d: `M ${coreX - 22} ${coreY + 12} L ${coreX - 5} ${coreY - 2} L ${coreX + 14} ${coreY - 17} M ${coreX - 5} ${coreY - 2} L ${coreX + 21} ${coreY + 13}`, class: 'nexo-core-branches' }));
@@ -611,6 +611,7 @@ class NexoGraphView extends ItemView {
       const group = svgElement('g', { class: 'nexo-node', transform: `translate(${node.x} ${node.y})`, tabindex: '0', role: 'button', 'aria-label': `Open ${node.name}; Space selects, Enter opens` });
       group.style.setProperty('--nexo-node-color', visualGroups[node.group]?.color || '#729680');
       const radius = nodeRadius(node.degree);
+      group.appendChild(svgElement('circle', { r: 9, class: 'nexo-node-hit-area', 'aria-hidden': 'true' }));
       group.appendChild(svgElement('circle', { r: radius }));
       const labelPosition = labels.positions.get(node.path) || { x: 0, y: -radius - 7, anchor: 'middle' };
       const label = svgElement('text', {
