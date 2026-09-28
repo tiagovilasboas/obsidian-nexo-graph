@@ -1,9 +1,10 @@
 const { ItemView, Menu, Plugin, PluginSettingTab, Setting } = require('obsidian');
 const MAX_NODES = 500;
 const MAX_EDGES = 1600;
-// Irregular domain anchors create a neural constellation around a stable core.
-// Deterministic placement keeps the graph still while its real links carry meaning.
-const GROUP_CENTERS = [[335, 210], [885, 260], [770, 625], [275, 520], [600, 400]];
+// Active domains orbit a stable, neutral core. Coordinates are recomputed
+// deterministically so empty configured groups do not reserve visual space.
+const CORE_CENTER = [600, 400];
+const DOMAIN_ORBIT_RADIUS = 290;
 const GROUP_RADIUS = 146;
 const CORE_EXCLUSION_RADIUS = 86;
 const LABEL_CLEARANCE = 56;
@@ -29,6 +30,23 @@ function searchSummary(nodes, query) {
   if (!normalized) return `${nodes.length} searchable ${nodes.length === 1 ? 'note' : 'notes'}`;
   if (!matches.length) return `No notes match “${normalized}”`;
   return `${matches.length} matching ${matches.length === 1 ? 'note' : 'notes'}`;
+}
+
+function activeGroupCenters(groupIndexes) {
+  const groups = [...new Set(groupIndexes.filter(index => Number.isInteger(index) && index >= 0 && index < 4))].sort((a, b) => a - b);
+  const centers = new Map();
+  if (!groups.length) return centers;
+
+  const count = groups.length;
+  const startAngle = count === 1 || count === 2 ? 0 : count === 3 ? -Math.PI / 6 : -Math.PI / 4;
+  groups.forEach((group, index) => {
+    const angle = startAngle + index * (Math.PI * 2 / count);
+    centers.set(group, [
+      CORE_CENTER[0] + Math.cos(angle) * DOMAIN_ORBIT_RADIUS,
+      CORE_CENTER[1] + Math.sin(angle) * DOMAIN_ORBIT_RADIUS
+    ]);
+  });
+  return centers;
 }
 
 function selectNodesByGroup(candidates, degree, rules) {
@@ -169,20 +187,34 @@ function graphData(app, rules, options = {}) {
 function positionNodes(nodes) {
   const groups = [[], [], [], [], []];
   for (const node of nodes) groups[node.group].push(node);
+  const centers = activeGroupCenters(groups.slice(0, 4).flatMap((group, index) => group.length ? [index] : []));
   for (const [groupIndex, group] of groups.entries()) {
     group.sort((a, b) => b.degree - a.degree || a.path.localeCompare(b.path));
+    if (groupIndex === 4) {
+      // Keep unclassified notes neutral and outside the central mark.
+      group.forEach((node, index) => {
+        const radius = 112 + Math.min(30, Math.sqrt(index) * 3);
+        const angle = index * 2.399963229728653;
+        node.x = CORE_CENTER[0] + Math.cos(angle) * radius;
+        node.y = CORE_CENTER[1] + Math.sin(angle) * radius;
+      });
+      continue;
+    }
+    if (!group.length) continue;
+    const [centerX, centerY] = centers.get(groupIndex);
     const spacing = group.length <= 1 ? 0 : Math.min(26, (GROUP_RADIUS - 36) / Math.sqrt(group.length - 1));
     group.forEach((node, index) => {
       const radius = index === 0 ? 0 : 36 + spacing * Math.sqrt(index - 1);
       const angle = index * 2.399963229728653 + groupIndex * 0.6;
-      node.x = GROUP_CENTERS[groupIndex][0] + Math.cos(angle) * radius;
-      node.y = GROUP_CENTERS[groupIndex][1] + Math.sin(angle) * radius;
+      node.x = centerX + Math.cos(angle) * radius;
+      node.y = centerY + Math.sin(angle) * radius;
     });
   }
+  return centers;
 }
 
 function edgeRoute(source, target) {
-  const local = source.group === target.group || source.group > 3 || target.group > 3;
+  const local = source.group === target.group;
   const dx = target.x - source.x;
   const dy = target.y - source.y;
   const length = Math.max(1, Math.hypot(dx, dy));
@@ -199,7 +231,7 @@ function edgeRoute(source, target) {
     const controlY = (source.y + target.y) / 2 + dx / length * bend * side;
     return { crossDomain: false, d: `M ${source.x} ${source.y} Q ${controlX} ${controlY} ${target.x} ${target.y}` };
   }
-  const [coreX, coreY] = GROUP_CENTERS[4];
+  const [coreX, coreY] = CORE_CENTER;
   const centerDistance = Math.hypot(midpointX - coreX, midpointY - coreY);
   const lane = centerDistance < CORE_EXCLUSION_RADIUS + 20 ? 132 + (hash % 3) * 18 : Math.min(64, Math.max(24, length * 0.12));
   const controlX = midpointX + normalX * lane * side;
@@ -372,7 +404,7 @@ class NexoGraphView extends ItemView {
       count.textContent = `(${total})`;
       checkbox.setAttribute('aria-label', `Show ${name} notes (${total})`);
     });
-    positionNodes(nodes);
+    const groupCenters = positionNodes(nodes);
     const byPath = new Map(nodes.map(node => [node.path, node]));
     const svg = svgElement('svg', { viewBox: '0 0 1200 800', role: 'img', 'aria-label': 'Graph of linked notes' });
     svg.classList.add('nexo-map');
@@ -391,17 +423,24 @@ class NexoGraphView extends ItemView {
     svg.prepend(defs);
     const atmosphere = svgElement('g', { class: 'nexo-atmosphere' });
     viewport.appendChild(atmosphere);
-    const [coreX, coreY] = GROUP_CENTERS[4];
-    GROUP_CENTERS.forEach(([x, y], index) => {
-      const color = this.plugin.settings.groups[index]?.color || '#668b72';
-      const gradient = svgElement('radialGradient', { id: `nexo-halo-${index}` });
-      gradient.appendChild(svgElement('stop', { offset: '0%', 'stop-color': color, 'stop-opacity': index === 4 ? 0.08 : 0.17 }));
-      gradient.appendChild(svgElement('stop', { offset: '100%', 'stop-color': color, 'stop-opacity': 0 }));
-      defs.appendChild(gradient);
+    const [coreX, coreY] = CORE_CENTER;
+    const visualGroups = [...this.plugin.settings.groups, { name: 'Other', color: '#668b72' }];
+    const coreGradient = svgElement('radialGradient', { id: 'nexo-halo-core' });
+    coreGradient.appendChild(svgElement('stop', { offset: '0%', 'stop-color': '#668b72', 'stop-opacity': 0.08 }));
+    coreGradient.appendChild(svgElement('stop', { offset: '100%', 'stop-color': '#668b72', 'stop-opacity': 0 }));
+    defs.appendChild(coreGradient);
+    visualGroups.forEach((rule, index) => {
+      const color = rule.color || '#668b72';
       const arrow = svgElement('marker', { id: `nexo-arrow-${index}`, markerWidth: 7, markerHeight: 7, refX: 6, refY: 3.5, viewBox: '0 0 7 7', orient: 'auto', markerUnits: 'userSpaceOnUse' });
       arrow.appendChild(svgElement('path', { d: 'M 0 0 L 7 3.5 L 0 7 z', fill: color }));
       defs.appendChild(arrow);
-      if (index < 4) {
+      const center = groupCenters.get(index);
+      if (center) {
+        const [x, y] = center;
+        const gradient = svgElement('radialGradient', { id: `nexo-halo-${index}` });
+        gradient.appendChild(svgElement('stop', { offset: '0%', 'stop-color': color, 'stop-opacity': 0.17 }));
+        gradient.appendChild(svgElement('stop', { offset: '100%', 'stop-color': color, 'stop-opacity': 0 }));
+        defs.appendChild(gradient);
         const midpointX = (coreX + x) / 2;
         const midpointY = (coreY + y) / 2;
         atmosphere.appendChild(svgElement('path', {
@@ -410,15 +449,14 @@ class NexoGraphView extends ItemView {
           'stroke': color
         }));
         atmosphere.appendChild(svgElement('circle', { cx: x, cy: y, r: 5, class: 'nexo-field-hub', stroke: color }));
-      }
-      atmosphere.appendChild(svgElement('circle', { cx: x, cy: y, r: index === 4 ? 156 : GROUP_RADIUS + 38, fill: `url(#nexo-halo-${index})` }));
-      if (index < 4) {
+        atmosphere.appendChild(svgElement('circle', { cx: x, cy: y, r: GROUP_RADIUS + 38, fill: `url(#nexo-halo-${index})` }));
         const caption = svgElement('text', { x, y: y - GROUP_RADIUS + 22, 'text-anchor': 'middle', class: 'nexo-cluster-label' });
         caption.style.fill = color;
-        caption.textContent = this.plugin.settings.groups[index].name.toUpperCase();
+        caption.textContent = rule.name.trim().toUpperCase();
         atmosphere.appendChild(caption);
       }
     });
+    atmosphere.appendChild(svgElement('circle', { cx: coreX, cy: coreY, r: 156, fill: 'url(#nexo-halo-core)' }));
     const core = svgElement('g', { class: 'nexo-core', role: 'presentation' });
     core.appendChild(svgElement('path', { d: `M ${coreX - 22} ${coreY + 12} L ${coreX - 5} ${coreY - 2} L ${coreX + 14} ${coreY - 17} M ${coreX - 5} ${coreY - 2} L ${coreX + 21} ${coreY + 13}`, class: 'nexo-core-branches' }));
     core.appendChild(svgElement('circle', { cx: coreX - 22, cy: coreY + 12, r: 5, class: 'nexo-core-neuron is-secondary' }));
@@ -604,6 +642,13 @@ class NexoGraphSettings extends PluginSettingTab {
         await this.plugin.saveSettings();
       }));
     this.plugin.settings.groups.forEach((rule, index) => {
+      new Setting(container).setName('Group name').setDesc('A short label shown in the graph, filters, and legend.').addText(input => input
+        .setValue(rule.name)
+        .setPlaceholder(DEFAULT_SETTINGS.groups[index]?.name || `Group ${index + 1}`)
+        .onChange(async value => {
+          rule.name = value || DEFAULT_SETTINGS.groups[index]?.name || `Group ${index + 1}`;
+          await this.plugin.saveSettings();
+        }));
       new Setting(container).setName(`${rule.name} folder prefixes`).setDesc('Comma-separated. Example: pages/pessoal/, pages/ideas/').addText(input => input
         .setValue((Array.isArray(rule.prefixes) ? rule.prefixes : [rule.prefix]).filter(Boolean).join(', '))
         .onChange(async value => {

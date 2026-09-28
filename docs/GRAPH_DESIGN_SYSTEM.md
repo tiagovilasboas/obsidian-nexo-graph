@@ -7,12 +7,12 @@ Signal Field is Nexo Graph's current visual language. It arranges configured fol
 - Notes come from `vault.getMarkdownFiles()` and relationships from `metadataCache.resolvedLinks`.
 - A folder prefix assigns a note to the first matching configured group. Prefixes do not create relationships.
 - Unmatched notes use the neutral `Other` group. Cross-domain routing uses the configured group index.
-- Group names, prefixes, and colors are stored per vault in plugin settings. The settings UI currently edits prefixes and colors for the four default group names.
+- Group names, prefixes, and colors are stored per vault in plugin settings. The settings UI edits the names, prefixes, and colors of the four default configurable groups; it does not add or remove groups.
 - Graph refresh listens to vault create/modify/delete/rename and metadata-cache resolved/changed events.
 
 ## Geometry and density
 
-The engine places notes deterministically in fixed group sectors around the core. There is no force simulation or layout physics. The view caps the rendered graph at 500 notes and 1,600 links, sampling across groups and group pairs so one large folder does not hide every smaller group. In dense graphs, labels are restricted by deterministic degree ranking; search matches and the focused note can reveal labels on demand. Cross-domain links use curved routes that avoid the core. Empty configured sectors may still reserve geometry; adaptive active-group layout is a tracked follow-up.
+The engine places configured notes deterministically in sectors around the fixed neutral core. Only populated configured groups receive an outer sector, halo, and label; one or two active groups use a horizontal orbit, while three or four are distributed around the core. Unclassified `Other` notes remain neutral on a ring outside the central mark. There is no force simulation or layout physics. The view caps the rendered graph at 500 notes and 1,600 links, sampling across groups and group pairs so one large folder does not hide every smaller group. In dense graphs, labels are restricted by deterministic degree ranking; search matches and the focused note can reveal labels on demand. Cross-domain links use curved routes that avoid the core.
 
 ## Visual and interaction contract
 
@@ -44,4 +44,4 @@ CI is a computacional sensor for syntax, bundle consistency, engine tests, and m
 4. Every new interaction has a keyboard path, visible focus, and a sensor.
 5. Every animation has a finite purpose and a reduced-motion path.
 6. Keep the Obsidian public API boundary; do not use private Graph internals.
-7. Treat adaptive group geometry, editable group names, DOM integration tests, and dense visual baselines as planned until implemented and verified.
+7. Treat DOM integration tests and dense visual baselines as planned until implemented and verified.

@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Let vault owners name the four configurable graph groups, with the names reflected in filters, legend, and populated Signal Field domains.
+- Place only populated configured groups around the neutral core; keep unclassified notes neutral outside the central mark.
+- Keep Signal Field placement deterministic and route cross-domain links around the core as active group geometry changes.
 - Refresh the open graph after vault file and metadata changes so new notes and edited links appear without reopening the view.
 - Clarify that folder prefixes group notes while resolved Markdown links create graph edges.
 
