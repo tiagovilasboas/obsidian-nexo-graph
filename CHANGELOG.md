@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Add Obsidian API stub checks for live graph refresh events and per-vault settings migration/persistence.
 - Separate node keyboard actions: Enter opens, Space toggles persistent neighbor selection, Escape clears search/selection, and the context-menu shortcut remains available.
 - Keep keyboard selections visually and accessibly exposed after focus moves.
 - Let vault owners name the four configurable graph groups, with the names reflected in filters, legend, and populated Signal Field domains.

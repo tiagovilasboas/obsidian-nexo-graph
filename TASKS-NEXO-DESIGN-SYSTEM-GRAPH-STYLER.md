@@ -17,7 +17,8 @@ Cada incremento precisa de um **guia** (documentação, comportamento esperado o
 - [x] Signal Field com core neutro, quatro domínios, curvas cross-domain e rótulos limitados em grafos densos.
 - [x] CI para sintaxe, bundle, testes da engine e contrato do manifesto.
 - [x] Transições de teclado dos nós testadas (Enter abre, Space seleciona/desselciona, Escape limpa, Shift+F10/menu abre).
-- [ ] Testes de integração DOM/API Obsidian para teclado, foco, menu contextual, eventos e persistência.
+- [x] Wiring de eventos do Obsidian e migração/persistência de configurações testados com API stubs.
+- [ ] Testes DOM para renderização SVG/foco, menu contextual, pointer e debounce de atualização.
 - [ ] Métricas automatizadas de colisões/legibilidade em grafo denso e baseline visual sintético.
 - [x] Centros/halos adaptados ao conjunto de grupos ativos por teste determinístico; falta revisão visual em Obsidian.
 - [x] Nome dos quatro grupos configurável pela UI; cobertura de persistência por UI/API ainda pendente.
@@ -51,9 +52,9 @@ Cada incremento precisa de um **guia** (documentação, comportamento esperado o
 ### NEXO-004 — Testes de integração da view — P0
 
 - **Guia:** README registra Enter, Space, Escape, Shift+F10, Local mode e atualização de conteúdo.
-- **Sensor computacional:** contrato puro de transição de teclas passou; harness DOM + API Obsidian para renderização, eventos, debounce e persistência ainda pendente.
+- **Sensor computacional:** contrato de teclas, wiring de eventos e migração/persistência passam com stubs; harness DOM para renderização, foco/pointer, menu e debounce ainda pendente.
 - **Classificação:** maintainability e behaviour; guia documental + sensor computacional.
-- **Entregue parcialmente:** Enter/Space/Escape/ContextMenu/Shift+F10 cobertos por sensor computacional e fluxo atualizado no guia. Integração DOM/API e persistência ainda pendentes.
+- **Entregue parcialmente:** Enter/Space/Escape/ContextMenu/Shift+F10, subscriptions de vault/metadata, migração de nomes e saveData/loadData são cobertos por sensores computacionais. Integração DOM/render, menu nativo e debounce ainda pendentes.
 
 ### NEXO-005 — Legibilidade e desempenho em grafos densos — P1
 

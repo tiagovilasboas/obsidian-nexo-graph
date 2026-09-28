@@ -29,9 +29,9 @@ Every graph change follows Harness Engineering's dual loop:
 
 | Concern | Guia | Sensor | Classificação |
 | --- | --- | --- | --- |
-| Data and group semantics | This document and settings descriptions | Engine fixtures and manifest/CI checks | Computational; architecture fitness and behaviour |
+| Data and group semantics | This document and settings descriptions | Engine fixtures, Obsidian API stub checks, and manifest/CI checks | Computational; architecture fitness and behaviour |
 | Visual legibility | Density, label, and color contract | Synthetic geometry tests plus Obsidian visual review | Computational and inferential; behaviour |
-| Keyboard and motion | Interaction contract and accessible control names | Keyboard transition tests, reduced-motion stylesheet check, manual keyboard review | Computational and inferential; behaviour |
+| Keyboard and motion | Interaction contract and accessible control names | Keyboard transition tests, API event/settings tests, reduced-motion stylesheet check, manual keyboard review | Computational and inferential; behaviour |
 | Distribution | README and release checklist | Bundle, test, manifest, tag asset validation, clean install | Computational and inferential; maintainability |
 
 CI is a computacional sensor for syntax, bundle consistency, engine tests, and manifest validity. A CI pass does not replace rendered visual/accessibility review in Obsidian. Do not use private RAG note names or screenshots as public fixtures.
