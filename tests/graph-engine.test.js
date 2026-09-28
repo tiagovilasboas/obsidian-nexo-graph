@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { CORE_CENTER, CORE_EXCLUSION_RADIUS, DOMAIN_ORBIT_RADIUS, GROUP_RADIUS, MAX_EDGES, MAX_NODES, activeGroupCenters, edgeRoute, graphData, groupFor, handleNodeKey, labelPlan, positionNodes, searchMatches, searchSummary } = require('../src/graph-engine');
+const { CORE_CENTER, CORE_EXCLUSION_RADIUS, DOMAIN_ORBIT_RADIUS, GROUP_RADIUS, MAX_EDGES, MAX_NODES, activeGroupCenters, edgeRoute, graphData, groupFor, handleNodeKey, labelPlan, positionNodes, searchMatches, searchSummary, shouldShowAllLabels, visibleLegendGroups } = require('../src/graph-engine');
 
 const rules = [
   { name: 'Personal', prefix: 'pages/pessoal/' },
@@ -302,6 +302,18 @@ test('dense graph label plan is deterministic and suppresses estimated label col
       assert.equal(overlap, false, `${a.path} overlaps ${b.path}`);
     }
   }
+});
+
+test('label density switches before moderate graphs become crowded', () => {
+  assert.equal(shouldShowAllLabels(31), true);
+  assert.equal(shouldShowAllLabels(32), false);
+  assert.equal(shouldShowAllLabels(40), false);
+  assert.equal(shouldShowAllLabels(80), false);
+});
+
+test('footer legend omits empty domains while filters can still expose them', () => {
+  const groups = [{ name: 'Agents' }, { name: 'Internal' }, { name: 'Rules' }, { name: 'Other' }];
+  assert.deepEqual(visibleLegendGroups(groups, [4, 0, 23, 12]), [groups[0], groups[2], groups[3]]);
 });
 
 test('neural mesh routes cross-domain links around the visible core', () => {
