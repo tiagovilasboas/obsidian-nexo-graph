@@ -55,9 +55,9 @@ Search, zoom controls, Local mode, hop depth, and group filters keep visible key
 3. In Obsidian, turn on community plugins and enable **Nexo Graph**.
 4. Choose **Open Nexo Graph** in the command palette or click its ribbon icon.
 
-Version 0.1.0 was an early preview. Version 0.2.1 introduced filters and local exploration; 0.3.0 improved graph sampling; 0.4.0 adds multi-prefix folder groups. Community plugin gallery submission is planned; until then, install manually. The manifest includes the funding link for the future listing.
+Version 0.4.0 brings multi-prefix folder groups, improved dense-vault layout and labeling, the Signal Field neural mesh, keyboard interactions, and accessibility refinements. Install manually while the official Community Plugins submission is in progress.
 
-**Release status:** the latest published GitHub release is still **0.3.0**. The repository `main` branch and manifest are at **0.4.0**, but those assets have not been published as a GitHub release yet. The “Latest release” download therefore does not include the 0.4.0 changes. Keep `main.js`, `manifest.json`, and `styles.css` from one version together; do not mix release assets.
+**Release status:** GitHub release **0.4.0** contains the version-matched `main.js`, `manifest.json`, and `styles.css` assets. Keep those three files from one release together; do not mix versions.
 
 ## Privacy and architecture
 
