@@ -3,7 +3,7 @@ const MAX_EDGES = 1600;
 const LABEL_ALL_THRESHOLD = 32;
 const CORE_CENTER = [600, 400];
 const CORE_EXCLUSION_RADIUS = 86;
-const CORE_TITLE_BOX = { left: 488, top: 464, right: 712, bottom: 484, kind: 'core-title' };
+const CORE_TITLE_BOX = { left: 488, top: 426, right: 712, bottom: 446, kind: 'core-title' };
 
 function nodeRadius(degree) {
   return Math.min(3.7, 1.4 + Math.sqrt(Math.max(0, degree)) * 0.34);

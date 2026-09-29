@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.1
+
+- Replace the oversized multi-dot core with a smaller N monogram and a quieter orbit; bring the core label closer to the mark.
+
 ## 0.4.0
 
 - Improve graph node outlines and keyboard focus, show the active Local control, enlarge toolbar targets, and respect increased contrast and reduced motion preferences.
