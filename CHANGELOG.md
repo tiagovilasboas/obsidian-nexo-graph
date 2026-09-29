@@ -1,12 +1,11 @@
 # Changelog
 
-## Unreleased
+## 0.4.0
 
 - Improve graph node outlines and keyboard focus, show the active Local control, enlarge toolbar targets, and respect increased contrast and reduced motion preferences.
 - Refine the Signal Field core: thinner branches, smaller nodes, softer glow, and quieter label hierarchy.
 - Reduce node size and soften node fills; use a thinner, translucent visual hierarchy for selection and neighbors.
 - Expand the default graph framing, simplify the ambient background, reduce dense-graph node size, soften hover emphasis, and preserve 9 px click targets with a transparent hit area.
-- Clarify that the published 0.3.0 release does not yet include the repository's 0.4.0 source changes.
 - Pass published release tags to the asset verifier as quoted data instead of interpolating event input into shell source.
 - Suppress lower-priority automatic labels when their estimated text boxes collide in dense graphs.
 - Add Obsidian API stub checks for live graph refresh events and per-vault settings migration/persistence.
@@ -17,8 +16,6 @@
 - Keep Signal Field edges quiet at rest and make focused relationships stand out; group colors and filters remain available throughout the shared field.
 - Refresh the open graph after vault file and metadata changes so new notes and edited links appear without reopening the view.
 - Clarify that folder prefixes group notes while resolved Markdown links create graph edges.
-
-## 0.4.0
 
 - Support multiple folder prefixes per graph group for vaults with broader knowledge architectures.
 - Exclude configured path prefixes from the graph while leaving vault notes untouched.
