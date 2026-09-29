@@ -8,7 +8,9 @@
 
 [![Buy me a coffee](https://raw.githubusercontent.com/tiagovilasboas/tiagovilasboas/main/assets/buy-me-a-coffee.svg)](https://buymeacoffee.com/tiagovilasboas)
 
-**Current runtime preview:** the graph has been smoke-tested in Obsidian 1.13.7 against a synthetic dense vault: 500 notes and 1,600 links. It renders as a dense circular mesh with small, subdued nodes, a compact central Nexo core, and the plugin's search, zoom, local-scope, and group-filter controls. This is a description of the observed runtime, not a screenshot. A checked-in capture from Obsidian is still pending; the older sparse animation has been removed because it did not represent the current product. See the [visual baseline](docs/visual-baseline/SYNTHETIC.md) for the fixture and its limits.
+![Dense Nexo Graph illustration with 500 nodes and 1,600 links](docs/dense-graph-preview.svg)
+
+This synthetic illustration shows the current dense-vault shape: many small, subdued nodes in a circular field around a compact core. The 500-node / 1,600-link counts match the Obsidian 1.13.7 synthetic-vault smoke test. Group labels and controls are drawn for context. It is not a screenshot; a checked-in capture from Obsidian is still pending. See the [visual baseline](docs/visual-baseline/SYNTHETIC.md) for the fixture and its limits.
 
 ## What it does
 
