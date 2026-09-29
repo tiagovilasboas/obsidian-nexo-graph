@@ -331,7 +331,7 @@ test('label plan reserves the core title before placing note labels', () => {
   assert.ok(coreTitle);
 
   const captionNode = { path: 'fixture/caption.md', name: 'Synthetic caption label', group: 0, degree: 4, x: 900, y: 400 };
-  const coreNode = { path: 'fixture/core.md', name: 'Synthetic core label', group: 4, degree: 4, x: CORE_CENTER[0], y: CORE_CENTER[1] + 50 };
+  const coreNode = { path: 'fixture/core.md', name: 'Synthetic core label', group: 4, degree: 4, x: CORE_CENTER[0], y: CORE_CENTER[1] + 30 };
   const unreserved = labelPlan([captionNode, coreNode]);
   const first = labelPlan([captionNode, coreNode], 4, 3, reserved);
   const second = labelPlan([captionNode, coreNode], 4, 3, reserved);

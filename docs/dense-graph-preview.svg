@@ -2118,6 +2118,6 @@
 <circle cx="600" cy="410" r="17" fill="none" stroke="#00e5a0" stroke-opacity=".2" stroke-width=".8"/>
 <path d="M594 416 V404 L606 416 V404" fill="none" stroke="#00e5a0" stroke-opacity=".82" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
 <path d="M600 407.5 L602.5 410 L600 412.5 L597.5 410 Z" fill="#b8ff5a" fill-opacity=".92"/>
-<text x="600" y="442" text-anchor="middle" fill="#88c99b" fill-opacity=".8" font-family="Menlo,monospace" font-size="9" letter-spacing="1.1">NEXO / KNOWLEDGE CORE</text></g>
+<text x="600" y="450" text-anchor="middle" fill="#88c99b" fill-opacity=".8" font-family="Menlo,monospace" font-size="9" letter-spacing="1.1">NEXO / KNOWLEDGE CORE</text></g>
 <path d="M0 724H1200" stroke="#1b3b28"/><text x="28" y="748" fill="#9bafa1" font-family="Menlo,monospace" font-size="11">500 shown · 500 in vault · 1,600 links</text><text x="1172" y="748" text-anchor="end" fill="#617e69" font-family="Menlo,monospace" font-size="10">SYNTHETIC ILLUSTRATION · NOT A SCREENSHOT</text>
 </svg>

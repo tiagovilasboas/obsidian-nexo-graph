@@ -4,7 +4,7 @@ const MAX_EDGES = 1600;
 const LABEL_ALL_THRESHOLD = 32;
 const CORE_CENTER = [600, 400];
 const CORE_EXCLUSION_RADIUS = 86;
-const CORE_TITLE_BOX = { left: 488, top: 464, right: 712, bottom: 484, kind: 'core-title' };
+const CORE_TITLE_BOX = { left: 488, top: 426, right: 712, bottom: 446, kind: 'core-title' };
 
 function nodeRadius(degree) {
   return Math.min(3.7, 1.4 + Math.sqrt(Math.max(0, degree)) * 0.34);
@@ -550,12 +550,10 @@ class NexoGraphView extends ItemView {
     atmosphere.appendChild(svgElement('circle', { cx: coreX, cy: coreY, r: 250, class: 'nexo-field-ring' }));
     atmosphere.appendChild(svgElement('circle', { cx: coreX, cy: coreY, r: 156, fill: 'url(#nexo-halo-core)' }));
     const core = svgElement('g', { class: 'nexo-core', role: 'presentation' });
-    core.appendChild(svgElement('path', { d: `M ${coreX - 22} ${coreY + 12} L ${coreX - 5} ${coreY - 2} L ${coreX + 14} ${coreY - 17} M ${coreX - 5} ${coreY - 2} L ${coreX + 21} ${coreY + 13}`, class: 'nexo-core-branches' }));
-    core.appendChild(svgElement('circle', { cx: coreX - 22, cy: coreY + 12, r: 3.5, class: 'nexo-core-neuron is-secondary' }));
-    core.appendChild(svgElement('circle', { cx: coreX - 5, cy: coreY - 2, r: 5, class: 'nexo-core-neuron' }));
-    core.appendChild(svgElement('circle', { cx: coreX + 14, cy: coreY - 17, r: 3.5, class: 'nexo-core-neuron is-secondary' }));
-    core.appendChild(svgElement('circle', { cx: coreX + 21, cy: coreY + 13, r: 3.5, class: 'nexo-core-neuron is-secondary' }));
-    const coreTitle = svgElement('text', { x: coreX, y: coreY + 78, 'text-anchor': 'middle', class: 'nexo-core-label' });
+    core.appendChild(svgElement('circle', { cx: coreX, cy: coreY, r: 17, class: 'nexo-core-orbit' }));
+    core.appendChild(svgElement('path', { d: `M ${coreX - 6} ${coreY + 6} V ${coreY - 6} L ${coreX + 6} ${coreY + 6} V ${coreY - 6}`, class: 'nexo-core-monogram' }));
+    core.appendChild(svgElement('path', { d: `M ${coreX} ${coreY - 2.5} L ${coreX + 2.5} ${coreY} L ${coreX} ${coreY + 2.5} L ${coreX - 2.5} ${coreY} Z`, class: 'nexo-core-nexus' }));
+    const coreTitle = svgElement('text', { x: coreX, y: coreY + 40, 'text-anchor': 'middle', class: 'nexo-core-label' });
     coreTitle.textContent = 'NEXO / KNOWLEDGE CORE';
     core.appendChild(coreTitle);
     const edgeLayer = svgElement('g', { class: 'nexo-edges' });

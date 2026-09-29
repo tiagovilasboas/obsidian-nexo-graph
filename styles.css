@@ -85,10 +85,10 @@
 .nexo-empty { fill: #729680; font: 13px ui-monospace, monospace; }
 .nexo-field-boundary { fill: none; stroke: #00ff41; stroke-width: 0.8; stroke-dasharray: 1 8; opacity: 0.19; pointer-events: none; }
 .nexo-field-ring { fill: none; stroke: #00e5a0; stroke-width: 0.6; stroke-dasharray: 1 12; opacity: 0.09; pointer-events: none; }
-.nexo-core-branches { fill: none; stroke: #00e5a0; stroke-width: 1.25; stroke-linecap: round; opacity: 0.62; }
-.nexo-core-neuron { fill: #00e5a0; stroke: #b8ff5a; stroke-width: 0.7; filter: drop-shadow(0 0 3px #00e5a0); }
-.nexo-core-neuron.is-secondary { fill: #07180d; }
-.nexo-core-label { fill: #91fdb8; font: 600 8px ui-monospace, monospace; letter-spacing: 0.14em; opacity: 0.72; pointer-events: none; }
+.nexo-core-orbit { fill: none; stroke: #00e5a0; stroke-width: 0.8; opacity: 0.2; pointer-events: none; }
+.nexo-core-monogram { fill: none; stroke: #00e5a0; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; opacity: 0.82; pointer-events: none; }
+.nexo-core-nexus { fill: #b8ff5a; opacity: 0.92; pointer-events: none; }
+.nexo-core-label { fill: #91fdb8; font: 600 8px ui-monospace, monospace; letter-spacing: 0.14em; opacity: 0.64; pointer-events: none; }
 .nexo-edges path { fill: none; stroke: var(--nexo-edge-color, #28643c); stroke-width: 0.85; opacity: 0.045; pointer-events: none; }
 .nexo-edges path.is-cross-domain { stroke-width: 0.9; opacity: 0.03; }
 .nexo-edges path.is-cross-domain.is-dimmed { opacity: 0.008; }
