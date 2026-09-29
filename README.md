@@ -8,9 +8,7 @@
 
 [![Buy me a coffee](https://raw.githubusercontent.com/tiagovilasboas/tiagovilasboas/main/assets/buy-me-a-coffee.svg)](https://buymeacoffee.com/tiagovilasboas)
 
-![Animated Nexo Signal Field illustrating a fictional 57-note, four-group hub](docs/nexo-graph-showcase.gif)
-
-This original product illustration uses synthetic data. It is not a capture of the Obsidian app and does not contain vault content. For a static view of the graph language, see the [Signal Field diagram](docs/signal-field-demo.svg).
+**Current runtime preview:** the graph has been smoke-tested in Obsidian 1.13.7 against a synthetic dense vault: 500 notes and 1,600 links. It renders as a dense circular mesh with small, subdued nodes, a compact central Nexo core, and the plugin's search, zoom, local-scope, and group-filter controls. This is a description of the observed runtime, not a screenshot. A checked-in capture from Obsidian is still pending; the older sparse animation has been removed because it did not represent the current product. See the [visual baseline](docs/visual-baseline/SYNTHETIC.md) for the fixture and its limits.
 
 ## What it does
 
@@ -27,7 +25,7 @@ This original product illustration uses synthetic data. It is not a capture of t
 
 ## Signal Field
 
-Signal Field is Nexo Graph's visual language: every folder domain shares one circular neural field around a neutral Nexo core. Resolved links create a gentle pull between connected notes, while a fixed repulsion and circular boundary keep the mesh legible and the core clear. Group colors and filters still distinguish folder domains without splitting them into isolated islands. Cross-domain links travel in curved lanes around the core; focusing a note brings its direct links forward. The preview above uses invented fixture data only; it contains no vault content.
+Signal Field is Nexo Graph's visual language: every folder domain shares one circular neural field around a neutral Nexo core. Resolved links create a gentle pull between connected notes, while a fixed repulsion and circular boundary keep the mesh legible and the core clear. Group colors and filters still distinguish folder domains without splitting them into isolated islands. Cross-domain links travel in curved lanes around the core; focusing a note brings its direct links forward. The dense-vault smoke fixture uses synthetic data only; it contains no private vault content.
 
 Node size reflects link count within a restrained range and stays small in dense vaults; a larger transparent hit area keeps notes easy to click. The field uses more of the available viewport, while translucent fills and restrained glow keep dense networks legible. Hover, keyboard focus, search matches, neighbors, and persistent selection use progressively clearer outlines rather than larger solid dots.
 
