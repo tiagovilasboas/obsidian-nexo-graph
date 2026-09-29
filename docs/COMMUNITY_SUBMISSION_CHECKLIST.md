@@ -10,11 +10,11 @@ This checklist prepares the first Nexo Graph listing. Release 0.4.0 is published
 - [x] Stable release `0.4.0` is the latest release and its tag matches the manifest version.
 - [x] Release assets are `main.js`, `manifest.json`, and `styles.css`; the release verifier compares them with the tag.
 - [x] Release `0.4.0` assets were downloaded and compared byte-for-byte with their tagged source; the release verification workflow passed on 29 September 2026.
-- [x] README includes an original animated Signal Field illustration using synthetic data; it is clearly labeled as an illustration, not an Obsidian runtime screenshot.
+- [x] README describes the current dense-vault runtime smoke and clearly says that a real Obsidian screenshot is still pending.
 - [x] The plugin uses Obsidian's public plugin API, has no bundled dependencies or telemetry, and declares `isDesktopOnly: false`.
 - [ ] Reconfirm the plugin id is still unique in the official directory immediately before submission.
 - [ ] Complete a clean-install review of the published `0.4.0` files, including console output and persistence of group settings. A synthetic dense vault was opened in Obsidian 1.13.7 and rendered 500 notes / 1,600 links with filters and graph controls. This runtime smoke did not verify console output or settings persistence and does not prove support for the declared minimum Obsidian 1.13.0.
-- [ ] Add a real Obsidian runtime screenshot captured from the synthetic showcase vault before submitting the plugin listing; the README animation is not a substitute.
+- [ ] Add a real Obsidian runtime screenshot captured from the synthetic showcase vault before submitting the plugin listing.
 
 ## Account and listing
 
