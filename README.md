@@ -8,7 +8,9 @@
 
 [![Buy me a coffee](https://raw.githubusercontent.com/tiagovilasboas/tiagovilasboas/main/assets/buy-me-a-coffee.svg)](https://buymeacoffee.com/tiagovilasboas)
 
-![Synthetic preview of Nexo Signal Field](docs/signal-field-demo.svg)
+![Animated Nexo Signal Field illustrating a fictional 57-note, four-group hub](docs/nexo-graph-showcase.gif)
+
+This original product illustration uses synthetic data. It is not a capture of the Obsidian app and does not contain vault content. For a static view of the graph language, see the [Signal Field diagram](docs/signal-field-demo.svg).
 
 ## What it does
 
