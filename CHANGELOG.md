@@ -3,6 +3,7 @@
 ## 0.4.1
 
 - Replace the oversized multi-dot core with a smaller N monogram and a quieter orbit; bring the core label closer to the mark.
+- Point the funding link and README support badge to GitHub Sponsors.
 
 ## 0.4.0
 
