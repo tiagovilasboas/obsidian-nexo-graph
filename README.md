@@ -59,7 +59,7 @@ Search, zoom controls, Local mode, hop depth, and group filters keep visible key
 
 Version 0.4.0 brings multi-prefix folder groups, improved dense-vault layout and labeling, the Signal Field neural mesh, keyboard interactions, and accessibility refinements. Install manually while the official Community Plugins submission is in progress.
 
-**Release status:** GitHub release **0.4.0** contains the version-matched `main.js`, `manifest.json`, and `styles.css` assets. Keep those three files from one release together; do not mix versions.
+**Release status:** GitHub release **0.4.1** contains the version-matched `main.js`, `manifest.json`, and `styles.css` assets. Keep those three files from one release together; do not mix versions.
 
 ## Privacy and architecture
 
