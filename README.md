@@ -6,7 +6,7 @@
 
 [Changelog](CHANGELOG.md)
 
-[![Buy me a coffee](https://raw.githubusercontent.com/tiagovilasboas/tiagovilasboas/main/assets/buy-me-a-coffee.svg)](https://buymeacoffee.com/tiagovilasboas)
+[![Sponsor](https://img.shields.io/badge/Sponsor-GitHub-ea4aaa?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/tiagovilasboas)
 
 ![Dense Nexo Graph illustration with 500 nodes and 1,600 links](docs/dense-graph-preview.svg)
 
@@ -84,6 +84,6 @@ node scripts/graph-visual-metrics.mjs
 
 ## Support and feedback
 
-Support development of Nexo Graph on [Buy Me a Coffee](https://buymeacoffee.com/tiagovilasboas), or use [Issues](../../issues) for bugs and ideas.
+Support development of Nexo Graph on [GitHub Sponsors](https://github.com/sponsors/tiagovilasboas), or use [Issues](../../issues) for bugs and ideas.
 
 Nexo Graph is original software distributed under the [MIT license](LICENSE).
